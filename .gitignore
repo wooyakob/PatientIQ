@@ -11,6 +11,11 @@ __pycache__
 .mypy_cache
 .ipynb_checkpoints
 
+.agent-catalog
+.agent-activity
+
+.model-cache
+
 dist
 build
 *.egg-info
@@ -36,6 +41,5 @@ build
 *certificate*
 
 !.env.example
-!requirements.txt
 !pyproject.toml
 !uv.lock
