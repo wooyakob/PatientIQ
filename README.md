@@ -66,3 +66,9 @@ uv sync --extra dev
 uv run agentc index tools --tools --no-prompts
 uv run agentc index prompts --prompts --no-tools
 uv run agentc publish --bucket agent-catalog
+
+
+prompts and tools embedded with sentence transformers model,
+https://huggingface.co/microsoft/MiniLM-L12-H384-uncased 
+
+
