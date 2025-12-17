@@ -1,0 +1,37 @@
+[project]
+name = "cko"
+version = "0.1.0"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "couchbase",
+  "python-dotenv",
+  "sentence-transformers",
+]
+
+[project.optional-dependencies]
+dev = [
+  "flake8",
+  "ruff",
+]
+
+[tool.uv]
+managed = true
+
+[tool.flake8]
+max-line-length = 100
+extend-exclude = [
+  ".venv",
+  "venv",
+  "__pycache__",
+]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = [
+  ".venv",
+  "venv",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

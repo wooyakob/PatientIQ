@@ -58,5 +58,3 @@ Plan switched from basic to dev pro because basic is unsupported (even though un
 Workflow test, failure limits on shared embedding model (reported, work in progress)
 Vectorizing structured from S3, shared bucket but can't separate data, specifiy a file path, folder - again reported, work in progress
 
-
-
