@@ -100,3 +100,27 @@
  Embeddings model used for prompts/tools:
  
  - https://huggingface.co/microsoft/MiniLM-L12-H384-uncased
+
+ ### Rough cost of running cluster until CKO (estimate)
+ 
+ **Window**
+ 
+ - **Feb 8–12**
+ - **Feb 12:** cluster destroyed
+ 
+ **Assumptions used in this estimate**
+ 
+ - **Weekdays (Mon–Fri):** 9am–noon (3 hours/day)
+ - **Weekend:** Sat/Sun off
+ - **Rate (on):** 2.77
+ 
+ **Weekly estimate**
+ 
+ | Category | Calculation | Weekly hours | Cost |
+ | --- | --- | ---: | ---: |
+ | On time | 3 hours/day × 5 days | 15 | $41.55 |
+ | Off time | (21 hours × 5 days) + (24 hours × 2 days) | 153 | $24.48 |
+ | **Total** |  |  | **$66.03** |
+ 
+ **Projected total (3–4 weeks):** $198.09
+

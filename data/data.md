@@ -7,3 +7,17 @@ Only able to save 145 of 1,000 rows.
 pubmed central
 "PubMed Central (PMC) is a free full-text archive of biomedical and life sciences journal literature at the U.S. National Institutes of Health's National Library of Medicine (NIH NLM). This dataset contains open access articles available under Creative Commons. The collection includes article metadata, full text content, author information, publication dates, journal details, and licensing information."
 
+from Somya,
+study with real wearable data of about 22 asthma patients: https://datashare.ed.ac.uk/handle/10283/4761
+study on wearable data usefulness: https://pmc.ncbi.nlm.nih.gov/articles/PMC12387376/
+
+Keith,
+we start with one category, then figure out how to relate the data we have on patients, to that specific category and it's respective illnesses
+
+figure out focus for the dataset
+e.g. respirtory conditions
+Condition: Asthma... 
+
+Fill category...
+Next category: Cardiovascular diseases
+
