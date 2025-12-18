@@ -1,74 +1,102 @@
 # CKO
-
-Format:
-1. 40 min pres (demo)
-2. Tech mini booth
-3. Demo 
-
-Model Service available models?
-
-couchbase-fe tenant
-cluster:
-- multi node
-AWS US East
-- 10.0.18.0/24 CIDR
-restrict public access: off
-v 8.0
-5 nodes
-SG1 data
-3 nodes
-CPU 8vCPUs, 16GB
-Disk 50GB
-IOPS 3000
-Disk GP3
-
-SG2
-2 nodes
-Index, Query, Search, Eventing
-8 vCPUs, 16GB
-Disk 50GB
-IOPS 3000
-Disk GP3
-
-Basic support plan, we'll fix it if something goes wrong...
-
-nodes are deployed across multiple AZs to keep data highly available and protect against downtime: off, single using az1
-
-On $2.77 per hour.
-
-playground disabled
-deletion protection enabled
-
-add allowed IP
-
-
-
-
-use cases on website:
-Hyper personalized content generation
-Chatbot Q&A
-Enhanced enterprise search
-Recommendation systems
-Hybrid search
-Data analysis
-come up with our own, ideation phase
-
-
-Plan switched from basic to dev pro because basic is unsupported (even though undocumented, not in cluster compatibility error message in UI)
-Workflow test, failure limits on shared embedding model (reported, work in progress)
-Vectorizing structured from S3, shared bucket but can't separate data, specifiy a file path, folder - again reported, work in progress
-
-
-index and publish prompts and tools to catalog
-uv lock
-uv sync --extra dev
-
-uv run agentc index tools --tools --no-prompts
-uv run agentc index prompts --prompts --no-tools
-uv run agentc publish --bucket agent-catalog
-
-
-prompts and tools embedded with sentence transformers model,
-https://huggingface.co/microsoft/MiniLM-L12-H384-uncased 
-
-
+ 
+ This repo contains:
+ 
+ - `backend/`: a FastAPI service
+ - `frontend/`: a Vite + React + TypeScript UI
+ - `prompts/` and `tools/`: content that can be indexed/published to the Agent Catalog via `agentc`
+ 
+ ## Prerequisites
+ 
+ - Python `>=3.11,<3.14`
+ - Node.js (recommended: current LTS)
+ - `uv` for Python dependency management
+ 
+ ## Environment setup
+ 
+ This repo expects environment variables for Couchbase/Capella + Agent Catalog.
+ 
+ - Copy `.env.example` to `.env`
+ - Fill in the values locally
+ 
+ `*.env` files and secrets should not be committed.
+ 
+ ## Backend (FastAPI)
+ 
+ Python dependencies are managed with `uv` via `pyproject.toml` and `uv.lock`.
+ 
+ ```sh
+ uv sync --extra dev
+ ```
+ 
+ Run the API (from repo root):
+ 
+ ```sh
+ uvicorn backend.api:app --reload --port 8000
+ ```
+ 
+ Verify:
+ 
+ - `http://127.0.0.1:8000/health`
+ - `http://127.0.0.1:8000/docs`
+ 
+ ## Frontend (Vite)
+ 
+ Frontend dependencies are managed with `npm` in `frontend/`.
+ 
+ ```sh
+ cd frontend
+ npm install
+ npm run dev
+ ```
+ 
+ The dev server defaults to port `8080`. If that port is already in use, Vite will pick the next available port and print it.
+ 
+ ## Agent Catalog (agentc)
+ 
+ `agentc` is installed as part of the backend Python dependencies.
+ 
+ The Agent Catalog connection values are configured via `.env` (see `.env.example` for required variables).
+ 
+ Index tools:
+ 
+ ```sh
+ uv run agentc index tools --tools --no-prompts
+ ```
+ 
+ Index prompts:
+ 
+ ```sh
+ uv run agentc index prompts --prompts --no-tools
+ ```
+ 
+ Publish to the catalog bucket:
+ 
+ ```sh
+ uv run agentc publish --bucket agent-catalog
+ ```
+ 
+ Notes:
+ 
+ - If you change Python dependencies, prefer `uv add <pkg>` (it updates `pyproject.toml` and `uv.lock`).
+ - If you change prompt/tool content, re-run the `agentc index ...` commands before `publish`.
+ 
+ ## Challenge / cluster notes
+ 
+ Cluster used for testing (high level):
+ 
+ - AWS US East
+ - Couchbase Server `8.0`
+ - 5 nodes total
+ - Data service group: 3 nodes
+ - Index/Query/Search/Eventing group: 2 nodes
+ 
+ Observations:
+ 
+ - Support plan had to be switched from Basic to Dev Pro due to an unsupported configuration.
+ - Workflow testing hit failure limits on the shared embedding model (reported; WIP).
+ - Vectorizing structured content from S3 is limited when using a shared bucket without path-level separation (reported; WIP).
+ 
+ Embeddings model used for prompts/tools:
+ 
+ - https://huggingface.co/microsoft/MiniLM-L12-H384-uncased

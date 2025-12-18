@@ -5,8 +5,10 @@ requires-python = ">=3.11,<3.14"
 dependencies = [
   "agentc[langchain,langgraph,llamaindex]>=1.0.0",
   "couchbase",
+  "fastapi>=0.125.0",
   "python-dotenv",
   "sentence-transformers",
+  "uvicorn>=0.38.0",
 ]
 
 [project.optional-dependencies]

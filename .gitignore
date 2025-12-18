@@ -5,6 +5,8 @@ venv
 
 __pycache__
 *.pyc
+*.pyo
+*.pyd
 
 .ruff_cache
 .pytest_cache
@@ -18,6 +20,9 @@ __pycache__
 
 dist
 build
+dist-ssr
+node_modules
+.vite
 *.egg-info
 *.log
 
@@ -32,6 +37,11 @@ build
 *.pfx
 *.crt
 *.cer
+*.der
+*.jks
+*.keystore
+*.sqlite
+*.db
 
 *api-key*
 *apikey*
@@ -39,6 +49,17 @@ build
 *secret*
 *private*
 *certificate*
+*credentials*
+*passwd*
+*password*
+*bearer*
+*session*
+*cookie*
+*oauth*
+*jwt*
+*ssh*
+*id_rsa*
+*id_ed25519*
 
 !.env.example
 !pyproject.toml
