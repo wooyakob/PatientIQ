@@ -113,6 +113,7 @@
  - **Weekdays (Mon–Fri):** 9am–noon (3 hours/day)
  - **Weekend:** Sat/Sun off
  - **Rate (on):** 2.77
+ - **Rate (off):** 0.16
  
  **Weekly estimate**
  

@@ -10,6 +10,7 @@ pubmed central
 from Somya,
 study with real wearable data of about 22 asthma patients: https://datashare.ed.ac.uk/handle/10283/4761
 study on wearable data usefulness: https://pmc.ncbi.nlm.nih.gov/articles/PMC12387376/
+wearable data: https://www.kaggle.com/datasets/manideepreddy966/wearables-dataset 
 
 Keith,
 we start with one category, then figure out how to relate the data we have on patients, to that specific category and it's respective illnesses
