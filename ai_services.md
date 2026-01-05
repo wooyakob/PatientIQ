@@ -25,12 +25,12 @@ structured (JSON)
 unstructured 
 to vectorize, neither work due to S3 bucket restrictions.
 
-data from capella
-research papers stored in Capella
-testing workflow
-using predeployed embedding model
-nvidia/llama-3.2-nv-embedqa-1b-v2
-129 documents
+- data from capella
+  - research papers stored in Capella
+  - testing workflow
+  - using predeployed embedding model
+  - `nvidia/llama-3.2-nv-embedqa-1b-v2`
+  - 129 documents
 
 
 # Models
