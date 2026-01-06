@@ -1,13 +1,24 @@
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { PatientCard } from '@/components/dashboard/PatientCard';
-import { patients } from '@/data/mockPatients';
 import { Users, Search } from 'lucide-react';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getPatients } from '@/lib/api';
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const {
+    data: patients = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['patients'],
+    queryFn: getPatients,
+  });
 
   const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -42,16 +53,32 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {filteredPatients.map((patient, index) => (
-            <PatientCard
-              key={patient.id}
-              patient={patient}
-              onClick={() => navigate(`/patient/${patient.id}`)}
-              index={index}
-            />
-          ))}
-        </div>
+        {isLoading && (
+          <div className="glass-card p-12 text-center animate-fade-in">
+            <p className="text-muted-foreground">Loading patients…</p>
+          </div>
+        )}
+
+        {isError && (
+          <div className="glass-card p-12 text-center animate-fade-in">
+            <p className="text-muted-foreground">
+              Failed to load patients: {(error as Error).message}
+            </p>
+          </div>
+        )}
+
+        {!isLoading && !isError && (
+          <div className="space-y-3">
+            {filteredPatients.map((patient, index) => (
+              <PatientCard
+                key={patient.id}
+                patient={patient}
+                onClick={() => navigate(`/patient/${patient.id}`)}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
 
         {filteredPatients.length === 0 && (
           <div className="glass-card p-12 text-center animate-fade-in">

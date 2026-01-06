@@ -1,13 +1,47 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { patients } from '@/data/mockPatients';
 import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { getPatient } from '@/lib/api';
 
 const WearablesDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const patient = patients.find(p => p.id === id);
+  const patientId = id ?? '';
+
+  const {
+    data: patient,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['patient', patientId],
+    queryFn: () => getPatient(patientId),
+    enabled: Boolean(patientId),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading wearable data…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Failed to load wearable data</h1>
+          <p className="text-muted-foreground mb-6">{(error as Error).message}</p>
+          <Button onClick={() => navigate('/')}>Return to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!patient) {
     return (
@@ -21,14 +55,16 @@ const WearablesDetail = () => {
   }
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const avgHeartRate = Math.round(patient.wearableData.heartRate.reduce((a, b) => a + b, 0) / 7);
-  const avgSteps = Math.round(patient.wearableData.stepCount.reduce((a, b) => a + b, 0) / 7);
-  const maxHeartRate = Math.max(...patient.wearableData.heartRate);
-  const minHeartRate = Math.min(...patient.wearableData.heartRate);
-  const maxSteps = Math.max(...patient.wearableData.stepCount);
+  const heartRates = patient.wearableData.heartRate ?? [];
+  const stepCounts = patient.wearableData.stepCount ?? [];
+  const avgHeartRate = Math.round(heartRates.reduce((a, b) => a + b, 0) / (heartRates.length || 1));
+  const avgSteps = Math.round(stepCounts.reduce((a, b) => a + b, 0) / (stepCounts.length || 1));
+  const maxHeartRate = heartRates.length ? Math.max(...heartRates) : 0;
+  const minHeartRate = heartRates.length ? Math.min(...heartRates) : 0;
+  const maxSteps = stepCounts.length ? Math.max(...stepCounts) : 0;
 
-  const heartRateTrend = patient.wearableData.heartRate[6] - patient.wearableData.heartRate[0];
-  const stepsTrend = patient.wearableData.stepCount[6] - patient.wearableData.stepCount[0];
+  const heartRateTrend = heartRates.length >= 2 ? heartRates[heartRates.length - 1] - heartRates[0] : 0;
+  const stepsTrend = stepCounts.length >= 2 ? stepCounts[stepCounts.length - 1] - stepCounts[0] : 0;
 
   const getTrendIcon = (trend: number) => {
     if (trend > 2) return <TrendingUp className="h-4 w-4 text-emerald-500" />;
@@ -97,7 +133,7 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {patient.wearableData.heartRate.map((rate, index) => (
+              {heartRates.slice(0, 7).map((rate, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground w-8">{days[index]}</span>
                   <div className="flex-1 neo-inset h-6 rounded-full overflow-hidden">
@@ -124,7 +160,7 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {patient.wearableData.stepCount.map((steps, index) => (
+              {stepCounts.slice(0, 7).map((steps, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground w-8">{days[index]}</span>
                   <div className="flex-1 neo-inset h-6 rounded-full overflow-hidden">

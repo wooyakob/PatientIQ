@@ -4,14 +4,48 @@ import { ResearchWidget } from '@/components/dashboard/ResearchWidget';
 import { WearableWidget } from '@/components/dashboard/WearableWidget';
 import { SentimentWidget } from '@/components/dashboard/SentimentWidget';
 import { DoctorNotesWidget } from '@/components/dashboard/DoctorNotesWidget';
-import { patients } from '@/data/mockPatients';
 import { ArrowLeft, Calendar, User, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { getPatientWithNotes } from '@/lib/api';
 
 const PatientDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const patient = patients.find(p => p.id === id);
+  const patientId = id ?? '';
+
+  const {
+    data: patient,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['patient', patientId],
+    queryFn: () => getPatientWithNotes(patientId),
+    enabled: Boolean(patientId),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading patient…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Failed to load patient</h1>
+          <p className="text-muted-foreground mb-6">{(error as Error).message}</p>
+          <Button onClick={() => navigate('/')}>Return to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!patient) {
     return (

@@ -1,13 +1,47 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { patients } from '@/data/mockPatients';
 import { ArrowLeft, BookOpen, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { getPatient } from '@/lib/api';
 
 const ResearchDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const patient = patients.find(p => p.id === id);
+  const patientId = id ?? '';
+
+  const {
+    data: patient,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['patient', patientId],
+    queryFn: () => getPatient(patientId),
+    enabled: Boolean(patientId),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading research…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Failed to load research</h1>
+          <p className="text-muted-foreground mb-6">{(error as Error).message}</p>
+          <Button onClick={() => navigate('/')}>Return to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!patient) {
     return (
@@ -45,12 +79,12 @@ const ResearchDetail = () => {
           </div>
 
           <div className="neo-card p-6 rounded-2xl mb-8">
-            <h2 className="text-xl font-semibold text-primary mb-2">{patient.researchTopic}</h2>
+            <h2 className="text-xl font-semibold text-primary mb-2">{patient.researchTopic || 'Medical Research'}</h2>
             <p className="text-sm text-muted-foreground">Based on: {patient.condition}</p>
           </div>
 
           <div className="space-y-6">
-            {patient.researchContent.map((paragraph, index) => (
+            {(patient.researchContent ?? []).map((paragraph, index) => (
               <div 
                 key={index}
                 className="animate-slide-up"
@@ -59,6 +93,10 @@ const ResearchDetail = () => {
                 <p className="text-foreground leading-relaxed">{paragraph}</p>
               </div>
             ))}
+
+            {(patient.researchContent ?? []).length === 0 && (
+              <p className="text-muted-foreground">No research summary available yet.</p>
+            )}
           </div>
 
           <div className="mt-8 pt-6 border-t border-border">

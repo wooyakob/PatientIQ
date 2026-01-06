@@ -1,4 +1,4 @@
-import { Patient } from '@/data/mockPatients';
+import { Patient } from '@/lib/api';
 import { FileText, ExternalLink, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

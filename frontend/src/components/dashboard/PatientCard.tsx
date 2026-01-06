@@ -1,4 +1,4 @@
-import { Patient } from '@/data/mockPatients';
+import { Patient } from '@/lib/api';
 import { ChevronRight, Heart, Activity } from 'lucide-react';
 
 interface PatientCardProps {
