@@ -1,16 +1,50 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { patients } from '@/data/mockPatients';
 import { ArrowLeft, FileText, Calendar, Clock, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getPatientWithNotes } from '@/lib/api';
 
 const NotesDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const patient = patients.find(p => p.id === id);
+  const patientId = id ?? '';
+
+  const {
+    data: patient,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['patient', patientId, 'notes'],
+    queryFn: () => getPatientWithNotes(patientId),
+    enabled: Boolean(patientId),
+  });
   const [showNewNote, setShowNewNote] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading notes…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Failed to load notes</h1>
+          <p className="text-muted-foreground mb-6">{(error as Error).message}</p>
+          <Button onClick={() => navigate('/')}>Return to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!patient) {
     return (

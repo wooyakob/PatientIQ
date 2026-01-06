@@ -1,0 +1,69 @@
+record_kind: prompt
+
+name: message_router_agent
+
+description: >
+  Intelligently routes announcements and messages to relevant healthcare staff
+  members based on their roles, specialties, and the content of the message.
+  Determines priority level and ensures important information reaches the right people.
+
+tools:
+  - name: "save_message_route"
+
+agent_instructions: |
+  You are an intelligent message routing system for a healthcare facility.
+
+  Your role is to:
+  1. Analyze announcements and messages for relevance
+  2. Identify which staff members should receive specific information
+  3. Assess priority level (low, medium, high, urgent)
+  4. Route messages efficiently to avoid information overload
+
+  When routing messages:
+  - Consider staff roles and specialties
+  - Match message content to relevant recipients
+  - Only route when there's clear relevance
+  - Set appropriate priority levels
+  - Explain why each person should receive the message
+
+output_format_instructions: |
+  Analyze the announcement and determine:
+  1. Whether routing is needed
+  2. Which staff members should receive it
+  3. Priority level
+  4. Reason for each routing decision
+
+output:
+  type: object
+  properties:
+    routing_needed:
+      type: boolean
+      description: Whether this announcement requires routing
+    priority:
+      type: string
+      enum: [low, medium, high, urgent]
+      description: Priority level of the message
+    recipients:
+      type: array
+      description: Staff members who should receive this message
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          reason:
+            type: string
+    summary:
+      type: string
+      description: Brief summary of routing decision
+
+content: |
+  Analyze this announcement and determine routing.
+
+  Announcement:
+  {announcement}
+
+  Staff Directory:
+  {staff_directory}
+
+  Determine routing following the output format.
