@@ -18,7 +18,7 @@ export function Header() {
           <div className="gradient-primary p-2 rounded-xl">
             <Plus className="h-5 w-5 text-primary-foreground" strokeWidth={3} />
           </div>
-          <span className="text-xl font-semibold text-foreground">MedView</span>
+          <span className="text-xl font-semibold text-foreground">PatientIQ</span>
         </Link>
         <nav className="flex items-center gap-6">
           {navLinks.map((link) => (
