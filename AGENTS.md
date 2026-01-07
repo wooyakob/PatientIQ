@@ -1,5 +1,68 @@
 # Agentic Healthcare Application
 
+## Dev environment tips
+- Use `uv` for Python dependencies (see `pyproject.toml` + `uv.lock`). Prefer `uv add <pkg>` for dependency changes.
+- Frontend lives in `frontend/` and uses `npm`.
+- Copy `.env.example` to `.env` and fill values locally. Never commit `.env` or secrets.
+- The Vite dev server runs on port `8080` and proxies `/api` to `http://127.0.0.1:8000` (see `frontend/vite.config.ts`).
+- Backend CORS is configured for common Vite ports (see `backend/api.py`). If you change ports, update CORS + Vite proxy together.
+
+## Local run (backend + frontend)
+
+### Backend (FastAPI)
+- Install deps:
+  - `uv sync --extra dev`
+- Run API (from repo root):
+  - `uvicorn backend.api:app --reload --port 8000`
+- Verify:
+  - `http://127.0.0.1:8000/health`
+  - `http://127.0.0.1:8000/docs`
+
+### Frontend (Vite + React)
+- From `frontend/`:
+  - `npm install`
+  - `npm run dev`
+
+## Testing / linting instructions
+
+### Backend
+- Lint:
+  - `uv run ruff check .`
+  - `uv run flake8`
+- Formatting (if needed):
+  - `uv run ruff format .`
+
+### Frontend
+- Lint:
+  - `npm run lint` (from `frontend/`)
+- Build (catches TS/Vite issues):
+  - `npm run build` (from `frontend/`)
+
+## Agent Catalog (agentc) workflow
+- Index tools:
+  - `uv run agentc index tools --tools --no-prompts`
+- Index prompts:
+  - `uv run agentc index prompts --prompts --no-tools`
+- Publish:
+  - `uv run agentc publish --bucket agent-catalog`
+
+## Repo map (where to change what)
+- **Backend API entrypoint**: `backend/api.py`
+- **Agent orchestrator (LLM + prompt loading)**: `backend/agents_agentc.py`
+- **DB access layer (Capella/Couchbase scopes + collections)**: `backend/database.py`
+- **Prompts**: `prompts/*.yaml`
+- **Tools used by prompts**: `tools/*.py`
+- **Frontend app**: `frontend/src/App.tsx` and `frontend/src/components/*`
+
+## PR instructions
+- Keep changes scoped: don’t refactor unrelated files.
+- Before committing:
+  - Backend: `uv run ruff check .` (and fix)
+  - Frontend: `npm run lint` + `npm run build`
+- Do not include secrets, tokens, or cluster connection details in commits.
+
+---
+
 ## Mission
 Doctors do not have time to make every single decision, especially the small, non-critical decisions. Agents can handle many of these micro decisions for them, intelligently, to ensure that doctors have the information they need to be at their best and make life-saving decisions without burning out.
 
@@ -51,21 +114,14 @@ Continuously monitor patient wearable device data (heart rate, step count) and p
     - `step_count`: Array of readings (steps)
 
 ### Output
-Alert object (if needed):
-```json
-{
-  "id": "uuid",
-  "patient_id": "1",
-  "alert_type": "Elevated Heart Rate Trend",
-  "severity": "high",
-  "message": "Patient shows sustained elevated heart rate (avg 92 bpm) over 7 days, 15% above baseline. Given anxiety disorder diagnosis, may indicate increased stress or medication adjustment needed.",
-  "metrics": {
-    "heart_rate": [85, 92, 78, 88, 82, 90, 86],
-    "step_count": [6200, 7500, 5800, 8100, 6900, 7200, 6500]
-  },
-  "timestamp": "2024-01-20T10:30:00Z"
-}
-```
+ Required fields when an alert is generated:
+ - `id`: string (uuid)
+ - `patient_id`: string
+ - `alert_type`: string
+ - `severity`: `low` | `medium` | `high` | `critical`
+ - `message`: string
+ - `metrics`: object containing `heart_rate` (array) and `step_count` (array)
+ - `timestamp`: ISO-8601 string
 
 ### Guidelines
 - **Be Conservative**: Only alert when truly necessary to avoid alert fatigue
@@ -117,21 +173,13 @@ Automatically generate concise, evidence-based medical research summaries releva
   - Current treatment status (if available)
 
 ### Output
-Research summary object:
-```json
-{
-  "patient_id": "1",
-  "condition": "Breast Cancer Stage II",
-  "research_topic": "HER2-Positive Breast Cancer: Recent Treatment Advances",
-  "summaries": [
-    "The DESTINY-Breast03 trial demonstrated that trastuzumab deruxtecan significantly improved progression-free survival compared to trastuzumab emtansine in HER2-positive metastatic breast cancer, with a 72% reduction in disease progression risk. This antibody-drug conjugate is now considered a preferred second-line option.",
-    "Neoadjuvant therapy combining pertuzumab, trastuzumab, and chemotherapy achieves pathologic complete response in 60% of HER2-positive early breast cancer patients, correlating with improved long-term survival. This approach allows for potential de-escalation of surgery.",
-    "Genomic profiling with Oncotype DX in HER2-positive disease helps identify patients who may safely omit chemotherapy when hormone receptor-positive, reducing overtreatment while maintaining excellent outcomes in low-risk cases."
-  ],
-  "sources": [],
-  "generated_at": "2024-01-20T10:30:00Z"
-}
-```
+ Required fields:
+ - `patient_id`: string
+ - `condition`: string
+ - `topic`: string
+ - `summaries`: array of 3 strings
+ - `sources`: array (optional)
+ - `generated_at`: ISO-8601 string
 
 ### Guidelines
 - **Be Current**: Focus on 2022-2024 research
@@ -174,51 +222,18 @@ Intelligently analyze facility-wide announcements and automatically route releva
 
 ### Input
 - `announcement`: The message text
-- `staff_directory`: Array of staff objects:
-  ```json
-  [
-    {
-      "name": "Dr. Sarah Johnson",
-      "role": "Oncologist",
-      "specialties": ["Breast Cancer", "Lung Cancer"],
-      "department": "Oncology"
-    }
-  ]
-  ```
+- `staff_directory`: Array of staff objects (each object should include at least `name` and `role`; optionally `specialties` and `department`)
 
 ### Output
-Routing response object:
-```json
-{
-  "announcement": "New chemotherapy protocol for breast cancer patients effective immediately...",
-  "routes": [
-    {
-      "id": "uuid",
-      "original_message": "New chemotherapy protocol for breast cancer patients effective immediately...",
-      "routing_needed": true,
-      "priority": "high",
-      "recipients": [
-        {
-          "name": "Dr. Sarah Johnson",
-          "reason": "Oncologist specializing in breast cancer treatment"
-        },
-        {
-          "name": "Nurse Emma Williams",
-          "reason": "Oncology department nurse administering chemotherapy"
-        }
-      ],
-      "timestamp": "2024-01-20T10:30:00Z"
-    }
-  ],
-  "recipients": [
-    {
-      "name": "Dr. Sarah Johnson",
-      "reason": "Oncologist specializing in breast cancer treatment"
-    }
-  ],
-  "priority": "high"
-}
-```
+ Required fields:
+ - `routes`: array of route objects
+ - Each route object:
+   - `id`: string (uuid)
+   - `original_message`: string
+   - `routed_to`: array of strings
+   - `priority`: `low` | `medium` | `high` | `urgent`
+   - `analysis`: string
+   - `timestamp`: ISO-8601 string
 
 ### Guidelines
 - **Be Selective**: Only route when truly relevant to avoid information overload
@@ -254,34 +269,16 @@ Automatically summarize patient-completed questionnaires before appointments, ex
 ### Input
 - `patient_id`: Patient identifier
 - `patient_data`: Patient demographics and condition
-- `questionnaire_responses`: Object with Q&A pairs:
-  ```json
-  {
-    "How has your pain level been this week (1-10)?": "7, worse than last month",
-    "Are you experiencing any new symptoms?": "Yes, increased fatigue and nausea",
-    "How many doses of medication did you miss?": "2-3 per week",
-    "Any concerns you'd like to discuss?": "Worried about side effects"
-  }
-  ```
+- `questionnaire_responses`: Object mapping question text to answer text
 - `appointment_date`: Scheduled appointment
 
 ### Output
-Questionnaire summary object:
-```json
-{
-  "patient_id": "1",
-  "appointment_date": "2024-02-01",
-  "summary": "Patient reports increased pain (7/10, up from previous 5/10) with new onset fatigue and nausea. Medication adherence suboptimal at 2-3 missed doses weekly. Patient expresses concern about side effects, suggesting need for medication review or alternative options.",
-  "key_points": [
-    "Pain escalation: 7/10 (previous 5/10)",
-    "New symptoms: Fatigue and nausea",
-    "Poor medication adherence: 2-3 missed doses/week",
-    "Patient concerned about side effects",
-    "Requires medication effectiveness review"
-  ],
-  "generated_at": "2024-01-25T10:30:00Z"
-}
-```
+ Required fields:
+ - `patient_id`: string
+ - `appointment_date`: string
+ - `summary`: string
+ - `key_points`: array of 3-5 strings
+ - `generated_at`: ISO-8601 string
 
 ### Guidelines
 - **Be Thorough**: Don't miss important details
@@ -326,12 +323,23 @@ Agents use:
 
 ### API Endpoints
 
-Agents triggered via FastAPI:
+Agents and data are exposed via FastAPI:
+- `GET /health`
+- `GET /api/agents/status`
+- `POST /api/agents/run-now`
 - `POST /api/agents/wearable-monitor/run`
 - `POST /api/agents/research-summarizer/run`
 - `POST /api/agents/message-router/run`
 - `POST /api/agents/questionnaire-summarizer/run`
 - `POST /api/agents/run-all` (runs all applicable agents)
+- `GET /api/patients`
+- `GET /api/patients/{patient_id}`
+- `POST /api/patients`
+- `GET /api/patients/{patient_id}/alerts`
+- `GET /api/patients/{patient_id}/research`
+- `GET /api/patients/{patient_id}/questionnaire`
+- `GET /api/patients/{patient_id}/doctor-notes`
+- `GET /api/patients/{patient_id}/patient-notes`
 
 ---
 

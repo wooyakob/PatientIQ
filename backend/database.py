@@ -93,8 +93,6 @@ class CouchbaseDB:
                 f"Please verify ckodb bucket exists with proper scopes/collections."
             )
 
-    # ==================== PATIENT OPERATIONS ====================
-
     def get_patient(self, patient_id: str) -> Optional[dict]:
         """Retrieve a patient by ID from People.Patient collection"""
         self._check_connection()
@@ -131,8 +129,6 @@ class CouchbaseDB:
             print(f"Error upserting patient: {e}")
             return False
 
-    # ==================== WEARABLE ALERTS ====================
-
     def save_wearable_alert(self, alert_id: str, alert_data: dict) -> bool:
         """Save a wearable data alert to Wearables.Watch collection"""
         self._check_connection()
@@ -159,8 +155,6 @@ class CouchbaseDB:
         except Exception as e:
             print(f"Error fetching alerts: {e}")
             return []
-
-    # ==================== RESEARCH SUMMARIES ====================
 
     def save_research_summary(self, summary_id: str, summary_data: dict) -> bool:
         """Save a research summary to Research.pubmed collection"""
@@ -191,8 +185,6 @@ class CouchbaseDB:
             print(f"Error fetching research: {e}")
             return None
 
-    # ==================== MESSAGE ROUTING ====================
-
     def save_message_route(self, route_id: str, route_data: dict) -> bool:
         """Save a message routing record to Notes.Doctor collection"""
         self._check_connection()
@@ -204,7 +196,6 @@ class CouchbaseDB:
             print(f"Error saving message route: {e}")
             return False
 
-    # ==================== QUESTIONNAIRE SUMMARIES ====================
     # NOTE: Questionnaires scope collection names TBD
     # Temporarily saving to Notes.Doctor until collection is confirmed
 
@@ -248,8 +239,6 @@ class CouchbaseDB:
             print(f"Error fetching questionnaire: {e}")
             return None
 
-    # ==================== DOCTOR NOTES ====================
-
     def save_doctor_note(self, note_id: str, note_data: dict) -> bool:
         """Save a doctor note to Notes.Doctor collection"""
         self._check_connection()
@@ -276,8 +265,6 @@ class CouchbaseDB:
         except Exception as e:
             print(f"Error fetching doctor notes: {e}")
             return []
-
-    # ==================== PATIENT NOTES ====================
 
     def save_patient_note(self, note_id: str, note_data: dict) -> bool:
         """Save a patient note to Notes.Patient collection"""

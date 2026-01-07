@@ -22,3 +22,53 @@ Condition: Asthma...
 Fill category...
 Next category: Cardiovascular diseases
 
+doctor notes:
+doctor_id
+patient_id
+doctor_name
+patient_name
+visit_date
+notes_text [this will be vectorized]
+
+
+patient notes (this will use AI functions to remove personal info and perform sentiment analysis using a Couchbase Capella function):
+patient_id
+patient_name
+visit_date
+assigned_doctor (their doctor on insurance)
+visit_doctor (doctor they saw during visit)
+
+people
+
+doctor:
+doctor_name
+doctor_id
+doctor_specialty
+doctor_hospital
+doctor_licence_number
+
+patient:
+patient_name
+patient_id
+patient_age
+patient_gender
+patient_height
+patient_weight
+patient_bmi
+patient_blood_type
+patient_allergies
+patient_medication
+patient_illnesses
+
+research
+pubmed
+
+
+wearable data
+phone
+
+
+watch
+
+
+
