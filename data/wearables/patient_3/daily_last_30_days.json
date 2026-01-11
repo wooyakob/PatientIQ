@@ -1,0 +1,542 @@
+[
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-11T11:05:00-08:00",
+    "metrics": {
+      "steps": 4245,
+      "calories_burned": 347.1,
+      "distance_covered": 3.133,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.516,
+      "exercise_intensity": "Low",
+      "heart_rate": 126,
+      "blood_oxygen_level": 90.33,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-12T11:05:00-08:00",
+    "metrics": {
+      "steps": 4543,
+      "calories_burned": 316.7,
+      "distance_covered": 2.746,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.421,
+      "exercise_intensity": "Low",
+      "heart_rate": 129,
+      "blood_oxygen_level": 90.06,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-13T11:05:00-08:00",
+    "metrics": {
+      "steps": 3583,
+      "calories_burned": 241.5,
+      "distance_covered": 2.865,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.393,
+      "exercise_intensity": "Low",
+      "heart_rate": 117,
+      "blood_oxygen_level": 90.89,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-14T11:05:00-08:00",
+    "metrics": {
+      "steps": 3970,
+      "calories_burned": 271.4,
+      "distance_covered": 2.976,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.523,
+      "exercise_intensity": "Low",
+      "heart_rate": 106,
+      "blood_oxygen_level": 89.27,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-15T11:05:00-08:00",
+    "metrics": {
+      "steps": 4161,
+      "calories_burned": 284.0,
+      "distance_covered": 2.813,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.386,
+      "exercise_intensity": "Low",
+      "heart_rate": 123,
+      "blood_oxygen_level": 89.1,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-16T11:05:00-08:00",
+    "metrics": {
+      "steps": 3073,
+      "calories_burned": 196.2,
+      "distance_covered": 2.171,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.264,
+      "exercise_intensity": "Low",
+      "heart_rate": 125,
+      "blood_oxygen_level": 91.69,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-17T11:05:00-08:00",
+    "metrics": {
+      "steps": 4194,
+      "calories_burned": 245.4,
+      "distance_covered": 2.544,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.511,
+      "exercise_intensity": "Low",
+      "heart_rate": 121,
+      "blood_oxygen_level": 88.73,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-18T11:05:00-08:00",
+    "metrics": {
+      "steps": 3020,
+      "calories_burned": 209.8,
+      "distance_covered": 2.368,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.17,
+      "exercise_intensity": "Low",
+      "heart_rate": 121,
+      "blood_oxygen_level": 90.03,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-19T11:05:00-08:00",
+    "metrics": {
+      "steps": 3928,
+      "calories_burned": 348.2,
+      "distance_covered": 2.965,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.22,
+      "exercise_intensity": "Low",
+      "heart_rate": 133,
+      "blood_oxygen_level": 92.31,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-20T11:05:00-08:00",
+    "metrics": {
+      "steps": 3304,
+      "calories_burned": 307.0,
+      "distance_covered": 2.455,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.407,
+      "exercise_intensity": "Low",
+      "heart_rate": 105,
+      "blood_oxygen_level": 91.89,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-21T11:05:00-08:00",
+    "metrics": {
+      "steps": 3807,
+      "calories_burned": 261.1,
+      "distance_covered": 2.201,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.412,
+      "exercise_intensity": "Low",
+      "heart_rate": 113,
+      "blood_oxygen_level": 90.93,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-22T11:05:00-08:00",
+    "metrics": {
+      "steps": 2147,
+      "calories_burned": 88.3,
+      "distance_covered": 1.797,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.208,
+      "exercise_intensity": "Low",
+      "heart_rate": 114,
+      "blood_oxygen_level": 88.85,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-23T11:05:00-08:00",
+    "metrics": {
+      "steps": 3715,
+      "calories_burned": 303.1,
+      "distance_covered": 2.177,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.19,
+      "exercise_intensity": "Low",
+      "heart_rate": 121,
+      "blood_oxygen_level": 90.9,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-24T11:05:00-08:00",
+    "metrics": {
+      "steps": 2984,
+      "calories_burned": 240.4,
+      "distance_covered": 2.107,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.405,
+      "exercise_intensity": "Low",
+      "heart_rate": 124,
+      "blood_oxygen_level": 91.16,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-25T11:05:00-08:00",
+    "metrics": {
+      "steps": 3500,
+      "calories_burned": 313.1,
+      "distance_covered": 2.073,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.142,
+      "exercise_intensity": "Low",
+      "heart_rate": 112,
+      "blood_oxygen_level": 89.8,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-26T11:05:00-08:00",
+    "metrics": {
+      "steps": 3647,
+      "calories_burned": 310.5,
+      "distance_covered": 2.13,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.223,
+      "exercise_intensity": "Low",
+      "heart_rate": 122,
+      "blood_oxygen_level": 89.36,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-27T11:05:00-08:00",
+    "metrics": {
+      "steps": 3378,
+      "calories_burned": 220.4,
+      "distance_covered": 2.225,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.352,
+      "exercise_intensity": "Low",
+      "heart_rate": 117,
+      "blood_oxygen_level": 89.5,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-28T11:05:00-08:00",
+    "metrics": {
+      "steps": 4085,
+      "calories_burned": 356.6,
+      "distance_covered": 2.986,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.233,
+      "exercise_intensity": "Low",
+      "heart_rate": 118,
+      "blood_oxygen_level": 88.94,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-29T11:05:00-08:00",
+    "metrics": {
+      "steps": 3302,
+      "calories_burned": 219.7,
+      "distance_covered": 1.988,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.276,
+      "exercise_intensity": "Low",
+      "heart_rate": 109,
+      "blood_oxygen_level": 90.57,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-30T11:05:00-08:00",
+    "metrics": {
+      "steps": 4081,
+      "calories_burned": 319.5,
+      "distance_covered": 2.541,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.475,
+      "exercise_intensity": "Low",
+      "heart_rate": 115,
+      "blood_oxygen_level": 89.01,
+      "ecg": "Abnormal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-31T11:05:00-08:00",
+    "metrics": {
+      "steps": 2597,
+      "calories_burned": 170.9,
+      "distance_covered": 1.746,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.337,
+      "exercise_intensity": "Low",
+      "heart_rate": 107,
+      "blood_oxygen_level": 89.88,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-01T11:05:00-08:00",
+    "metrics": {
+      "steps": 3803,
+      "calories_burned": 286.8,
+      "distance_covered": 2.115,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.487,
+      "exercise_intensity": "Low",
+      "heart_rate": 122,
+      "blood_oxygen_level": 89.27,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-02T11:05:00-08:00",
+    "metrics": {
+      "steps": 1749,
+      "calories_burned": 61.4,
+      "distance_covered": 1.468,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.098,
+      "exercise_intensity": "Low",
+      "heart_rate": 119,
+      "blood_oxygen_level": 88.29,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-03T11:05:00-08:00",
+    "metrics": {
+      "steps": 3380,
+      "calories_burned": 209.5,
+      "distance_covered": 2.18,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.419,
+      "exercise_intensity": "Low",
+      "heart_rate": 115,
+      "blood_oxygen_level": 89.06,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-04T11:05:00-08:00",
+    "metrics": {
+      "steps": 4052,
+      "calories_burned": 227.2,
+      "distance_covered": 2.911,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.505,
+      "exercise_intensity": "Low",
+      "heart_rate": 116,
+      "blood_oxygen_level": 88.88,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-05T11:05:00-08:00",
+    "metrics": {
+      "steps": 3632,
+      "calories_burned": 220.5,
+      "distance_covered": 2.47,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.22,
+      "exercise_intensity": "Low",
+      "heart_rate": 124,
+      "blood_oxygen_level": 90.19,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-06T11:05:00-08:00",
+    "metrics": {
+      "steps": 4509,
+      "calories_burned": 362.4,
+      "distance_covered": 3.666,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.195,
+      "exercise_intensity": "Low",
+      "heart_rate": 116,
+      "blood_oxygen_level": 86.41,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-07T11:05:00-08:00",
+    "metrics": {
+      "steps": 3174,
+      "calories_burned": 184.4,
+      "distance_covered": 2.513,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.28,
+      "exercise_intensity": "Low",
+      "heart_rate": 111,
+      "blood_oxygen_level": 91.66,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-08T11:05:00-08:00",
+    "metrics": {
+      "steps": 3542,
+      "calories_burned": 254.8,
+      "distance_covered": 2.261,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.293,
+      "exercise_intensity": "Low",
+      "heart_rate": 106,
+      "blood_oxygen_level": 89.27,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "3",
+    "patient_name": "Robert Chen",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-09T11:05:00-08:00",
+    "metrics": {
+      "steps": 3746,
+      "calories_burned": 276.6,
+      "distance_covered": 2.779,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.264,
+      "exercise_intensity": "Low",
+      "heart_rate": 111,
+      "blood_oxygen_level": 90.34,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  }
+]

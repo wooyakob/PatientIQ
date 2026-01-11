@@ -1,0 +1,1 @@
+{"cells":[{"kind":2,"language":"SQL++","value":"CREATE PRIMARY INDEX ON `Scripps`.`People`.`Doctors`;"},{"kind":2,"language":"SQL++","value":"CREATE PRIMARY INDEX ON `Scripps`.`People`.`Patients`;"},{"kind":2,"language":"SQL++","value":"SELECT patient_id, patient_name\nFROM `Scripps`.`People`.`Patients`\nLIMIT 5;"}]}

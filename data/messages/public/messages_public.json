@@ -1,0 +1,98 @@
+[
+  {
+    "id": "msg_public_001",
+    "message_type": "public",
+    "from_id": "admin_director",
+    "from_name": "Dr. Patricia Williams, Medical Director",
+    "to_name": "All Scripps Staff",
+    "subject": "New EHR System Training - Mandatory",
+    "content": "Dear Scripps Hospital Staff, We will be rolling out the updated EHR system on January 22nd. Mandatory training sessions are scheduled for all clinical staff. Please check your email for your assigned session time. Training will cover new patient data entry protocols, enhanced medication ordering, and improved clinical decision support features.",
+    "timestamp": "2024-01-05T08:00:00Z",
+    "read": true,
+    "priority": "high"
+  },
+  {
+    "id": "msg_public_002",
+    "message_type": "public",
+    "from_id": "facilities",
+    "from_name": "Facilities Management",
+    "to_name": "All Scripps Staff",
+    "subject": "Planned Maintenance - East Wing Elevator",
+    "content": "The East Wing elevator will be out of service for routine maintenance on Thursday, January 11th from 6 AM to 2 PM. Please use the West Wing or Central elevators during this time. We apologize for any inconvenience.",
+    "timestamp": "2024-01-06T12:00:00Z",
+    "read": true,
+    "priority": "normal"
+  },
+  {
+    "id": "msg_public_003",
+    "message_type": "public",
+    "from_id": "infection_control",
+    "from_name": "Infection Control Department",
+    "to_name": "All Scripps Staff",
+    "subject": "Flu Season Update and Vaccination Reminder",
+    "content": "As we enter peak flu season, please remind all patients to get their annual flu vaccination. Staff vaccination compliance is at 92% - if you haven't received your flu shot yet, please visit Employee Health Services. Also reminder: strict adherence to hand hygiene protocols and appropriate PPE use for respiratory patients.",
+    "timestamp": "2024-01-07T09:30:00Z",
+    "read": false,
+    "priority": "high"
+  },
+  {
+    "id": "msg_public_004",
+    "message_type": "public",
+    "from_id": "hr_dept",
+    "from_name": "Human Resources",
+    "to_name": "All Scripps Staff",
+    "subject": "Open Enrollment Period Extended",
+    "content": "Due to technical issues with the benefits portal, we are extending the open enrollment period through January 19th. If you experienced difficulties accessing your benefits options, please try again or contact HR at ext. 5500 for assistance.",
+    "timestamp": "2024-01-08T10:00:00Z",
+    "read": false,
+    "priority": "normal"
+  },
+  {
+    "id": "msg_public_005",
+    "message_type": "public",
+    "from_id": "quality_dept",
+    "from_name": "Quality Assurance",
+    "to_name": "All Scripps Staff",
+    "subject": "Patient Safety Initiative - Medication Reconciliation",
+    "content": "Q4 audit results show 15% improvement in medication reconciliation compliance. Great work! However, we've identified gaps in documenting medication allergies. Please ensure all patients have allergy status verified and documented at each visit. Updated protocol guide available on the staff intranet.",
+    "timestamp": "2024-01-09T11:00:00Z",
+    "read": true,
+    "priority": "high"
+  },
+  {
+    "id": "msg_public_006",
+    "message_type": "public",
+    "from_id": "security",
+    "from_name": "Security Office",
+    "to_name": "All Scripps Staff",
+    "subject": "New Badge Access System - Action Required",
+    "content": "The hospital will transition to a new badge access system starting January 15th. All staff must register their current badge with the new system. Registration stations are available in the main lobby and each department. Please complete registration by January 14th to avoid access issues. Contact Security at ext. 4000 with questions.",
+    "timestamp": "2024-01-09T14:00:00Z",
+    "read": false,
+    "priority": "high"
+  },
+  {
+    "id": "msg_public_007",
+    "message_type": "public",
+    "from_id": "events",
+    "from_name": "Staff Events Committee",
+    "to_name": "All Scripps Staff",
+    "subject": "Healthcare Heroes Appreciation Lunch",
+    "content": "You're invited! Join us for our annual Healthcare Heroes Appreciation Lunch on Friday, January 19th at 12 PM in the cafeteria. This is our way of saying thank you for your dedication and hard work. Complimentary lunch will be provided. RSVP by January 15th to events@scripps.org.",
+    "timestamp": "2024-01-10T08:30:00Z",
+    "read": false,
+    "priority": "normal"
+  },
+  {
+    "id": "msg_public_008",
+    "message_type": "public",
+    "from_id": "it_dept",
+    "from_name": "IT Department",
+    "to_name": "All Scripps Staff",
+    "subject": "Cybersecurity Alert - Phishing Awareness",
+    "content": "ALERT: We've detected an increase in phishing attempts targeting healthcare organizations. Be cautious of emails requesting login credentials or containing suspicious links, even if they appear to come from internal sources. Never share your password. If you receive a suspicious email, forward it to security@scripps.org before deleting. Mandatory cybersecurity training link will be sent next week.",
+    "timestamp": "2024-01-10T13:00:00Z",
+    "read": false,
+    "priority": "urgent"
+  }
+]

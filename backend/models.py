@@ -4,13 +4,6 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
-class SentimentLevel(str, Enum):
-    AMAZING = "amazing"
-    GOOD = "good"
-    NEUTRAL = "neutral"
-    POOR = "poor"
-    TERRIBLE = "terrible"
-
 
 class WearableData(BaseModel):
     heart_rate: List[int] = Field(default_factory=list, description="7-day heart rate readings")
@@ -38,7 +31,9 @@ class Patient(BaseModel):
     private_notes: str
     research_topic: str
     research_content: List[str]
-    doctor_notes: List[DoctorNote] = Field(default_factory=list, description="Doctor notes (fetched separately)")
+    doctor_notes: List[DoctorNote] = Field(
+        default_factory=list, description="Doctor notes (fetched separately)"
+    )
 
 
 class WearableAlert(BaseModel):
@@ -66,10 +61,28 @@ class MessageRoute(BaseModel):
     priority: str
     timestamp: datetime
 
+class Message(BaseModel):
+    id: str
+    message_type: str  # "private" or "public"
+    from_id: str
+    from_name: str
+    to_id: str = None  # For private messages
+    to_name: str = None  # For private messages
+    subject: str
+    content: str
+    timestamp: datetime
+    read: bool = False
+    priority: str = "normal"  # normal, high, urgent
 
-class QuestionnaireSummary(BaseModel):
+
+class Appointment(BaseModel):
+    id: str
     patient_id: str
-    appointment_date: str
-    summary: str
-    key_points: List[str]
-    generated_at: datetime
+    patient_name: str
+    doctor_id: str
+    doctor_name: str
+    appointment_date: str  # ISO format YYYY-MM-DD
+    appointment_time: str  # HH:MM format
+    appointment_type: str  # follow-up, consultation, emergency, routine
+    status: str  # scheduled, completed, cancelled, no-show
+    duration_minutes: int = 30

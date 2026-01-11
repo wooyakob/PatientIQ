@@ -1,0 +1,1 @@
+{"cells":[{"kind":2,"language":"SQL++","value":"CREATE PRIMARY INDEX ON `Scripps`.`Notes`.`Doctor`;"},{"kind":2,"language":"SQL++","value":"SELECT visit_notes, patient_name, visit_date\nFROM `Scripps`.`Notes`.`Doctor`\nLIMIT 5;"}]}

@@ -1,0 +1,542 @@
+[
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-11T10:30:00-08:00",
+    "metrics": {
+      "steps": 7644,
+      "calories_burned": 342.5,
+      "distance_covered": 5.824,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.599,
+      "exercise_intensity": "Low",
+      "heart_rate": 154,
+      "blood_oxygen_level": 91.79,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-12T10:30:00-08:00",
+    "metrics": {
+      "steps": 11795,
+      "calories_burned": 588.3,
+      "distance_covered": 9.673,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.601,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 137,
+      "blood_oxygen_level": 88.46,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-13T10:30:00-08:00",
+    "metrics": {
+      "steps": 9582,
+      "calories_burned": 412.6,
+      "distance_covered": 7.358,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 1.181,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 155,
+      "blood_oxygen_level": 91.21,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-14T10:30:00-08:00",
+    "metrics": {
+      "steps": 7749,
+      "calories_burned": 464.8,
+      "distance_covered": 6.524,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.778,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 139,
+      "blood_oxygen_level": 88.21,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-15T10:30:00-08:00",
+    "metrics": {
+      "steps": 10978,
+      "calories_burned": 505.5,
+      "distance_covered": 8.958,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 1.156,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 139,
+      "blood_oxygen_level": 91.84,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-16T10:30:00-08:00",
+    "metrics": {
+      "steps": 9604,
+      "calories_burned": 500.2,
+      "distance_covered": 7.737,
+      "exercise_type": "HIIT",
+      "exercise_duration": 1.344,
+      "exercise_intensity": "High",
+      "heart_rate": 151,
+      "blood_oxygen_level": 92.54,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-17T10:30:00-08:00",
+    "metrics": {
+      "steps": 7802,
+      "calories_burned": 404.4,
+      "distance_covered": 6.003,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.816,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 137,
+      "blood_oxygen_level": 90.91,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-18T10:30:00-08:00",
+    "metrics": {
+      "steps": 7077,
+      "calories_burned": 349.0,
+      "distance_covered": 5.441,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.781,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 140,
+      "blood_oxygen_level": 88.96,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-19T10:30:00-08:00",
+    "metrics": {
+      "steps": 9790,
+      "calories_burned": 490.5,
+      "distance_covered": 7.451,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.949,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 134,
+      "blood_oxygen_level": 89.74,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-20T10:30:00-08:00",
+    "metrics": {
+      "steps": 11742,
+      "calories_burned": 555.8,
+      "distance_covered": 10.11,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.986,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 145,
+      "blood_oxygen_level": 91.1,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-21T10:30:00-08:00",
+    "metrics": {
+      "steps": 8424,
+      "calories_burned": 348.3,
+      "distance_covered": 6.615,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.961,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 136,
+      "blood_oxygen_level": 91.81,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-22T10:30:00-08:00",
+    "metrics": {
+      "steps": 8412,
+      "calories_burned": 441.6,
+      "distance_covered": 6.555,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.558,
+      "exercise_intensity": "Low",
+      "heart_rate": 140,
+      "blood_oxygen_level": 89.22,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-23T10:30:00-08:00",
+    "metrics": {
+      "steps": 7563,
+      "calories_burned": 416.3,
+      "distance_covered": 5.761,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.45,
+      "exercise_intensity": "Low",
+      "heart_rate": 157,
+      "blood_oxygen_level": 91.32,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-24T10:30:00-08:00",
+    "metrics": {
+      "steps": 7772,
+      "calories_burned": 327.1,
+      "distance_covered": 6.12,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.731,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 145,
+      "blood_oxygen_level": 90.41,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-25T10:30:00-08:00",
+    "metrics": {
+      "steps": 11083,
+      "calories_burned": 571.8,
+      "distance_covered": 8.712,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.931,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 131,
+      "blood_oxygen_level": 90.82,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-26T10:30:00-08:00",
+    "metrics": {
+      "steps": 10533,
+      "calories_burned": 501.3,
+      "distance_covered": 8.226,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.167,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 146,
+      "blood_oxygen_level": 89.47,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-27T10:30:00-08:00",
+    "metrics": {
+      "steps": 10777,
+      "calories_burned": 479.3,
+      "distance_covered": 8.386,
+      "exercise_type": "HIIT",
+      "exercise_duration": 1.357,
+      "exercise_intensity": "High",
+      "heart_rate": 145,
+      "blood_oxygen_level": 90.15,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-28T10:30:00-08:00",
+    "metrics": {
+      "steps": 10641,
+      "calories_burned": 554.9,
+      "distance_covered": 8.025,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.189,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 144,
+      "blood_oxygen_level": 91.98,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-29T10:30:00-08:00",
+    "metrics": {
+      "steps": 8473,
+      "calories_burned": 492.0,
+      "distance_covered": 6.7,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.885,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 131,
+      "blood_oxygen_level": 89.06,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-30T10:30:00-08:00",
+    "metrics": {
+      "steps": 9065,
+      "calories_burned": 493.8,
+      "distance_covered": 7.485,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.027,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 161,
+      "blood_oxygen_level": 91.84,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-31T10:30:00-08:00",
+    "metrics": {
+      "steps": 12032,
+      "calories_burned": 640.9,
+      "distance_covered": 9.706,
+      "exercise_type": "Cycling",
+      "exercise_duration": 1.443,
+      "exercise_intensity": "High",
+      "heart_rate": 158,
+      "blood_oxygen_level": 89.53,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-01T10:30:00-08:00",
+    "metrics": {
+      "steps": 7069,
+      "calories_burned": 390.0,
+      "distance_covered": 5.549,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.728,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 144,
+      "blood_oxygen_level": 89.61,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-02T10:30:00-08:00",
+    "metrics": {
+      "steps": 8409,
+      "calories_burned": 444.1,
+      "distance_covered": 7.217,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.877,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 158,
+      "blood_oxygen_level": 91.21,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-03T10:30:00-08:00",
+    "metrics": {
+      "steps": 10662,
+      "calories_burned": 525.1,
+      "distance_covered": 8.634,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.777,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 148,
+      "blood_oxygen_level": 92.75,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-04T10:30:00-08:00",
+    "metrics": {
+      "steps": 10611,
+      "calories_burned": 516.2,
+      "distance_covered": 8.547,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.425,
+      "exercise_intensity": "Low",
+      "heart_rate": 143,
+      "blood_oxygen_level": 90.49,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-05T10:30:00-08:00",
+    "metrics": {
+      "steps": 10735,
+      "calories_burned": 510.8,
+      "distance_covered": 7.799,
+      "exercise_type": "HIIT",
+      "exercise_duration": 1.458,
+      "exercise_intensity": "High",
+      "heart_rate": 159,
+      "blood_oxygen_level": 87.99,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-06T10:30:00-08:00",
+    "metrics": {
+      "steps": 9073,
+      "calories_burned": 476.2,
+      "distance_covered": 7.22,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.655,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 141,
+      "blood_oxygen_level": 89.24,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-07T10:30:00-08:00",
+    "metrics": {
+      "steps": 11176,
+      "calories_burned": 584.0,
+      "distance_covered": 9.5,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.891,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 150,
+      "blood_oxygen_level": 89.07,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-08T10:30:00-08:00",
+    "metrics": {
+      "steps": 9791,
+      "calories_burned": 472.3,
+      "distance_covered": 7.652,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.183,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 148,
+      "blood_oxygen_level": 89.27,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "1",
+    "patient_name": "James Smith",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-09T10:30:00-08:00",
+    "metrics": {
+      "steps": 8518,
+      "calories_burned": 441.4,
+      "distance_covered": 7.032,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 1.158,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 147,
+      "blood_oxygen_level": 90.88,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  }
+]

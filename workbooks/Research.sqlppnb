@@ -1,0 +1,1 @@
+{"cells":[{"kind":2,"language":"SQL++","value":"CREATE PRIMARY INDEX ON `Research`.`Pubmed`.`Pulmonary`;"},{"kind":2,"language":"SQL++","value":"SELECT article_text\nFROM `Research`.`Pubmed`.`Pulmonary`\nLIMIT 5;"},{"kind":2,"language":"SQL++","value":"EXPLAIN SELECT article_text\nFROM `Research`.`Pubmed`.`Pulmonary`\nLIMIT 1;"},{"kind":2,"language":"SQL++","value":""}]}

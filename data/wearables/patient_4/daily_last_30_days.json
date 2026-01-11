@@ -1,0 +1,542 @@
+[
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-11T17:40:00-08:00",
+    "metrics": {
+      "steps": 5770,
+      "calories_burned": 399.0,
+      "distance_covered": 4.323,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.276,
+      "exercise_intensity": "Low",
+      "heart_rate": 130,
+      "blood_oxygen_level": 93.54,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-12T17:40:00-08:00",
+    "metrics": {
+      "steps": 7350,
+      "calories_burned": 364.6,
+      "distance_covered": 5.373,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.583,
+      "exercise_intensity": "Low",
+      "heart_rate": 131,
+      "blood_oxygen_level": 93.51,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-13T17:40:00-08:00",
+    "metrics": {
+      "steps": 7977,
+      "calories_burned": 426.1,
+      "distance_covered": 5.861,
+      "exercise_type": "Walking",
+      "exercise_duration": 1.109,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 128,
+      "blood_oxygen_level": 92.98,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-14T17:40:00-08:00",
+    "metrics": {
+      "steps": 10188,
+      "calories_burned": 549.9,
+      "distance_covered": 7.777,
+      "exercise_type": "Walking",
+      "exercise_duration": 1.174,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 140,
+      "blood_oxygen_level": 91.7,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-15T17:40:00-08:00",
+    "metrics": {
+      "steps": 6833,
+      "calories_burned": 354.9,
+      "distance_covered": 4.762,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.614,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 143,
+      "blood_oxygen_level": 92.67,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-16T17:40:00-08:00",
+    "metrics": {
+      "steps": 7446,
+      "calories_burned": 407.0,
+      "distance_covered": 5.829,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.465,
+      "exercise_intensity": "Low",
+      "heart_rate": 120,
+      "blood_oxygen_level": 92.02,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-17T17:40:00-08:00",
+    "metrics": {
+      "steps": 8834,
+      "calories_burned": 358.5,
+      "distance_covered": 5.713,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.985,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 135,
+      "blood_oxygen_level": 91.78,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-18T17:40:00-08:00",
+    "metrics": {
+      "steps": 7639,
+      "calories_burned": 419.5,
+      "distance_covered": 5.368,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.538,
+      "exercise_intensity": "Low",
+      "heart_rate": 146,
+      "blood_oxygen_level": 94.5,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-19T17:40:00-08:00",
+    "metrics": {
+      "steps": 9178,
+      "calories_burned": 402.5,
+      "distance_covered": 6.639,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.026,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 138,
+      "blood_oxygen_level": 94.67,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-20T17:40:00-08:00",
+    "metrics": {
+      "steps": 6611,
+      "calories_burned": 338.8,
+      "distance_covered": 4.223,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.391,
+      "exercise_intensity": "Low",
+      "heart_rate": 122,
+      "blood_oxygen_level": 93.56,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-21T17:40:00-08:00",
+    "metrics": {
+      "steps": 7657,
+      "calories_burned": 352.6,
+      "distance_covered": 4.953,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.916,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 132,
+      "blood_oxygen_level": 93.4,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-22T17:40:00-08:00",
+    "metrics": {
+      "steps": 7390,
+      "calories_burned": 379.6,
+      "distance_covered": 5.42,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.786,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 132,
+      "blood_oxygen_level": 93.72,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-23T17:40:00-08:00",
+    "metrics": {
+      "steps": 7789,
+      "calories_burned": 397.3,
+      "distance_covered": 5.472,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.728,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 123,
+      "blood_oxygen_level": 93.95,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-24T17:40:00-08:00",
+    "metrics": {
+      "steps": 4994,
+      "calories_burned": 285.3,
+      "distance_covered": 3.706,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.44,
+      "exercise_intensity": "Low",
+      "heart_rate": 139,
+      "blood_oxygen_level": 94.18,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-25T17:40:00-08:00",
+    "metrics": {
+      "steps": 8142,
+      "calories_burned": 405.3,
+      "distance_covered": 6.144,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.51,
+      "exercise_intensity": "Low",
+      "heart_rate": 128,
+      "blood_oxygen_level": 95.23,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-26T17:40:00-08:00",
+    "metrics": {
+      "steps": 8559,
+      "calories_burned": 436.5,
+      "distance_covered": 6.576,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.746,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 143,
+      "blood_oxygen_level": 92.94,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-27T17:40:00-08:00",
+    "metrics": {
+      "steps": 8696,
+      "calories_burned": 452.2,
+      "distance_covered": 6.798,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.487,
+      "exercise_intensity": "Low",
+      "heart_rate": 147,
+      "blood_oxygen_level": 93.95,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-28T17:40:00-08:00",
+    "metrics": {
+      "steps": 9070,
+      "calories_burned": 462.2,
+      "distance_covered": 6.523,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.861,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 121,
+      "blood_oxygen_level": 92.61,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-29T17:40:00-08:00",
+    "metrics": {
+      "steps": 7786,
+      "calories_burned": 379.3,
+      "distance_covered": 5.451,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.99,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 132,
+      "blood_oxygen_level": 94.97,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-30T17:40:00-08:00",
+    "metrics": {
+      "steps": 8325,
+      "calories_burned": 395.0,
+      "distance_covered": 6.182,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.941,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 144,
+      "blood_oxygen_level": 94.6,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-31T17:40:00-08:00",
+    "metrics": {
+      "steps": 7274,
+      "calories_burned": 349.5,
+      "distance_covered": 5.262,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.298,
+      "exercise_intensity": "Low",
+      "heart_rate": 130,
+      "blood_oxygen_level": 93.79,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-01T17:40:00-08:00",
+    "metrics": {
+      "steps": 10120,
+      "calories_burned": 491.3,
+      "distance_covered": 6.601,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.772,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 129,
+      "blood_oxygen_level": 93.39,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-02T17:40:00-08:00",
+    "metrics": {
+      "steps": 6264,
+      "calories_burned": 379.1,
+      "distance_covered": 4.635,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.716,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 115,
+      "blood_oxygen_level": 93.63,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-03T17:40:00-08:00",
+    "metrics": {
+      "steps": 7851,
+      "calories_burned": 411.0,
+      "distance_covered": 5.969,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.592,
+      "exercise_intensity": "Low",
+      "heart_rate": 139,
+      "blood_oxygen_level": 93.4,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-04T17:40:00-08:00",
+    "metrics": {
+      "steps": 7605,
+      "calories_burned": 412.7,
+      "distance_covered": 5.24,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.556,
+      "exercise_intensity": "Low",
+      "heart_rate": 123,
+      "blood_oxygen_level": 92.55,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-05T17:40:00-08:00",
+    "metrics": {
+      "steps": 7627,
+      "calories_burned": 420.4,
+      "distance_covered": 4.581,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.539,
+      "exercise_intensity": "Low",
+      "heart_rate": 136,
+      "blood_oxygen_level": 92.92,
+      "ecg": "Abnormal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-06T17:40:00-08:00",
+    "metrics": {
+      "steps": 8149,
+      "calories_burned": 417.2,
+      "distance_covered": 5.791,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.336,
+      "exercise_intensity": "Low",
+      "heart_rate": 148,
+      "blood_oxygen_level": 93.07,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-07T17:40:00-08:00",
+    "metrics": {
+      "steps": 7116,
+      "calories_burned": 384.2,
+      "distance_covered": 4.668,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.574,
+      "exercise_intensity": "Low",
+      "heart_rate": 145,
+      "blood_oxygen_level": 95.0,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-08T17:40:00-08:00",
+    "metrics": {
+      "steps": 7552,
+      "calories_burned": 474.3,
+      "distance_covered": 5.478,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.591,
+      "exercise_intensity": "Low",
+      "heart_rate": 140,
+      "blood_oxygen_level": 93.7,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  },
+  {
+    "patient_id": "4",
+    "patient_name": "Aisha Khan",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-09T17:40:00-08:00",
+    "metrics": {
+      "steps": 9444,
+      "calories_burned": 504.8,
+      "distance_covered": 6.793,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.389,
+      "exercise_intensity": "Low",
+      "heart_rate": 144,
+      "blood_oxygen_level": 94.2,
+      "ecg": "Normal",
+      "stress_level": "High"
+    }
+  }
+]
