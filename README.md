@@ -10,12 +10,7 @@ Doctors today face countless daily micro decisions, many of which are administra
 
 ## AI Agents
 
-PatientIQ features **two specialized AI agents** powered by vector search:
-
-1. **Medical Researcher Agent** - Finds and summarizes relevant medical research for patient conditions
-2. **Doctor Notes Buddy Agent** - Searches doctor notes and answers questions using semantic search
-
-See [AGENTS.md](./AGENTS.md) for detailed documentation on each agent, including API endpoints, usage examples, and integration guides.
+See: `/agents/AGENTS.md`
 
 ## Technology Stack
 
@@ -24,11 +19,10 @@ See [AGENTS.md](./AGENTS.md) for detailed documentation on each agent, including
 - **Hyperscale Vector Indexes**:
   - `hyperscale_pubmed_vectorized_article_vectorized` (Research)
   - `hyperscale_doctor_notes_vectorized_all_notes_vectorized` (Notes)
-- **Semantic Search**: N1QL queries with `SEARCH()` function and KNN
-- **LLM**: OpenAI GPT-4 for synthesis and summarization
 
-make dev
-make stop
+### Running Locally
+- `make dev`
+- `make stop`
 
 ### Backend (FastAPI)
 - Install deps:
@@ -57,6 +51,11 @@ make stop
  - Private Networking Enabled for Workflows, Embedding Model to Work
 
 ### Database Schema
+
+Configured via environment variables:
+- `COUCHBASE_BUCKET` (defaults to `Scripps`)
+- `COUCHBASE_RESEARCH_BUCKET` (defaults to `Research`)
+
 Research (bucket)
   Pubmed (scope)
     Pulmonary (collection)

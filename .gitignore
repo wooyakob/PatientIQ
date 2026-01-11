@@ -44,6 +44,11 @@ node_modules
 *.db
 
 *.csv
+*examples/
+*indexes/
+
+
+
 
 *api-key*
 *apikey*

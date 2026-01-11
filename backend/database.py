@@ -21,11 +21,14 @@ class CouchbaseDB:
     Couchbase database utility for healthcare agent application.
 
     Uses bucket/scope/collection hierarchy:
-    - ckodb bucket
-      - People scope (Patient, Doctor collections)
-      - Research scope (pubmed collection)
-      - Wearables scope (Watch, 
+    - Scripps bucket (clinical data)
+      - People scope (Patients, Doctors collections)
       - Notes scope (Patient, Doctor collections)
+      - Wearables scope (Patient_1..Patient_5 collections)
+      - Messages scope (Private, Public collections)
+      - Calendar scope (Appointments collection)
+    - Research bucket
+      - Pubmed scope (Pulmonary collection)
 
     """
 
@@ -35,6 +38,7 @@ class CouchbaseDB:
         self.username = os.getenv("CLUSTER_USERNAME", "ac")
         self.password = os.getenv("CLUSTER_PASS")
         self.bucket_name = os.getenv("COUCHBASE_BUCKET", "Scripps")
+        self.research_bucket_name = os.getenv("COUCHBASE_RESEARCH_BUCKET", "Research")
 
         # Connection state
         self.cluster = None
@@ -92,15 +96,20 @@ class CouchbaseDB:
             self.calendar_scope = self.bucket.scope("Calendar")
             self.appointments_collection = self.calendar_scope.collection("Appointments")
 
-            print(f"Connected to Couchbase cluster. Using bucket: {self.bucket_name}")
-            print("Initialized scopes: People, Wearables, Notes, Messages, Calendar")
+            print(
+                "Connected to Couchbase cluster. "
+                f"Scripps bucket: {self.bucket_name}. "
+                f"Research bucket: {self.research_bucket_name}"
+            )
+            print("Initialized scopes (Scripps): People, Wearables, Notes, Messages, Calendar")
 
         except Exception as e:
             self._connection_error = e
             print(f"Warning: Could not connect to Couchbase: {e}")
             print("   Please verify the cluster is running and accessible.")
             print(
-                "   Expected structure: Scripps bucket with People/Notes/Wearables scopes"
+                "   Expected structure: Scripps bucket with People/Notes/Wearables/Calendar/Messages scopes "
+                "and Research bucket with Pubmed/Pulmonary collection"
             )
 
     def _check_connection(self):
@@ -132,6 +141,51 @@ class CouchbaseDB:
             return date.fromisoformat(value)
         except Exception:
             return None
+
+    def _normalize_date_string(self, value) -> str:
+        if value is None:
+            return ""
+
+        if isinstance(value, (int, float)):
+            try:
+                ts = float(value)
+                if ts > 1e12:
+                    ts = ts / 1000.0
+                return datetime.fromtimestamp(ts).date().isoformat()
+            except Exception:
+                return ""
+
+        if isinstance(value, dict):
+            for key in ("$date", "date", "value", "iso"):
+                if key in value:
+                    return self._normalize_date_string(value.get(key))
+            return ""
+
+        s = str(value).strip()
+        if not s:
+            return ""
+
+        parsed = self._parse_date(s)
+        if parsed:
+            return parsed.isoformat()
+
+        s2 = s.replace("Z", "+00:00")
+        for fmt in (
+            "%Y-%m-%d",
+            "%Y/%m/%d",
+            "%m/%d/%Y",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
+        ):
+            try:
+                return datetime.strptime(s, fmt).date().isoformat()
+            except Exception:
+                pass
+
+        try:
+            return datetime.fromisoformat(s2).date().isoformat()
+        except Exception:
+            return ""
 
     def _sentiment_from_text(self, text: str) -> str:
         t = (text or "").lower()
@@ -201,11 +255,16 @@ class CouchbaseDB:
     def _get_research_snippets(self, limit: int = 2, max_chars: int = 700) -> List[str]:
         query = """
             SELECT p.article_text AS article_text
-            FROM `Research`.`Pubmed`.`Pulmonary` p
+            FROM `{research_bucket}`.`Pubmed`.`Pulmonary` p
             LIMIT $limit
         """
         try:
-            rows = list(self.cluster.query(query, QueryOptions(named_parameters={"limit": limit})))
+            rows = list(
+                self.cluster.query(
+                    query.format(research_bucket=self.research_bucket_name),
+                    QueryOptions(named_parameters={"limit": limit}),
+                )
+            )
         except Exception:
             return []
 
@@ -228,7 +287,7 @@ class CouchbaseDB:
         pattern = f"%{c}%"
         query = """
             SELECT p.article_text AS article_text
-            FROM `Research`.`Pubmed`.`Pulmonary` p
+            FROM `{research_bucket}`.`Pubmed`.`Pulmonary` p
             WHERE LOWER(IFMISSINGORNULL(p.article_text, '')) LIKE $pattern
                OR LOWER(IFMISSINGORNULL(p.title, '')) LIKE $pattern
                OR LOWER(IFMISSINGORNULL(p.abstract, '')) LIKE $pattern
@@ -237,7 +296,7 @@ class CouchbaseDB:
         try:
             rows = list(
                 self.cluster.query(
-                    query,
+                    query.format(research_bucket=self.research_bucket_name),
                     QueryOptions(named_parameters={"pattern": pattern, "limit": int(limit)}),
                 )
             )
@@ -501,12 +560,20 @@ class CouchbaseDB:
                        n.visit_notes AS content
                 FROM `{self.bucket_name}`.`Notes`.`Doctor` n
                 WHERE n.patient_id = $patient_id
+                  AND n.visit_date IS VALUED
+                  AND TRIM(TOSTRING(n.visit_date)) != ''
+                  AND n.visit_notes IS VALUED
+                  AND TRIM(TOSTRING(n.visit_notes)) != ''
                 ORDER BY n.visit_date DESC
             """
             result = self.cluster.query(
                 query, QueryOptions(named_parameters={"patient_id": patient_id})
             )
-            return [row for row in result]
+            rows = [row for row in result]
+            for r in rows:
+                r["date"] = self._normalize_date_string(r.get("date"))
+            rows = [r for r in rows if r.get("content") and r.get("date")]
+            return rows
         except Exception as e:
             print(f"Error fetching doctor notes: {e}")
             return []
@@ -533,12 +600,20 @@ class CouchbaseDB:
                        n.visit_notes AS content
                 FROM `{self.bucket_name}`.`Notes`.`Patient` n
                 WHERE n.patient_id = $patient_id
+                  AND n.visit_date IS VALUED
+                  AND TRIM(TOSTRING(n.visit_date)) != ''
+                  AND n.visit_notes IS VALUED
+                  AND TRIM(TOSTRING(n.visit_notes)) != ''
                 ORDER BY n.visit_date DESC
             """
             result = self.cluster.query(
                 query, QueryOptions(named_parameters={"patient_id": patient_id})
             )
-            return [row for row in result]
+            rows = [row for row in result]
+            for r in rows:
+                r["date"] = self._normalize_date_string(r.get("date"))
+            rows = [r for r in rows if r.get("content") and r.get("date")]
+            return rows
         except Exception as e:
             print(f"Error fetching patient notes: {e}")
             return []

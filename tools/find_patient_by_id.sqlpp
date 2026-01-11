@@ -1,0 +1,24 @@
+/*
+name: find_patient_by_id
+
+description: >
+    Lookup a patient record by patient_id.
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "patient_id": { "type": "integer" }
+      }
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+
+FROM   `Scripps`.People.Patients p
+WHERE  p.patient_id = $patient_id
+SELECT p.*;
