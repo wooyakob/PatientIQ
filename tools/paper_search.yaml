@@ -3,14 +3,21 @@ record_kind: semantic_search
 name: paper_search
 
 description: >
-    Find answers to questions from medical research papers that are focused on Pulmonary c
+    Find answers to questions from medical research papers that are focused on Pulmonary conditions.
 
 # The inputs used to build a comparable representation for a semantic search.
 # Inputs are described using a JSON object that follows the JSON schema standard.
 # This field is mandatory.
 # See https://json-schema.org/learn/getting-started-step-by-step for more info.
 input: >
-   <<< Replace me with your input type! >>>
+   {
+     "type": "object",
+     "properties": {
+       "query": { "type": "string" },
+       "top_k": { "type": "integer", "default": 3 }
+     },
+     "required": ["query"]
+   }
 
 # As a supplement to the tool similarity search, users can optionally specify search annotations.
 # The values of these annotations MUST be strings (e.g., not 'true', but '"true"').
@@ -25,17 +32,15 @@ secrets:
 
   # All Couchbase tools (e.g., semantic search, SQL++) must specify conn_string, username, and password.
   - couchbase:
-      conn_string: CB_CONN_STRING
-      username: CB_USERNAME
-      password: CB_PASSWORD
-      certificate: CB_CERTIFICATE
+      conn_string: CLUSTER_CONNECTION_STRING
+      username: CLUSTER_USERNAME
+      password: CLUSTER_PASS
+      certificate: AGENT_CATALOG_CONN_ROOT_CERTIFICATE
 
   # For cloud-hosted embedding models, a Bearer token is required.
   # If your embedding model is hosted on Capella, provide the username and password below.
-  - embedding_model:
-      # auth: OPENAI_API_KEY
-      username: CB_USERNAME
-      password: CB_PASSWORD
+  - embedding:
+      auth: EMBEDDING_MODEL_TOKEN
 
 # Couchbase semantic search tools always involve a vector search.
 vector_search:
@@ -62,8 +67,8 @@ vector_search:
   # This embedding model field value is directly passed to sentence transformers.
   # In the future, we will add support for other types of embedding models.
   embedding_model:
-    name: 
-    base_url: 
+    name: nvidia/llama-3.2-nv-embedqa-1b-v2
+    base_url: EMBEDDING_MODEL_ENDPOINT
 
   # The number of candidates (i.e., the K value) to request for when performing a vector top-k search.
   # This field is optional, and defaults to k=3 if not specified.
