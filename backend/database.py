@@ -1,5 +1,6 @@
 import os
 import re
+import threading
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 from couchbase.auth import PasswordAuthenticator
@@ -29,27 +30,43 @@ class CouchbaseDB:
     """
 
     def __init__(self):
-        endpoint = os.getenv("CLUSTER_CONNECTION_STRING")
-        username = os.getenv("CLUSTER_USERNAME", "ac")
-        password = os.getenv("CLUSTER_PASS")
-
-        if not endpoint or not username or not password:
-            raise RuntimeError(
-                "Missing required environment variables. "
-                "Please set CLUSTER_CONNECTION_STRING, CLUSTER_NAME, and CLUSTER_PASS"
-            )
-
-        auth = PasswordAuthenticator(username, password)
-        options = ClusterOptions(auth)
-        options.apply_profile("wan_development")
-
-        self.cluster = Cluster(endpoint, options)
-        self.cluster.wait_until_ready(timedelta(seconds=5))
-
-        # Default to Scripps to match the current database schema in this repo.
+        # Store connection parameters but don't connect yet (lazy initialization)
+        self.endpoint = os.getenv("CLUSTER_CONNECTION_STRING")
+        self.username = os.getenv("CLUSTER_USERNAME", "ac")
+        self.password = os.getenv("CLUSTER_PASS")
         self.bucket_name = os.getenv("COUCHBASE_BUCKET", "Scripps")
 
+        # Connection state
+        self.cluster = None
+        self.bucket = None
+        self.patients_collection = None
+        self._connection_attempted = False
+        self._connection_error = None
+
+    def _ensure_connected(self):
+        """Lazy initialization - connect to database on first use"""
+        if self._connection_attempted:
+            return
+
+        self._connection_attempted = True
+
+        if not self.endpoint or not self.username or not self.password:
+            self._connection_error = RuntimeError(
+                "Missing required environment variables. "
+                "Please set CLUSTER_CONNECTION_STRING, CLUSTER_USERNAME, and CLUSTER_PASS"
+            )
+            print(f"Database connection error: {self._connection_error}")
+            return
+
         try:
+            print(f"Connecting to Couchbase at {self.endpoint}...")
+            auth = PasswordAuthenticator(self.username, self.password)
+            options = ClusterOptions(auth)
+            options.apply_profile("wan_development")
+
+            self.cluster = Cluster(self.endpoint, options)
+            self.cluster.wait_until_ready(timedelta(seconds=10))
+
             self.bucket = self.cluster.bucket(self.bucket_name)
 
             # Initialize scopes and collections
@@ -75,25 +92,27 @@ class CouchbaseDB:
             self.calendar_scope = self.bucket.scope("Calendar")
             self.appointments_collection = self.calendar_scope.collection("Appointments")
 
-            # Questionnaires scope - collection names TBD
-            # self.questionnaires_scope = self.bucket.scope("Questionnaires")
-            # self.patient_questionnaires_collection = self.questionnaires_scope.collection("Patient")
-
             print(f"Connected to Couchbase cluster. Using bucket: {self.bucket_name}")
             print("Initialized scopes: People, Wearables, Notes, Messages, Calendar")
 
         except Exception as e:
-            print(f"Warning: Could not access bucket '{self.bucket_name}': {e}")
-            print("   Please verify the bucket exists in Couchbase Capella.")
+            self._connection_error = e
+            print(f"Warning: Could not connect to Couchbase: {e}")
+            print("   Please verify the cluster is running and accessible.")
             print(
                 "   Expected structure: Scripps bucket with People/Notes/Wearables scopes"
             )
-            # Set to None so we can check later
-            self.bucket = None
-            self.patients_collection = None
 
     def _check_connection(self):
         """Check if database is connected"""
+        self._ensure_connected()
+
+        if self._connection_error:
+            raise RuntimeError(
+                f"Database connection failed: {self._connection_error}. "
+                f"Please verify the Couchbase cluster is running and accessible."
+            )
+
         if not self.patients_collection:
             raise RuntimeError(
                 f"Bucket '{self.bucket_name}' not available. "
@@ -687,4 +706,22 @@ class CouchbaseDB:
 
 
 # Global database instance
-db = CouchbaseDB()
+_db_instance = None
+_db_lock = threading.Lock()
+
+
+def _get_db_instance():
+    global _db_instance
+    if _db_instance is None:
+        with _db_lock:
+            if _db_instance is None:
+                _db_instance = CouchbaseDB()
+    return _db_instance
+
+
+class _DBProxy:
+    def __getattr__(self, name):
+        return getattr(_get_db_instance(), name)
+
+
+db = _DBProxy()
