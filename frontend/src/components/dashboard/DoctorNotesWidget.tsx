@@ -8,6 +8,15 @@ interface DoctorNotesWidgetProps {
 
 export function DoctorNotesWidget({ patient }: DoctorNotesWidgetProps) {
   const latestNote = patient.doctorNotes[0];
+  const latestDate = latestNote ? new Date(latestNote.date) : null;
+  const latestDateLabel =
+    latestDate && !Number.isNaN(latestDate.getTime())
+      ? latestDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
+      : '';
 
   return (
     <Link
@@ -29,11 +38,7 @@ export function DoctorNotesWidget({ patient }: DoctorNotesWidgetProps) {
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
-              {new Date(latestNote.date).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                year: 'numeric' 
-              })}
+              {latestDateLabel}
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" />

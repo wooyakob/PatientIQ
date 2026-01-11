@@ -102,12 +102,14 @@ export async function getDoctorNotes(patientId: string): Promise<DoctorNote[]> {
     `/api/patients/${encodeURIComponent(patientId)}/doctor-notes`
   );
 
-  return (result.notes ?? []).map((n, idx) => ({
-    id: String(n.id ?? `${patientId}-${idx}`),
-    date: String(n.date ?? ""),
-    time: String(n.time ?? ""),
-    content: String(n.content ?? ""),
-  }));
+  return (result.notes ?? [])
+    .map((n, idx) => ({
+      id: String(n.id ?? `${patientId}-${idx}`),
+      date: String(n.date ?? ""),
+      time: String(n.time ?? ""),
+      content: String(n.content ?? ""),
+    }))
+    .filter((n) => n.date.trim().length > 0 && n.content.trim().length > 0);
 }
 
 export async function getPatientWithNotes(patientId: string): Promise<Patient> {

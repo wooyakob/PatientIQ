@@ -14,9 +14,9 @@ input: >
 
 secrets:
     - couchbase:
-        conn_string: CB_CONN_STRING
-        username: CB_USERNAME
-        password: CB_PASSWORD
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
 */
 
 FROM   `Scripps`.People.Patients p

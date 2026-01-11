@@ -130,11 +130,16 @@ const NotesDetail = () => {
                 <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5" />
-                    {new Date(note.date).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
+                    {(() => {
+                      const d = new Date(note.date);
+                      return !Number.isNaN(d.getTime())
+                        ? d.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })
+                        : '';
+                    })()}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5" />
