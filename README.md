@@ -27,6 +27,9 @@ See [AGENTS.md](./AGENTS.md) for detailed documentation on each agent, including
 - **Semantic Search**: N1QL queries with `SEARCH()` function and KNN
 - **LLM**: OpenAI GPT-4 for synthesis and summarization
 
+make dev
+make stop
+
 ### Backend (FastAPI)
 - Install deps:
   - `uv sync --extra dev`

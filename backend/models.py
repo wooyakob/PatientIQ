@@ -4,6 +4,13 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
+class SentimentLevel(str, Enum):
+    amazing = "amazing"
+    good = "good"
+    neutral = "neutral"
+    poor = "poor"
+    terrible = "terrible"
+
 
 class WearableData(BaseModel):
     heart_rate: List[int] = Field(default_factory=list, description="7-day heart rate readings")
