@@ -1,0 +1,14 @@
+[
+    {
+        "doctor_name": "Tiffany Mitchell",
+        "doctor_id": 1,
+        "doctor_licence_number": "123456",
+        "patients": [
+            "James Smith",
+            "Maria Garcia",
+            "Robert Chen",
+            "Aisha Khan",
+            "Emily Johnson"
+        ]
+    }
+]

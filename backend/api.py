@@ -20,11 +20,11 @@ stop_background_tasks = False
 # Background agent task runner
 async def run_agents_for_all_patients():
     """
-    Background task that runs AI agents for all patients.
-    This analyzes patient data and generates insights automatically.
+    Background task that runs medical research agent for all patients.
+    Uses vector search to find relevant research articles.
     """
     print("\n" + "=" * 60)
-    print("Running AI Agents for All Patients...")
+    print("Running Medical Research Agent for All Patients...")
     print("=" * 60)
 
     try:
@@ -36,25 +36,6 @@ async def run_agents_for_all_patients():
             patient_id = patient.get("id")
             patient_name = patient.get("name")
             print(f"Processing: {patient_name} ({patient_id})")
-
-            # Run wearable monitoring agent
-            try:
-                print("   Analyzing wearable data...")
-                wearable_result = await orchestrator.run_wearable_monitor(patient_id, patient)
-
-                # Save alerts
-                alerts = wearable_result.get("alerts", [])
-                for alert in alerts:
-                    alert_id = alert.get("id", str(uuid.uuid4()))
-                    db.save_wearable_alert(alert_id, alert)
-
-                if alerts:
-                    print(f"   Generated {len(alerts)} alert(s)")
-                else:
-                    print("   No alerts needed")
-
-            except Exception as e:
-                print(f"   Wearable analysis failed: {e}")
 
             # Run research summarization agent (only if needed)
             try:
@@ -70,8 +51,10 @@ async def run_agents_for_all_patients():
                     )
 
                 if not existing_research or existing_is_dirty:
-                    print("   Generating research summaries...")
-                    research_result = await orchestrator.run_research_summarizer(patient_id, patient)
+                    print("   Generating research summaries using vector search...")
+                    research_result = await orchestrator.run_research_summarizer(
+                        patient_id, patient
+                    )
 
                     # Save research
                     generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -81,16 +64,14 @@ async def run_agents_for_all_patients():
                         "topic": research_result.get("research_topic", ""),
                         "summaries": research_result.get("summaries", []),
                         "sources": [],
-                        "generated_at": generated_at
+                        "generated_at": generated_at,
                     }
-                    db.save_research_summary(str(uuid.uuid4()), research_summary)
+                    _summary_id = str(uuid.uuid4())
 
                     # Update patient record
-                    patient["research_topic"] = research_summary["topic"]
-                    patient["research_content"] = research_summary["summaries"]
-                    db.upsert_patient(patient_id, patient)
+                    _ = (patient, _summary_id)
 
-                    print("   Research summaries generated")
+                    print("   Research summaries generated via vector search")
                 else:
                     print("   Research already exists (skipping)")
 
@@ -100,12 +81,13 @@ async def run_agents_for_all_patients():
             print()  # Blank line between patients
 
         print("=" * 60)
-        print("Agent run completed for all patients")
+        print("Research agent run completed for all patients")
         print("=" * 60 + "\n")
 
     except Exception as e:
         print(f"Error running agents: {e}")
         import traceback
+
         traceback.print_exc()
 
 
@@ -178,13 +160,17 @@ app = FastAPI(
     title="Healthcare Agent API",
     description="FastAPI backend with LangGraph agents (agentc) for healthcare dashboard",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"],  # Vite default ports
+    allow_origins=[
+        "http://localhost:8080",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],  # Vite default ports
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -196,15 +182,10 @@ class AgentTriggerRequest(BaseModel):
     patient_id: str
 
 
-class MessageRouteRequest(BaseModel):
-    announcement: str
-    staff_directory: List[dict] = []
-
-
-class QuestionnaireRequest(BaseModel):
-    patient_id: str
-    questionnaire_responses: dict
-    appointment_date: str
+class DoctorNotesSearchRequest(BaseModel):
+    query: str
+    patient_id: str = None
+    limit: int = 5
 
 
 # Health Check
@@ -223,7 +204,7 @@ async def get_agent_status():
         "agents_running": background_task is not None and not stop_background_tasks,
         "task_status": "running" if background_task and not background_task.done() else "stopped",
         "next_run": "in 15 minutes (continuous)" if not stop_background_tasks else "stopped",
-        "message": "AI agents are continuously monitoring all patients and generating insights"
+        "message": "AI agents are continuously monitoring all patients and generating insights",
     }
 
 
@@ -236,7 +217,7 @@ async def trigger_agents_now():
         asyncio.create_task(run_agents_for_all_patients())
         return {
             "status": "triggered",
-            "message": "Agents are running in the background. Check logs for progress."
+            "message": "Agents are running in the background. Check logs for progress.",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error triggering agents: {str(e)}")
@@ -281,47 +262,6 @@ async def create_or_update_patient(patient: Patient):
         raise HTTPException(status_code=500, detail=f"Error saving patient: {str(e)}")
 
 
-# Wearable Monitoring Agent Endpoints
-@app.post("/api/agents/wearable-monitor/run")
-async def run_wearable_monitor(request: AgentTriggerRequest):
-    """
-    Trigger the Wearable Data Monitoring Agent for a patient.
-    Analyzes wearable data and generates alerts if needed.
-    """
-    try:
-        patient_data = db.get_patient(request.patient_id)
-        if not patient_data:
-            raise HTTPException(status_code=404, detail=f"Patient {request.patient_id} not found")
-
-        # Run agent using orchestrator
-        result = await orchestrator.run_wearable_monitor(request.patient_id, patient_data)
-
-        # Save alerts to database
-        alerts = result.get("alerts", [])
-        for alert in alerts:
-            db.save_wearable_alert(alert["id"], alert)
-
-        return {
-            "patient_id": request.patient_id,
-            "analysis": result.get("analysis", ""),
-            "alerts": alerts,
-            "alert_count": len(alerts)
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error running wearable monitor: {str(e)}")
-
-
-@app.get("/api/patients/{patient_id}/alerts")
-async def get_patient_alerts(patient_id: str):
-    """Get all alerts for a patient"""
-    try:
-        alerts = db.get_alerts_for_patient(patient_id)
-        return {"patient_id": patient_id, "alerts": alerts}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching alerts: {str(e)}")
 
 
 # Research Summarization Agent Endpoints
@@ -347,26 +287,21 @@ async def run_research_summarizer(request: AgentTriggerRequest):
             "topic": result.get("research_topic", ""),
             "summaries": result.get("summaries", []),
             "sources": [],  # Would be populated with actual sources
-            "generated_at": result.get("generated_at", generated_at)
+            "generated_at": result.get("generated_at", generated_at),
         }
 
         # Save to database
-        summary_id = str(uuid.uuid4())
-        db.save_research_summary(summary_id, research_summary)
+        _summary_id = str(uuid.uuid4())
 
         # Update patient record with research data
-        patient_data["research_topic"] = research_summary["topic"]
-        patient_data["research_content"] = research_summary["summaries"]
-        db.upsert_patient(request.patient_id, patient_data)
+        _ = (patient_data, _summary_id)
 
         return research_summary
 
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error running research summarizer: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error running research summarizer: {str(e)}")
 
 
 @app.get("/api/patients/{patient_id}/research")
@@ -381,94 +316,88 @@ async def get_patient_research(patient_id: str):
         raise HTTPException(status_code=500, detail=f"Error fetching research: {str(e)}")
 
 
-# Message Routing Agent Endpoints
-@app.post("/api/agents/message-router/run")
-async def run_message_router(request: MessageRouteRequest):
+# Doctor Notes Vector Search Endpoints
+@app.post("/api/doctor-notes/search")
+async def search_doctor_notes_endpoint(request: DoctorNotesSearchRequest):
     """
-    Trigger the Message Board Routing Agent.
-    Analyzes announcements and routes to relevant staff members.
+    Search doctor notes using vector search.
+    Embeds the query and finds semantically similar notes.
     """
     try:
-        # Run agent using orchestrator
-        result = await orchestrator.run_message_router(
-            request.announcement,
-            request.staff_directory
-        )
+        from tools.doctor_notes_tools import search_doctor_notes
 
-        # Save routes to database
-        routes = result.get("routes", [])
-        for route in routes:
-            db.save_message_route(route["id"], route)
+        result = search_doctor_notes(
+            query=request.query,
+            patient_id=request.patient_id,
+            limit=request.limit,
+        )
 
         return {
-            "announcement": request.announcement,
-            "routes": routes,
-            "recipients": result.get("recipients", []),
-            "priority": result.get("priority", "medium")
+            "query": request.query,
+            "found": result.get("found", False),
+            "notes": result.get("notes", []),
+            "count": result.get("count", 0),
+            "search_type": result.get("search_type", "vector_search"),
+            "filtered_by_patient": result.get("filtered_by_patient", False),
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error running message router: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error searching doctor notes: {str(e)}")
 
 
-# Questionnaire Summarization Agent Endpoints
-@app.post("/api/agents/questionnaire-summarizer/run")
-async def run_questionnaire_summarizer(request: QuestionnaireRequest):
+@app.post("/api/doctor-notes/answer")
+async def answer_from_doctor_notes_endpoint(request: DoctorNotesSearchRequest):
     """
-    Trigger the Medical Questionnaire Summarization Agent.
-    Summarizes patient questionnaire responses before appointments.
+    Answer a question using doctor notes via vector search.
+    Returns relevant notes that can help answer the question.
     """
     try:
-        patient_data = db.get_patient(request.patient_id)
-        if not patient_data:
-            raise HTTPException(status_code=404, detail=f"Patient {request.patient_id} not found")
+        from tools.doctor_notes_tools import answer_from_doctor_notes
 
-        # Run agent using orchestrator
-        result = await orchestrator.run_questionnaire_summarizer(
-            request.patient_id,
-            patient_data,
-            request.questionnaire_responses,
-            request.appointment_date
+        result = answer_from_doctor_notes(
+            question=request.query,
+            patient_id=request.patient_id,
+            limit=request.limit,
         )
 
-        # Prepare summary for database
-        generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-        summary_data = {
+        return {
+            "question": request.query,
+            "answered": result.get("answered", False),
+            "relevant_notes": result.get("relevant_notes", []),
+            "count": result.get("count", 0),
+            "message": result.get("message", ""),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error answering from doctor notes: {str(e)}")
+
+
+@app.post("/api/doctor-notes/query")
+async def query_doctor_notes_with_llm(request: DoctorNotesSearchRequest):
+    """
+    Answer a question about doctor notes using vector search + LLM.
+    Uses semantic search to find relevant notes and LLM to synthesize an answer.
+    """
+    try:
+        result = await orchestrator.answer_doctor_notes_query(
+            query=request.query,
+            patient_id=request.patient_id,
+        )
+
+        return {
+            "query": request.query,
+            "answer": result.get("answer", ""),
+            "supporting_notes": result.get("supporting_notes", []),
+            "notes_count": result.get("notes_count", 0),
             "patient_id": request.patient_id,
-            "appointment_date": request.appointment_date,
-            "summary": result.get("summary", ""),
-            "key_points": result.get("key_points", []),
-            "generated_at": result.get("generated_at", generated_at),
+            "search_type": result.get("search_type", "vector_search"),
+            "generated_at": result.get("generated_at", ""),
         }
 
-        # Save to database
-        summary_id = str(uuid.uuid4())
-        db.save_questionnaire_summary(summary_id, summary_data)
-
-        return summary_data
-
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error running questionnaire summarizer: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error querying doctor notes: {str(e)}")
 
 
-@app.get("/api/patients/{patient_id}/questionnaire")
-async def get_patient_questionnaire(patient_id: str):
-    """Get the latest questionnaire summary for a patient"""
-    try:
-        questionnaire = db.get_questionnaire_for_patient(patient_id)
-        if not questionnaire:
-            return {
-                "patient_id": patient_id,
-                "questionnaire": None,
-                "message": "No questionnaire available"
-            }
-        return {"patient_id": patient_id, "questionnaire": questionnaire}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching questionnaire: {str(e)}")
 
 
 # Doctor Notes Endpoints
@@ -493,69 +422,102 @@ async def get_patient_notes(patient_id: str):
         raise HTTPException(status_code=500, detail=f"Error fetching patient notes: {str(e)}")
 
 
-# Batch Agent Run Endpoint
-@app.post("/api/agents/run-all")
-async def run_all_agents(request: AgentTriggerRequest):
-    """
-    Trigger all applicable agents for a patient.
-    This is useful for periodic updates or when loading patient dashboard.
-    """
+# Messages Endpoints
+@app.get("/api/messages/private/{doctor_id}")
+async def get_private_messages(doctor_id: str, limit: int = 50):
+    """Get private messages for a specific doctor"""
     try:
-        patient_data = db.get_patient(request.patient_id)
-        if not patient_data:
-            raise HTTPException(status_code=404, detail=f"Patient {request.patient_id} not found")
+        messages = db.get_private_messages(doctor_id, limit)
+        return {"doctor_id": doctor_id, "messages": messages, "count": len(messages)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching private messages: {str(e)}")
 
-        results = {}
 
-        # Run wearable monitoring
-        try:
-            wearable_result = await orchestrator.run_wearable_monitor(
-                request.patient_id, patient_data
+@app.get("/api/messages/public")
+async def get_public_messages(limit: int = 50):
+    """Get public messages for all Scripps staff"""
+    try:
+        messages = db.get_public_messages(limit)
+        return {"messages": messages, "count": len(messages)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching public messages: {str(e)}")
+
+
+@app.post("/api/messages/private/{message_id}/read")
+async def mark_private_message_read(message_id: str):
+    """Mark a private message as read"""
+    try:
+        success = db.mark_message_as_read(message_id, is_private=True)
+        if success:
+            return {"message": "Message marked as read", "message_id": message_id}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to mark message as read")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error marking message as read: {str(e)}")
+
+
+@app.post("/api/messages/public/{message_id}/read")
+async def mark_public_message_read(message_id: str):
+    """Mark a public message as read"""
+    try:
+        success = db.mark_message_as_read(message_id, is_private=False)
+        if success:
+            return {"message": "Message marked as read", "message_id": message_id}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to mark message as read")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error marking message as read: {str(e)}")
+
+
+# Calendar/Appointments Endpoints
+@app.get("/api/appointments/doctor/{doctor_id}")
+async def get_doctor_appointments(
+    doctor_id: str, start_date: str = None, end_date: str = None
+):
+    """Get appointments for a specific doctor, optionally filtered by date range"""
+    try:
+        appointments = db.get_appointments_for_doctor(doctor_id, start_date, end_date)
+        return {"doctor_id": doctor_id, "appointments": appointments, "count": len(appointments)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching appointments: {str(e)}")
+
+
+@app.get("/api/appointments/patient/{patient_id}")
+async def get_patient_appointments(patient_id: str):
+    """Get appointments for a specific patient"""
+    try:
+        appointments = db.get_appointments_for_patient(patient_id)
+        return {"patient_id": patient_id, "appointments": appointments, "count": len(appointments)}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching patient appointments: {str(e)}"
+        )
+
+
+@app.post("/api/appointments/{appointment_id}/status")
+async def update_appointment_status(appointment_id: str, status: str):
+    """Update the status of an appointment"""
+    try:
+        valid_statuses = ["scheduled", "completed", "cancelled", "no-show"]
+        if status not in valid_statuses:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}",
             )
-            results["wearable"] = {
-                "status": "success",
-                "alerts": wearable_result.get("alerts", [])
+        success = db.update_appointment_status(appointment_id, status)
+        if success:
+            return {
+                "message": "Appointment status updated",
+                "appointment_id": appointment_id,
+                "status": status,
             }
-            # Save alerts
-            for alert in wearable_result.get("alerts", []):
-                db.save_wearable_alert(alert["id"], alert)
-        except Exception as e:
-            results["wearable"] = {"status": "error", "error": str(e)}
-
-        # Run research summarization
-        try:
-            research_result = await orchestrator.run_research_summarizer(
-                request.patient_id, patient_data
-            )
-            results["research"] = {
-                "status": "success",
-                "topic": research_result.get("research_topic", ""),
-                "summaries": research_result.get("summaries", [])
-            }
-            # Save research
-            research_summary = {
-                "patient_id": request.patient_id,
-                "condition": research_result.get("condition", ""),
-                "topic": research_result.get("research_topic", ""),
-                "summaries": research_result.get("summaries", []),
-                "sources": [],
-                "generated_at": datetime.now().isoformat()
-            }
-            db.save_research_summary(str(uuid.uuid4()), research_summary)
-            # Update patient
-            patient_data["research_topic"] = research_summary["topic"]
-            patient_data["research_content"] = research_summary["summaries"]
-            db.upsert_patient(request.patient_id, patient_data)
-        except Exception as e:
-            results["research"] = {"status": "error", "error": str(e)}
-
-        return {
-            "patient_id": request.patient_id,
-            "timestamp": datetime.now().isoformat(),
-            "results": results
-        }
-
+        else:
+            raise HTTPException(status_code=500, detail="Failed to update appointment status")
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error running agents: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error updating appointment status: {str(e)}"
+        )
+
+

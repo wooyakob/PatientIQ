@@ -1,0 +1,542 @@
+[
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-11T09:20:00-08:00",
+    "metrics": {
+      "steps": 6312,
+      "calories_burned": 294.8,
+      "distance_covered": 4.88,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.577,
+      "exercise_intensity": "Low",
+      "heart_rate": 107,
+      "blood_oxygen_level": 91.22,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-12T09:20:00-08:00",
+    "metrics": {
+      "steps": 4841,
+      "calories_burned": 194.7,
+      "distance_covered": 3.778,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.418,
+      "exercise_intensity": "Low",
+      "heart_rate": 99,
+      "blood_oxygen_level": 92.41,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-13T09:20:00-08:00",
+    "metrics": {
+      "steps": 8610,
+      "calories_burned": 460.9,
+      "distance_covered": 5.874,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.822,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 90,
+      "blood_oxygen_level": 91.73,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-14T09:20:00-08:00",
+    "metrics": {
+      "steps": 6984,
+      "calories_burned": 345.6,
+      "distance_covered": 4.719,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.671,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 86,
+      "blood_oxygen_level": 91.13,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-15T09:20:00-08:00",
+    "metrics": {
+      "steps": 5387,
+      "calories_burned": 259.7,
+      "distance_covered": 3.52,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.343,
+      "exercise_intensity": "Low",
+      "heart_rate": 109,
+      "blood_oxygen_level": 91.87,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-16T09:20:00-08:00",
+    "metrics": {
+      "steps": 8908,
+      "calories_burned": 545.4,
+      "distance_covered": 6.481,
+      "exercise_type": "Walking",
+      "exercise_duration": 1.014,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 108,
+      "blood_oxygen_level": 90.85,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-17T09:20:00-08:00",
+    "metrics": {
+      "steps": 6844,
+      "calories_burned": 389.1,
+      "distance_covered": 4.534,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.941,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 99,
+      "blood_oxygen_level": 93.05,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-18T09:20:00-08:00",
+    "metrics": {
+      "steps": 6510,
+      "calories_burned": 300.4,
+      "distance_covered": 4.793,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.362,
+      "exercise_intensity": "Low",
+      "heart_rate": 98,
+      "blood_oxygen_level": 92.43,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-19T09:20:00-08:00",
+    "metrics": {
+      "steps": 4273,
+      "calories_burned": 202.6,
+      "distance_covered": 2.598,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.254,
+      "exercise_intensity": "Low",
+      "heart_rate": 81,
+      "blood_oxygen_level": 91.91,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-20T09:20:00-08:00",
+    "metrics": {
+      "steps": 6179,
+      "calories_burned": 342.6,
+      "distance_covered": 4.417,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.546,
+      "exercise_intensity": "Low",
+      "heart_rate": 95,
+      "blood_oxygen_level": 93.02,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-21T09:20:00-08:00",
+    "metrics": {
+      "steps": 6414,
+      "calories_burned": 423.5,
+      "distance_covered": 4.277,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.724,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 101,
+      "blood_oxygen_level": 92.41,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-22T09:20:00-08:00",
+    "metrics": {
+      "steps": 5875,
+      "calories_burned": 279.9,
+      "distance_covered": 4.569,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.683,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 96,
+      "blood_oxygen_level": 89.36,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-23T09:20:00-08:00",
+    "metrics": {
+      "steps": 5491,
+      "calories_burned": 343.9,
+      "distance_covered": 3.595,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.766,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 104,
+      "blood_oxygen_level": 91.48,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-24T09:20:00-08:00",
+    "metrics": {
+      "steps": 6112,
+      "calories_burned": 297.6,
+      "distance_covered": 4.911,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.493,
+      "exercise_intensity": "Low",
+      "heart_rate": 102,
+      "blood_oxygen_level": 93.35,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-25T09:20:00-08:00",
+    "metrics": {
+      "steps": 6422,
+      "calories_burned": 396.1,
+      "distance_covered": 4.437,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.691,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 103,
+      "blood_oxygen_level": 92.06,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-26T09:20:00-08:00",
+    "metrics": {
+      "steps": 6021,
+      "calories_burned": 266.3,
+      "distance_covered": 4.704,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.659,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 99,
+      "blood_oxygen_level": 93.32,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-27T09:20:00-08:00",
+    "metrics": {
+      "steps": 7669,
+      "calories_burned": 378.2,
+      "distance_covered": 5.824,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.671,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 90,
+      "blood_oxygen_level": 92.21,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-28T09:20:00-08:00",
+    "metrics": {
+      "steps": 7493,
+      "calories_burned": 375.3,
+      "distance_covered": 5.205,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.601,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 99,
+      "blood_oxygen_level": 90.74,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-29T09:20:00-08:00",
+    "metrics": {
+      "steps": 5875,
+      "calories_burned": 376.4,
+      "distance_covered": 4.34,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.499,
+      "exercise_intensity": "Low",
+      "heart_rate": 108,
+      "blood_oxygen_level": 92.78,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-30T09:20:00-08:00",
+    "metrics": {
+      "steps": 6707,
+      "calories_burned": 446.6,
+      "distance_covered": 5.057,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 0.788,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 95,
+      "blood_oxygen_level": 91.32,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-31T09:20:00-08:00",
+    "metrics": {
+      "steps": 6773,
+      "calories_burned": 350.5,
+      "distance_covered": 4.939,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.308,
+      "exercise_intensity": "Low",
+      "heart_rate": 93,
+      "blood_oxygen_level": 91.15,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-01T09:20:00-08:00",
+    "metrics": {
+      "steps": 8578,
+      "calories_burned": 401.9,
+      "distance_covered": 6.373,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.117,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 116,
+      "blood_oxygen_level": 91.32,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-02T09:20:00-08:00",
+    "metrics": {
+      "steps": 6005,
+      "calories_burned": 300.6,
+      "distance_covered": 4.047,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.516,
+      "exercise_intensity": "Low",
+      "heart_rate": 101,
+      "blood_oxygen_level": 90.24,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-03T09:20:00-08:00",
+    "metrics": {
+      "steps": 5759,
+      "calories_burned": 368.2,
+      "distance_covered": 4.646,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.361,
+      "exercise_intensity": "Low",
+      "heart_rate": 88,
+      "blood_oxygen_level": 91.88,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-04T09:20:00-08:00",
+    "metrics": {
+      "steps": 6730,
+      "calories_burned": 321.4,
+      "distance_covered": 5.709,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.301,
+      "exercise_intensity": "Low",
+      "heart_rate": 87,
+      "blood_oxygen_level": 91.17,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-05T09:20:00-08:00",
+    "metrics": {
+      "steps": 6378,
+      "calories_burned": 304.6,
+      "distance_covered": 4.053,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.606,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 108,
+      "blood_oxygen_level": 91.33,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-06T09:20:00-08:00",
+    "metrics": {
+      "steps": 7220,
+      "calories_burned": 350.8,
+      "distance_covered": 5.477,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.553,
+      "exercise_intensity": "Low",
+      "heart_rate": 93,
+      "blood_oxygen_level": 90.35,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-07T09:20:00-08:00",
+    "metrics": {
+      "steps": 8306,
+      "calories_burned": 466.2,
+      "distance_covered": 6.335,
+      "exercise_type": "Elliptical",
+      "exercise_duration": 1.023,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 106,
+      "blood_oxygen_level": 91.39,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-08T09:20:00-08:00",
+    "metrics": {
+      "steps": 6893,
+      "calories_burned": 412.5,
+      "distance_covered": 4.817,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.867,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 96,
+      "blood_oxygen_level": 91.08,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "5",
+    "patient_name": "Emily Johnson",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-09T09:20:00-08:00",
+    "metrics": {
+      "steps": 6834,
+      "calories_burned": 316.9,
+      "distance_covered": 5.303,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.374,
+      "exercise_intensity": "Low",
+      "heart_rate": 96,
+      "blood_oxygen_level": 94.82,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  }
+]

@@ -1,10 +1,9 @@
 """
-Healthcare agents implemented using agentc (agent-catalog) pattern.
-These agents use prompts and tools registered in the catalog.
+Healthcare Research Agent using vector search with Couchbase AI Services.
+Implements semantic search over medical research using embeddings.
 """
 
 import os
-import uuid
 import json
 import re
 from datetime import datetime, timezone
@@ -12,8 +11,12 @@ import agentc
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
+from tools.research_tools import fetch_research_articles
+from tools.doctor_notes_tools import search_doctor_notes
+
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except Exception:
     pass
@@ -29,8 +32,13 @@ def get_llm(model: str = "gpt-4", temperature: float = 0.7):
 
 class HealthcareAgentOrchestrator:
     """
-    Orchestrator for healthcare agents using agentc catalog.
-    Loads prompts and tools from the catalog and creates agent instances.
+    Orchestrator for healthcare AI agents.
+
+    Two specialized agents:
+    1. Medical Researcher Agent - Uses vector search on Research.Pubmed.Pulmonary
+    2. Doctor Notes Buddy Agent - Uses vector search on Scripps.Notes.Doctor
+
+    Both use Couchbase AI Services embedding model (2048 dimensions) for semantic search.
     """
 
     def __init__(self):
@@ -38,6 +46,8 @@ class HealthcareAgentOrchestrator:
         try:
             self.catalog = agentc.Catalog()
             print("Connected to agent catalog")
+            print("  - Loaded: Medical Researcher Agent (vector search)")
+            print("  - Loaded: Doctor Notes Buddy Agent (vector search)")
         except Exception as e:
             print(f"Warning: Could not connect to agent catalog: {e}")
             print("Will operate without catalog features")
@@ -45,243 +55,6 @@ class HealthcareAgentOrchestrator:
 
         self.llm = get_llm()
 
-    def _get_catalog_tools(self, tool_names: list[str]) -> list:
-        """Retrieve tools from the catalog by name"""
-        tools = []
-        if not self.catalog:
-            return tools
-
-        for tool_name in tool_names:
-            try:
-                tool = self.catalog.find("tool", name=tool_name)
-                if tool:
-                    tools.append(tool)
-            except Exception as e:
-                print(f"Warning: Could not load tool '{tool_name}': {e}")
-
-        return tools
-
-    def _format_prompt(self, prompt_content: str, variables: dict) -> str:
-        """Format prompt content with variables"""
-        try:
-            return prompt_content.format(**variables)
-        except KeyError as e:
-            print(f"Warning: Missing variable in prompt: {e}")
-            return prompt_content
-
-    async def run_wearable_monitor(self, patient_id: str, patient_data: dict) -> dict:
-        """
-        Run the Wearable Data Monitoring Agent.
-
-        Args:
-            patient_id: Patient identifier
-            patient_data: Patient information including wearable data
-
-        Returns:
-            Dictionary with analysis and alerts
-        """
-        try:
-            # Get prompt from catalog
-            prompt_record = None
-            if self.catalog:
-                try:
-                    prompt_record = self.catalog.find("prompt", name="wearable_monitor_agent")
-                except Exception as e:
-                    print(f"Could not load prompt from catalog: {e}")
-
-            # Prepare prompt variables
-            wearable_data = patient_data.get("wearable_data", {})
-            prompt_vars = {
-                "patient_name": patient_data.get("name", "Unknown"),
-                "patient_age": patient_data.get("age", "Unknown"),
-                "patient_condition": patient_data.get("condition", "Unknown"),
-                "heart_rate": wearable_data.get("heart_rate", []),
-                "step_count": wearable_data.get("step_count", [])
-            }
-
-            # Build prompt
-            if prompt_record:
-                system_content = prompt_record.get("agent_instructions", "")
-                user_content = self._format_prompt(
-                    prompt_record.get("content", ""), prompt_vars
-                )
-            else:
-                # Fallback prompt
-                system_content = "You are a medical AI assistant analyzing wearable health data."
-                user_content = f"""
-                Analyze wearable data for patient {prompt_vars['patient_name']}.
-                Condition: {prompt_vars['patient_condition']}
-                Heart Rate: {prompt_vars['heart_rate']}
-                Step Count: {prompt_vars['step_count']}
-
-                Determine if any alerts are needed.
-                """
-
-            messages = [
-                SystemMessage(content=system_content),
-                HumanMessage(content=user_content)
-            ]
-
-            # Run LLM
-            response = self.llm.invoke(messages)
-
-            # Parse response and generate alerts
-            analysis = response.content
-            alerts = []
-
-            # Simple alert detection (in production, use structured output)
-            if any(keyword in analysis.lower() for keyword in
-                   ["alert", "concerning", "critical", "urgent", "elevated"]):
-
-                alert_id = str(uuid.uuid4())
-                alert = {
-                    "id": alert_id,
-                    "patient_id": patient_id,
-                    "alert_type": "Wearable Data Alert",
-                    "message": analysis[:500],  # Truncate for summary
-                    "severity": "medium",
-                    "timestamp": "",
-                    "metrics": {
-                        "heart_rate": wearable_data.get("heart_rate", []),
-                        "step_count": wearable_data.get("step_count", [])
-                    }
-                }
-                alerts.append(alert)
-
-            return {
-                "analysis": analysis,
-                "alerts": alerts,
-                "patient_id": patient_id
-            }
-
-        except Exception as e:
-            print(f"Error in wearable monitor: {e}")
-            return {
-                "error": str(e),
-                "analysis": "",
-                "alerts": []
-            }
-
-    def _load_pubmed_articles(self):
-        """Load PubMedCentral.json articles"""
-        import json
-        try:
-            pubmed_path = os.path.join(
-                os.path.dirname(__file__), "..", "data", "PubMedCentral.json"
-            )
-            with open(pubmed_path, 'r', encoding='utf-8') as f:
-                articles = json.load(f)
-            return articles
-        except Exception as e:
-            print(f"Error loading PubMedCentral.json: {e}")
-            return []
-
-    def _find_relevant_articles(self, condition: str, articles: list, max_articles: int = 5) -> list:
-        """
-        Find articles relevant to patient condition using keyword matching.
-        """
-        # Define keywords for different conditions
-        condition_keywords = {
-            "Breast Cancer Stage II": [
-                "breast cancer",
-                "breast carcinoma",
-                "mammary",
-                "stage ii",
-                "early breast",
-                "early-stage",
-                "early stage",
-                "adjuvant",
-                "neoadjuvant",
-                "pathologic complete response",
-                "pcr",
-                "onotype",
-                "endocrine therapy",
-                "aromatase inhibitor",
-                "tamoxifen",
-                "radiotherapy",
-                "sentinel",
-                "her2",
-                "trastuzumab",
-                "pertuzumab",
-                "triple negative",
-                "tnbc",
-                "brca",
-                "ductal",
-                "lobular",
-                "estrogen receptor",
-                "progesterone receptor",
-            ],
-            "Type 2 Diabetes": ["diabetes", "diabetes mellitus", "glucose", "insulin", "glycemic", "metabolic", "hyperglycemia"],
-            "Anxiety Disorder": ["anxiety", "anxious", "panic", "mental health", "psychiatric", "stress", "depression"],
-            "Hypertension": ["hypertension", "blood pressure", "cardiovascular", "hypertensive", "BP", "cardiac"],
-            "Multiple Sclerosis": ["multiple sclerosis", "MS", "neurological", "autoimmune", "demyelinating", "neurodegenerative"]
-        }
-
-        # Get keywords for this condition
-        keywords = condition_keywords.get(condition, [])
-        if not keywords:
-            # Generic fallback based on condition name
-            keywords = [word.lower() for word in condition.split()]
-
-        # Score articles by keyword relevance
-        scored_articles = []
-        for article in articles:
-            title_text = str(article.get("title", "") or "").lower()
-            article_text = (article.get("article_text", "") + "\n" + title_text).lower()
-
-            if condition == "Breast Cancer Stage II":
-                # Require breast context in the TITLE to avoid papers that only mention breast cancer in passing.
-                if not any(term in title_text for term in ("breast cancer", "breast carcinoma", "mammary")):
-                    continue
-                required_any = (
-                    "stage ii",
-                    "early stage",
-                    "early-stage",
-                    "adjuvant",
-                    "neoadjuvant",
-                    "sentinel",
-                    "radiotherapy",
-                    "endocrine",
-                    "tamoxifen",
-                    "aromatase",
-                    "her2",
-                    "trastuzumab",
-                    "pertuzumab",
-                    "triple negative",
-                    "tnbc",
-                    "ductal",
-                    "lobular",
-                    "estrogen receptor",
-                    "progesterone receptor",
-                    "brca",
-                )
-                # Prefer early-stage/treatment-focused breast papers, but don't exclude all breast papers if missing.
-                if any(term in article_text for term in required_any):
-                    score_boost = 5
-                else:
-                    score_boost = 0
-
-                excluded_any = (
-                    "glioblastoma",
-                    "colorectal",
-                    "lung adenocarcinoma",
-                    "gonorrhea",
-                    "hiv-1",
-                    "psychosis",
-                )
-                if any(term in article_text for term in excluded_any):
-                    continue
-
-            score = sum(1 for keyword in keywords if keyword.lower() in article_text)
-            if condition == "Breast Cancer Stage II":
-                score += score_boost
-
-            if score > 0:
-                scored_articles.append((score, article))
-
-        # Sort by score (highest first) and return top N
-        scored_articles.sort(key=lambda x: x[0], reverse=True)
-        return [article for score, article in scored_articles[:max_articles]]
 
     def _extract_article_summary(self, article_text: str, max_length: int = 800) -> str:
         """Extract a meaningful portion from the article for summarization"""
@@ -297,15 +70,15 @@ class HealthcareAgentOrchestrator:
             tail = article_text[start:]
             tail_lines = []
             for line in tail.split("\n"):
-                l = line.strip()
-                if not l:
+                stripped_line = line.strip()
+                if not stripped_line:
                     tail_lines.append("")
                     continue
-                if "orcid.org" in l.lower():
+                if "orcid.org" in stripped_line.lower():
                     continue
-                if l.lower().startswith("===="):
+                if stripped_line.lower().startswith("===="):
                     continue
-                tail_lines.append(l)
+                tail_lines.append(stripped_line)
             cleaned = "\n".join(tail_lines)
             cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
             return cleaned[:max_length]
@@ -376,8 +149,8 @@ class HealthcareAgentOrchestrator:
             f"{context}\n\n"
             "Return STRICT JSON ONLY with this exact schema:\n"
             "{\n"
-            "  \"research_topic\": string,\n"
-            "  \"summaries\": [string, string, string]\n"
+            '  "research_topic": string,\n'
+            '  "summaries": [string, string, string]\n'
             "}\n\n"
             "Rules:\n"
             "- Each summary must be 2–3 sentences.\n"
@@ -434,13 +207,17 @@ class HealthcareAgentOrchestrator:
 
     async def run_research_summarizer(self, patient_id: str, patient_data: dict) -> dict:
         """
-        Run the Medical Research Summarization Agent.
+        Run the Medical Researcher Agent.
+
+        Agent Prompt: medical_researcher_agent.yaml
+        Tool: fetch_research_articles (vector search)
 
         This agent:
-        1. Loads articles from PubMedCentral.json
-        2. Finds articles relevant to patient's condition
-        3. Uses AI to create summaries of real research
-        4. Returns patient-specific research insights
+        1. Uses vector search (2048-dim embeddings) to find relevant research
+        2. Searches Research.Pubmed.Pulmonary using hyperscale index
+        3. Analyzes semantically similar research articles
+        4. Uses AI to create summaries of real research
+        5. Returns patient-specific research insights
 
         Args:
             patient_id: Patient identifier
@@ -450,40 +227,32 @@ class HealthcareAgentOrchestrator:
             Dictionary with research topic and AI-generated summaries from real papers
         """
         try:
-            condition = patient_data.get("condition", "Unknown")
+            condition = patient_data.get("condition") or patient_data.get("medical_conditions") or "Unknown"
             patient_age = patient_data.get("age", "Unknown")
             patient_name = patient_data.get("name", "Unknown")
 
-            print("   Loading PubMed articles...")
-            # Load PubMed articles
-            articles = self._load_pubmed_articles()
-            if not articles:
-                print("   No PubMed articles found, using generic summaries")
+            print("   Fetching research excerpts from Couchbase...")
+            tool_result = fetch_research_articles(condition=condition, limit=5, max_chars=1600)
+            excerpts = tool_result.get("excerpts") if isinstance(tool_result, dict) else None
+            excerpts = excerpts if isinstance(excerpts, list) else []
+
+            if not excerpts:
+                print(f"   No research excerpts found for {condition}")
                 return self._generate_fallback_research(patient_data)
 
-            print(f"   Searching {len(articles)} articles for: {condition}")
-            # Find relevant articles
-            relevant_articles = self._find_relevant_articles(condition, articles, max_articles=5)
-
-            if not relevant_articles:
-                print(f"   No relevant articles found for {condition}")
-                return self._generate_fallback_research(patient_data)
-
-            print(f"   Found {len(relevant_articles)} relevant articles")
-
-            # Extract content from articles for AI to summarize
             article_contents = []
-            for i, article in enumerate(relevant_articles):
-                content = self._extract_article_summary(article.get("article_text", ""))
+            for i, excerpt in enumerate(excerpts[:5]):
+                if not isinstance(excerpt, str):
+                    continue
+                content = self._extract_article_summary(excerpt)
                 if content:
-                    article_contents.append(f"Article {i+1}:\n{content}")
+                    article_contents.append(f"Article {i + 1}:\n{content}")
 
             if not article_contents:
-                print("   No usable article excerpts extracted")
+                print("   No usable excerpts extracted")
                 return self._generate_fallback_research(patient_data)
 
-            # Use AI to create patient-specific summaries
-            print("   Generating AI summaries from research papers...")
+            print("   Generating AI summaries from Couchbase research excerpts...")
             research_topic, summaries = self._generate_clean_summaries_from_articles(
                 patient_name=patient_name,
                 patient_age=patient_age,
@@ -491,20 +260,19 @@ class HealthcareAgentOrchestrator:
                 article_contents=article_contents,
             )
 
-            print(f"   Generated {len(summaries)} AI summaries from real research")
-
             return {
                 "research_topic": research_topic,
                 "summaries": summaries,
                 "condition": condition,
                 "patient_id": patient_id,
-                "articles_analyzed": len(relevant_articles),
+                "articles_analyzed": len(article_contents),
                 "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             }
 
         except Exception as e:
             print(f"   Error in research summarizer: {e}")
             import traceback
+
             traceback.print_exc()
             return self._generate_fallback_research(patient_data)
 
@@ -516,216 +284,104 @@ class HealthcareAgentOrchestrator:
             "summaries": [
                 f"Recent clinical studies continue to advance treatment options for {condition}.",
                 f"Current research focuses on improving outcomes and quality of life for patients with {condition}.",
-                f"Ongoing trials are investigating novel therapeutic approaches for {condition} management."
+                f"Ongoing trials are investigating novel therapeutic approaches for {condition} management.",
             ],
             "condition": condition,
             "patient_id": patient_data.get("id", ""),
-            "articles_analyzed": 0
+            "articles_analyzed": 0,
         }
 
-    async def run_message_router(
-        self, announcement: str, staff_directory: list[dict]
-    ) -> dict:
+    async def answer_doctor_notes_query(self, query: str, patient_id: str = None) -> dict:
         """
-        Run the Message Board Routing Agent.
+        Run the Doctor Notes Buddy Agent.
+
+        Agent Prompt: doctor_notes_buddy_agent.yaml
+        Tool: search_doctor_notes (vector search)
+
+        This agent:
+        1. Uses vector search (2048-dim embeddings) to find relevant doctor notes
+        2. Searches Scripps.Notes.Doctor using hyperscale index
+        3. Finds semantically similar notes even with different terminology
+        4. Passes the notes to LLM for answering the question
+        5. Returns a natural language answer with supporting notes
 
         Args:
-            announcement: The announcement to route
-            staff_directory: List of staff members with roles/specialties
+            query: Doctor's question (e.g., "How is the patient responding to treatment?")
+            patient_id: Optional patient ID to filter notes
 
         Returns:
-            Dictionary with routing decisions
+            Dictionary with answer and supporting notes
         """
         try:
-            # Get prompt from catalog
-            prompt_record = None
-            if self.catalog:
-                try:
-                    prompt_record = self.catalog.find("prompt", name="message_router_agent")
-                except Exception as e:
-                    print(f"Could not load prompt from catalog: {e}")
+            print(f"   Searching doctor notes for: {query}")
 
-            # Format staff directory
-            staff_text = "\n".join([
-                f"- {s.get('name', 'Unknown')}: {s.get('role', 'Unknown')}"
-                for s in staff_directory
+            # Search doctor notes using vector search
+            search_result = search_doctor_notes(
+                query=query,
+                patient_id=patient_id,
+                limit=5,
+                max_chars=1500,
+            )
+
+            if not search_result.get("found"):
+                return {
+                    "query": query,
+                    "answer": "No relevant doctor notes found to answer this question.",
+                    "supporting_notes": [],
+                    "patient_id": patient_id,
+                }
+
+            notes = search_result.get("notes", [])
+
+            # Format notes for LLM context
+            notes_context = "\n\n".join([
+                f"Note {idx + 1} (Date: {note.get('visit_date', 'Unknown')}, Patient: {note.get('patient_id', 'Unknown')}):\n{note.get('visit_notes', '')}"
+                for idx, note in enumerate(notes)
             ])
 
-            prompt_vars = {
-                "announcement": announcement,
-                "staff_directory": staff_text
-            }
+            # Build prompt for LLM
+            system_prompt = (
+                "You are a clinical assistant helping doctors review and understand patient notes. "
+                "Answer questions based on the provided doctor notes. "
+                "Be concise, factual, and cite which note(s) support your answer."
+            )
 
-            # Build prompt
-            if prompt_record:
-                system_content = prompt_record.get("agent_instructions", "")
-                user_content = self._format_prompt(
-                    prompt_record.get("content", ""), prompt_vars
-                )
-            else:
-                # Fallback prompt
-                system_content = "You are an intelligent message routing system."
-                user_content = f"""
-                Announcement: {announcement}
-
-                Staff: {staff_text}
-
-                Determine who should receive this message and the priority level.
-                """
+            user_prompt = (
+                f"Question: {query}\n\n"
+                "Relevant Doctor Notes:\n"
+                f"{notes_context}\n\n"
+                "Please provide a clear, concise answer based on these notes. "
+                "Reference specific notes when applicable (e.g., 'Note 1 indicates...')."
+            )
 
             messages = [
-                SystemMessage(content=system_content),
-                HumanMessage(content=user_content)
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=user_prompt)
             ]
 
-            # Run LLM
+            # Get answer from LLM
             response = self.llm.invoke(messages)
-            analysis = response.content
-
-            # Parse for routing (simplified)
-            priority = "medium"
-            recipients = []
-
-            if "urgent" in analysis.lower():
-                priority = "urgent"
-            elif "high" in analysis.lower():
-                priority = "high"
-            elif "low" in analysis.lower():
-                priority = "low"
-
-            # Extract recipient names (basic parsing)
-            for staff in staff_directory:
-                if staff.get("name", "") in analysis:
-                    recipients.append(staff.get("name", ""))
-
-            route = {
-                "id": str(uuid.uuid4()),
-                "original_message": announcement,
-                "routed_to": recipients,
-                "priority": priority,
-                "timestamp": "",
-                "analysis": analysis
-            }
+            answer = response.content
 
             return {
-                "routes": [route],
-                "recipients": recipients,
-                "priority": priority
-            }
-
-        except Exception as e:
-            print(f"Error in message router: {e}")
-            return {
-                "error": str(e),
-                "routes": [],
-                "recipients": [],
-                "priority": "medium"
-            }
-
-    async def run_questionnaire_summarizer(
-        self,
-        patient_id: str,
-        patient_data: dict,
-        questionnaire_responses: dict,
-        appointment_date: str
-    ) -> dict:
-        """
-        Run the Questionnaire Summarization Agent.
-
-        Args:
-            patient_id: Patient identifier
-            patient_data: Patient information
-            questionnaire_responses: Dictionary of Q&A
-            appointment_date: Date of appointment
-
-        Returns:
-            Dictionary with summary and key points
-        """
-        try:
-            # Get prompt from catalog
-            prompt_record = None
-            if self.catalog:
-                try:
-                    prompt_record = self.catalog.find(
-                        "prompt", name="questionnaire_summarizer_agent"
-                    )
-                except Exception as e:
-                    print(f"Could not load prompt from catalog: {e}")
-
-            # Format questionnaire
-            q_text = "\n".join([
-                f"Q: {q}\nA: {a}" for q, a in questionnaire_responses.items()
-            ])
-
-            prompt_vars = {
-                "patient_name": patient_data.get("name", "Unknown"),
-                "patient_age": patient_data.get("age", "Unknown"),
-                "patient_condition": patient_data.get("condition", "Unknown"),
-                "appointment_date": appointment_date,
-                "questionnaire_responses": q_text
-            }
-
-            # Build prompt
-            if prompt_record:
-                system_content = prompt_record.get("agent_instructions", "")
-                user_content = self._format_prompt(
-                    prompt_record.get("content", ""), prompt_vars
-                )
-            else:
-                # Fallback prompt
-                system_content = "You are a medical assistant summarizing questionnaires."
-                user_content = f"""
-                Patient: {prompt_vars['patient_name']}
-                Condition: {prompt_vars['patient_condition']}
-                Appointment: {appointment_date}
-
-                Questionnaire:
-                {q_text}
-
-                Create a concise summary with 3-5 key points.
-                """
-
-            messages = [
-                SystemMessage(content=system_content),
-                HumanMessage(content=user_content)
-            ]
-
-            # Run LLM
-            response = self.llm.invoke(messages)
-            content = response.content
-
-            # Parse summary and key points
-            lines = [l.strip() for l in content.split("\n") if l.strip()]
-
-            # Extract summary (first paragraph) and key points (bulleted items)
-            summary_lines = []
-            key_points = []
-
-            for line in lines:
-                if line.startswith("-") or line.startswith("*") or line.startswith("•"):
-                    key_points.append(line.lstrip("-*• "))
-                else:
-                    summary_lines.append(line)
-
-            summary = " ".join(summary_lines) if summary_lines else content[:300]
-
-            # Ensure we have some key points
-            if not key_points:
-                key_points = summary_lines[:5]
-
-            return {
-                "summary": summary,
-                "key_points": key_points[:5],
+                "query": query,
+                "answer": answer,
+                "supporting_notes": notes,
+                "notes_count": len(notes),
                 "patient_id": patient_id,
-                "appointment_date": appointment_date
+                "search_type": "vector_search",
+                "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             }
 
         except Exception as e:
-            print(f"Error in questionnaire summarizer: {e}")
+            print(f"   Error answering doctor notes query: {e}")
+            import traceback
+            traceback.print_exc()
             return {
-                "error": str(e),
-                "summary": "",
-                "key_points": []
+                "query": query,
+                "answer": f"Error processing query: {str(e)}",
+                "supporting_notes": [],
+                "patient_id": patient_id,
             }
 
 

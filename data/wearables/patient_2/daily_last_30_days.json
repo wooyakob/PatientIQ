@@ -1,0 +1,542 @@
+[
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-11T08:15:00-08:00",
+    "metrics": {
+      "steps": 5349,
+      "calories_burned": 278.5,
+      "distance_covered": 3.486,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.438,
+      "exercise_intensity": "Low",
+      "heart_rate": 96,
+      "blood_oxygen_level": 91.07,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-12T08:15:00-08:00",
+    "metrics": {
+      "steps": 5706,
+      "calories_burned": 387.0,
+      "distance_covered": 4.476,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.71,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 80,
+      "blood_oxygen_level": 93.13,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-13T08:15:00-08:00",
+    "metrics": {
+      "steps": 5504,
+      "calories_burned": 309.7,
+      "distance_covered": 4.227,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.564,
+      "exercise_intensity": "Low",
+      "heart_rate": 103,
+      "blood_oxygen_level": 93.16,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-14T08:15:00-08:00",
+    "metrics": {
+      "steps": 7990,
+      "calories_burned": 559.5,
+      "distance_covered": 5.745,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.679,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 96,
+      "blood_oxygen_level": 92.9,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-15T08:15:00-08:00",
+    "metrics": {
+      "steps": 6874,
+      "calories_burned": 357.4,
+      "distance_covered": 5.197,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.343,
+      "exercise_intensity": "Low",
+      "heart_rate": 101,
+      "blood_oxygen_level": 93.44,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-16T08:15:00-08:00",
+    "metrics": {
+      "steps": 4938,
+      "calories_burned": 408.8,
+      "distance_covered": 3.152,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.222,
+      "exercise_intensity": "Low",
+      "heart_rate": 100,
+      "blood_oxygen_level": 93.34,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-17T08:15:00-08:00",
+    "metrics": {
+      "steps": 5115,
+      "calories_burned": 363.6,
+      "distance_covered": 3.72,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.22,
+      "exercise_intensity": "Low",
+      "heart_rate": 109,
+      "blood_oxygen_level": 93.53,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-18T08:15:00-08:00",
+    "metrics": {
+      "steps": 6031,
+      "calories_burned": 341.2,
+      "distance_covered": 4.917,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.257,
+      "exercise_intensity": "Low",
+      "heart_rate": 105,
+      "blood_oxygen_level": 93.12,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-19T08:15:00-08:00",
+    "metrics": {
+      "steps": 3913,
+      "calories_burned": 232.5,
+      "distance_covered": 2.692,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.354,
+      "exercise_intensity": "Low",
+      "heart_rate": 102,
+      "blood_oxygen_level": 92.13,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-20T08:15:00-08:00",
+    "metrics": {
+      "steps": 5477,
+      "calories_burned": 293.2,
+      "distance_covered": 3.524,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.444,
+      "exercise_intensity": "Low",
+      "heart_rate": 104,
+      "blood_oxygen_level": 92.17,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-21T08:15:00-08:00",
+    "metrics": {
+      "steps": 5492,
+      "calories_burned": 330.7,
+      "distance_covered": 4.612,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.238,
+      "exercise_intensity": "Low",
+      "heart_rate": 89,
+      "blood_oxygen_level": 91.82,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-22T08:15:00-08:00",
+    "metrics": {
+      "steps": 4988,
+      "calories_burned": 311.2,
+      "distance_covered": 3.871,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.369,
+      "exercise_intensity": "Low",
+      "heart_rate": 110,
+      "blood_oxygen_level": 89.01,
+      "ecg": "Abnormal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-23T08:15:00-08:00",
+    "metrics": {
+      "steps": 6542,
+      "calories_burned": 326.4,
+      "distance_covered": 4.442,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.293,
+      "exercise_intensity": "Low",
+      "heart_rate": 104,
+      "blood_oxygen_level": 91.57,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-24T08:15:00-08:00",
+    "metrics": {
+      "steps": 6122,
+      "calories_burned": 396.2,
+      "distance_covered": 4.604,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.816,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 90,
+      "blood_oxygen_level": 91.94,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-25T08:15:00-08:00",
+    "metrics": {
+      "steps": 5212,
+      "calories_burned": 208.6,
+      "distance_covered": 4.207,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.337,
+      "exercise_intensity": "Low",
+      "heart_rate": 96,
+      "blood_oxygen_level": 93.13,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-26T08:15:00-08:00",
+    "metrics": {
+      "steps": 4468,
+      "calories_burned": 275.8,
+      "distance_covered": 3.925,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.356,
+      "exercise_intensity": "Low",
+      "heart_rate": 116,
+      "blood_oxygen_level": 93.39,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-27T08:15:00-08:00",
+    "metrics": {
+      "steps": 6040,
+      "calories_burned": 175.6,
+      "distance_covered": 4.777,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.273,
+      "exercise_intensity": "Low",
+      "heart_rate": 91,
+      "blood_oxygen_level": 92.9,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-28T08:15:00-08:00",
+    "metrics": {
+      "steps": 4633,
+      "calories_burned": 268.6,
+      "distance_covered": 3.714,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.342,
+      "exercise_intensity": "Low",
+      "heart_rate": 92,
+      "blood_oxygen_level": 92.13,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-29T08:15:00-08:00",
+    "metrics": {
+      "steps": 4643,
+      "calories_burned": 243.5,
+      "distance_covered": 3.332,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.3,
+      "exercise_intensity": "Low",
+      "heart_rate": 109,
+      "blood_oxygen_level": 94.02,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-30T08:15:00-08:00",
+    "metrics": {
+      "steps": 5055,
+      "calories_burned": 284.3,
+      "distance_covered": 3.914,
+      "exercise_type": "Stretching",
+      "exercise_duration": 0.462,
+      "exercise_intensity": "Low",
+      "heart_rate": 101,
+      "blood_oxygen_level": 92.23,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2025-12-31T08:15:00-08:00",
+    "metrics": {
+      "steps": 6362,
+      "calories_burned": 440.3,
+      "distance_covered": 4.252,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.725,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 105,
+      "blood_oxygen_level": 90.66,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-01T08:15:00-08:00",
+    "metrics": {
+      "steps": 5508,
+      "calories_burned": 317.1,
+      "distance_covered": 3.573,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.364,
+      "exercise_intensity": "Low",
+      "heart_rate": 96,
+      "blood_oxygen_level": 92.58,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-02T08:15:00-08:00",
+    "metrics": {
+      "steps": 4960,
+      "calories_burned": 323.4,
+      "distance_covered": 3.963,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.643,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 106,
+      "blood_oxygen_level": 92.87,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-03T08:15:00-08:00",
+    "metrics": {
+      "steps": 4281,
+      "calories_burned": 283.4,
+      "distance_covered": 3.346,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.341,
+      "exercise_intensity": "Low",
+      "heart_rate": 91,
+      "blood_oxygen_level": 91.22,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-04T08:15:00-08:00",
+    "metrics": {
+      "steps": 4973,
+      "calories_burned": 341.3,
+      "distance_covered": 3.867,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.61,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 109,
+      "blood_oxygen_level": 94.65,
+      "ecg": "Normal",
+      "stress_level": "Moderate"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-05T08:15:00-08:00",
+    "metrics": {
+      "steps": 4926,
+      "calories_burned": 289.6,
+      "distance_covered": 3.598,
+      "exercise_type": "Stationary Bike",
+      "exercise_duration": 0.603,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 89,
+      "blood_oxygen_level": 93.56,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-06T08:15:00-08:00",
+    "metrics": {
+      "steps": 4175,
+      "calories_burned": 283.1,
+      "distance_covered": 3.467,
+      "exercise_type": "Yoga",
+      "exercise_duration": 0.23,
+      "exercise_intensity": "Low",
+      "heart_rate": 93,
+      "blood_oxygen_level": 95.63,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-07T08:15:00-08:00",
+    "metrics": {
+      "steps": 4642,
+      "calories_burned": 193.0,
+      "distance_covered": 3.258,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.243,
+      "exercise_intensity": "Low",
+      "heart_rate": 96,
+      "blood_oxygen_level": 92.54,
+      "ecg": "Abnormal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-08T08:15:00-08:00",
+    "metrics": {
+      "steps": 5371,
+      "calories_burned": 281.7,
+      "distance_covered": 3.729,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.654,
+      "exercise_intensity": "Moderate",
+      "heart_rate": 94,
+      "blood_oxygen_level": 91.74,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  },
+  {
+    "patient_id": "2",
+    "patient_name": "Maria Garcia",
+    "device": "Apple Watch Series 4",
+    "timestamp": "2026-01-09T08:15:00-08:00",
+    "metrics": {
+      "steps": 6316,
+      "calories_burned": 304.6,
+      "distance_covered": 4.731,
+      "exercise_type": "Walking",
+      "exercise_duration": 0.499,
+      "exercise_intensity": "Low",
+      "heart_rate": 98,
+      "blood_oxygen_level": 92.06,
+      "ecg": "Normal",
+      "stress_level": "Low"
+    }
+  }
+]
