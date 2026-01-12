@@ -250,35 +250,40 @@ class CouchbaseDB:
             return None
         return f"`{self.bucket_name}`.`Wearables`.`Patient_{patient_id}`"
 
-    def _get_wearable_summary(self, patient_id: str) -> dict:
+    def _get_wearable_summary(self, patient_id: str, days: int = 30) -> dict:
         keyspace = self._wearables_keyspace_for_patient_id(patient_id)
         if not keyspace:
-            return {"heart_rate": [0] * 7, "step_count": [0] * 7}
+            return {"timestamps": [], "heart_rate": [], "step_count": []}
+
+        try:
+            limit = int(days)
+        except Exception:
+            limit = 30
+        if limit <= 0:
+            limit = 30
 
         query = f"""
-            SELECT w.metrics.heart_rate AS heart_rate,
+            SELECT w.timestamp AS timestamp,
+                   w.metrics.heart_rate AS heart_rate,
                    w.metrics.steps AS steps
             FROM {keyspace} w
             ORDER BY w.timestamp DESC
-            LIMIT 7
+            LIMIT {limit}
         """
         try:
             rows = list(self.cluster.query(query))
         except Exception:
             rows = []
 
+        timestamps = [str(r.get("timestamp") or "") for r in rows]
         heart_rates = [int(r.get("heart_rate") or 0) for r in rows]
         step_counts = [int(r.get("steps") or 0) for r in rows]
 
+        timestamps.reverse()
         heart_rates.reverse()
         step_counts.reverse()
 
-        if len(heart_rates) < 7:
-            heart_rates = ([0] * (7 - len(heart_rates))) + heart_rates
-        if len(step_counts) < 7:
-            step_counts = ([0] * (7 - len(step_counts))) + step_counts
-
-        return {"heart_rate": heart_rates[:7], "step_count": step_counts[:7]}
+        return {"timestamps": timestamps, "heart_rate": heart_rates, "step_count": step_counts}
 
     def _get_latest_patient_private_note(self, patient_id: str) -> str:
         query = f"""
@@ -434,6 +439,11 @@ class CouchbaseDB:
             return None
         except Exception:
             return None
+
+    def get_wearables_for_patient(self, patient_id: str, days: int = 30) -> dict:
+        """Retrieve daily wearable entries for a patient (last N days)"""
+        self._check_connection()
+        return self._get_wearable_summary(patient_id, days=days)
 
     def get_all_patients(self) -> List[dict]:
         """Retrieve all patients from People.Patient collection"""
@@ -597,6 +607,16 @@ class CouchbaseDB:
             print(f"Error saving doctor note: {e}")
             return False
 
+    def delete_doctor_note(self, note_id: str) -> bool:
+        """Delete a doctor note from Notes.Doctor collection"""
+        self._check_connection()
+        try:
+            self.doctor_notes_collection.remove(note_id)
+            return True
+        except Exception as e:
+            print(f"Error deleting doctor note: {e}")
+            return False
+
     def get_doctor_notes_for_patient(self, patient_id: str) -> List[dict]:
         """Get all doctor notes for a patient from Notes.Doctor collection"""
         self._check_connection()
@@ -676,6 +696,7 @@ class CouchbaseDB:
                 SELECT m.*
                 FROM `{self.bucket_name}`.`Messages`.`Private` m
                 WHERE m.to_id = $doctor_id
+                   OR m.from_id = $doctor_id
                 ORDER BY m.timestamp DESC
                 LIMIT $limit
             """

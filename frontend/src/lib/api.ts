@@ -1,6 +1,7 @@
 export type SentimentLevel = "amazing" | "good" | "neutral" | "poor" | "terrible";
 
 export interface ApiWearableData {
+  timestamps?: string[];
   heart_rate: number[];
   step_count: number[];
 }
@@ -38,6 +39,7 @@ export interface Patient {
   lastVisit: string;
   nextAppointment: string;
   wearableData: {
+    timestamps: string[];
     heartRate: number[];
     stepCount: number[];
   };
@@ -46,6 +48,134 @@ export interface Patient {
   researchTopic: string;
   researchContent: string[];
   doctorNotes: DoctorNote[];
+}
+
+export interface ApiStaffMessage {
+  id: string;
+  message_type: "private" | "public";
+  from_id: string;
+  from_name: string;
+  to_id?: string;
+  to_name?: string;
+  subject: string;
+  content: string;
+  timestamp: string;
+  read?: boolean;
+  priority?: string;
+}
+
+export interface ApiAppointment {
+  id: string;
+  patient_id: string;
+  patient_name: string;
+  doctor_id: string;
+  doctor_name: string;
+  appointment_date: string;
+  appointment_time: string;
+  appointment_type: string;
+  status: string;
+  duration_minutes?: number;
+  notes?: string;
+}
+
+export interface ApiQuestionnaireStatus {
+  patient_id: string;
+  exists: boolean;
+  completed: boolean;
+  date_completed?: string | null;
+}
+
+export async function getPreVisitQuestionnaireStatus(
+  patientIds: string[]
+): Promise<Record<string, ApiQuestionnaireStatus>> {
+  const result = await apiFetch<{ statuses: ApiQuestionnaireStatus[] }>(
+    "/api/questionnaires/pre-visit/status",
+    {
+      method: "POST",
+      body: JSON.stringify({ patient_ids: patientIds }),
+    }
+  );
+
+  const map: Record<string, ApiQuestionnaireStatus> = {};
+  for (const s of result.statuses ?? []) {
+    map[String(s.patient_id)] = s;
+  }
+  return map;
+}
+
+export async function getPreVisitQuestionnaire(patientId: string): Promise<any> {
+  return apiFetch<any>(
+    `/api/questionnaires/pre-visit/${encodeURIComponent(String(patientId))}`
+  );
+}
+
+export async function getDoctorAppointments(
+  doctorId: string,
+  params?: { start_date?: string; end_date?: string }
+): Promise<ApiAppointment[]> {
+  const search = new URLSearchParams();
+  if (params?.start_date) search.set("start_date", params.start_date);
+  if (params?.end_date) search.set("end_date", params.end_date);
+
+  const qs = search.toString();
+  const result = await apiFetch<{ doctor_id: string; appointments: ApiAppointment[] }>(
+    `/api/appointments/doctor/${encodeURIComponent(doctorId)}${qs ? `?${qs}` : ""}`
+  );
+
+  return result.appointments ?? [];
+}
+
+export async function getPrivateMessages(doctorId: string, limit: number = 50): Promise<ApiStaffMessage[]> {
+  const result = await apiFetch<{ doctor_id: string; messages: ApiStaffMessage[] }>(
+    `/api/messages/private/${encodeURIComponent(doctorId)}?limit=${encodeURIComponent(String(limit))}`
+  );
+  return result.messages ?? [];
+}
+
+export async function getPublicMessages(limit: number = 50): Promise<ApiStaffMessage[]> {
+  const result = await apiFetch<{ messages: ApiStaffMessage[] }>(
+    `/api/messages/public?limit=${encodeURIComponent(String(limit))}`
+  );
+  return result.messages ?? [];
+}
+
+export async function sendPrivateMessage(payload: {
+  to_id: string;
+  to_name: string;
+  subject: string;
+  content: string;
+  priority?: string;
+}): Promise<{ message: string; id: string }> {
+  return apiFetch<{ message: string; id: string }>("/api/messages/private", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function sendPublicMessage(payload: {
+  subject: string;
+  content: string;
+  priority?: string;
+}): Promise<{ message: string; id: string }> {
+  return apiFetch<{ message: string; id: string }>("/api/messages/public", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getPatientWearables( 
+  patientId: string,
+  days: number = 30
+): Promise<{ timestamps: string[]; heartRate: number[]; stepCount: number[] }> {
+  const result = await apiFetch<ApiWearableData>(
+    `/api/patients/${encodeURIComponent(patientId)}/wearables?days=${encodeURIComponent(String(days))}`
+  );
+
+  return {
+    timestamps: result?.timestamps ?? [],
+    heartRate: result?.heart_rate ?? [],
+    stepCount: result?.step_count ?? [],
+  };
 }
 
 export function toLocalDateOnlyString(d: Date): string {
@@ -90,6 +220,7 @@ const toPatient = (api: ApiPatient, doctorNotes: DoctorNote[] = []): Patient => 
     lastVisit: api.last_visit,
     nextAppointment: api.next_appointment,
     wearableData: {
+      timestamps: api.wearable_data?.timestamps ?? [],
       heartRate: api.wearable_data?.heart_rate ?? [],
       stepCount: api.wearable_data?.step_count ?? [],
     },
@@ -161,5 +292,11 @@ export async function saveDoctorNote(note: SaveDoctorNoteRequest): Promise<{ mes
   return apiFetch<{ message: string; note_id: string }>("/api/doctor-notes", {
     method: "POST",
     body: JSON.stringify(note),
+  });
+}
+
+export async function deleteDoctorNote(noteId: string): Promise<{ message: string; note_id: string }> {
+  return apiFetch<{ message: string; note_id: string }>(`/api/doctor-notes/${encodeURIComponent(noteId)}`, {
+    method: "DELETE",
   });
 }

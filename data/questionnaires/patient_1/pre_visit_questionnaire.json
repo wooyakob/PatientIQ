@@ -1,0 +1,157 @@
+[
+{
+  "questionnaire_type": "pre_visit",
+  "patient_id": "1",
+  "patient_name": "James Smith",
+  "date_completed": "2025-01-10",
+  "sections": {
+    "current_medications": {
+      "description": "List all medications you are currently taking",
+      "medications": [
+        {
+          "name": "Albuterol Inhaler",
+          "dosage": "90 mcg",
+          "frequency": "2 puffs every 4-6 hours as needed",
+          "purpose": "Quick relief for asthma symptoms",
+          "side_effects": "Mild tremors occasionally"
+        },
+        {
+          "name": "Fluticasone Propionate",
+          "dosage": "250 mcg",
+          "frequency": "2 puffs twice daily",
+          "purpose": "Long-term asthma control",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Montelukast",
+          "dosage": "10 mg",
+          "frequency": "Once daily at bedtime",
+          "purpose": "Asthma prevention",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Ibuprofen",
+          "dosage": "400 mg",
+          "frequency": "As needed for pain",
+          "purpose": "General pain relief",
+          "side_effects": "None reported"
+        }
+      ]
+    },
+    "allergies": {
+      "description": "List any known allergies (medications, food, environmental)",
+      "drug_allergies": [
+        "Penicillin - causes rash"
+      ],
+      "food_allergies": [
+        "Shellfish - mild reaction"
+      ],
+      "environmental_allergies": [
+        "Pollen - spring season",
+        "Dust mites",
+        "Cat dander"
+      ]
+    },
+    "current_symptoms": {
+      "description": "Describe any symptoms you are currently experiencing",
+      "respiratory_symptoms": {
+        "shortness_of_breath": "Mild, occurs 2-3 times per week, usually after exercise or exposure to cold air",
+        "coughing": "Occasional dry cough in the morning, more frequent during allergy season",
+        "wheezing": "Rare, only during severe asthma episodes",
+        "chest_tightness": "Mild tightness 1-2 times per week, relieved by rescue inhaler",
+        "sputum_production": "Minimal, clear mucus occasionally"
+      },
+      "general_symptoms": {
+        "fatigue": "Low fatigue, able to perform all daily activities",
+        "fever": "No fever",
+        "night_sweats": "None",
+        "weight_changes": "Stable weight",
+        "sleep_quality": "Good, occasional disruption due to nighttime coughing"
+      }
+    },
+    "pain_assessment": {
+      "description": "Rate your pain levels and describe location",
+      "chest_pain": {
+        "severity": "1/10 - minimal",
+        "frequency": "Rare, only during severe asthma episodes",
+        "triggers": "Intense exercise, cold weather, strong odors"
+      },
+      "other_pain": {
+        "location": "Lower back",
+        "severity": "2/10",
+        "description": "Occasional lower back discomfort from desk work"
+      }
+    },
+    "functional_status": {
+      "description": "Rate your ability to perform daily activities",
+      "walking_distance": "Can walk over 1 mile without significant difficulty",
+      "stair_climbing": "Can climb 3 flights without stopping, mild breathlessness at top",
+      "self_care_activities": "Independent with all activities",
+      "work_status": "Working full-time as software engineer, no limitations",
+      "exercise_tolerance": "Exercises 3-4 times per week, running and cycling, uses inhaler before exercise"
+    },
+    "quality_of_life": {
+      "description": "Rate how your condition affects your daily life",
+      "physical_limitations": "Minimal - avoid outdoor activities during high pollen days",
+      "emotional_wellbeing": "Good - asthma is well-controlled, minimal anxiety about symptoms",
+      "social_activities": "Not affected - participates in all social activities",
+      "sleep_quality": "Generally good - 7-8 hours per night, rarely woken by symptoms"
+    },
+    "environmental_exposures": {
+      "description": "Note any environmental factors affecting your health",
+      "occupational_exposures": "Office environment with air conditioning, no significant exposures",
+      "home_environment": "Apartment living, uses air purifier in bedroom, removed carpets",
+      "air_quality_concerns": "Lives in urban area, monitors air quality index during fire season",
+      "recent_travel": "None in past 3 months"
+    },
+    "compliance": {
+      "description": "How well are you following your treatment plan",
+      "medication_adherence": "95% compliant - rarely misses controller inhaler doses",
+      "oxygen_usage": "Not applicable",
+      "pulmonary_rehabilitation": "Not currently enrolled",
+      "dietary_restrictions": "No specific restrictions, maintains healthy diet"
+    },
+    "emergency_contacts": {
+      "primary_contact": {
+        "name": "Sarah Smith",
+        "relationship": "Wife",
+        "phone": "858-340-9876"
+      },
+      "secondary_contact": {
+        "name": "Michael Smith",
+        "relationship": "Brother",
+        "phone": "858-555-0123"
+      }
+    },
+    "recent_healthcare": {
+      "description": "Recent medical visits or hospitalizations",
+      "recent_er_visits": [],
+      "recent_hospitalizations": [],
+      "recent_procedures": [
+        {
+          "procedure": "Pulmonary function test",
+          "date": "2024-10-15",
+          "result": "FEV1 85% of predicted, good control"
+        }
+      ],
+      "upcoming_appointments": [
+        {
+          "appointment_type": "Follow-up with Dr. Mitchell",
+          "date": "2025-01-25",
+          "purpose": "Routine asthma management review"
+        }
+      ]
+    },
+    "additional_notes": {
+      "patient_concerns": "Concerned about increased symptoms during spring allergy season. Would like to discuss preventive strategies.",
+      "goals_for_visit": "Review current medication regimen and discuss allergy management. Obtain flu vaccine if available.",
+      "questions_for_doctor": [
+        "Should I increase my controller medication dose during allergy season?",
+        "Are there any new asthma medications I should consider?",
+        "How can I better manage exercise-induced symptoms?"
+      ]
+    }
+  }
+}
+
+]

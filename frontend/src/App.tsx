@@ -11,6 +11,7 @@ import SentimentDetail from "./pages/SentimentDetail";
 import NotesDetail from "./pages/NotesDetail";
 import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
+import PreVisitQuestionnaire from "./pages/PreVisitQuestionnaire";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/patient/:id/wearables" element={<WearablesDetail />} />
           <Route path="/patient/:id/sentiment" element={<SentimentDetail />} />
           <Route path="/patient/:id/notes" element={<NotesDetail />} />
+          <Route path="/patient/:id/questionnaires/pre-visit" element={<PreVisitQuestionnaire />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

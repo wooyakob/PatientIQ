@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { ArrowLeft, FileText, Calendar, Clock, Plus, Edit2, X } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, Clock, Plus, Edit2, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDateOnlyForDisplay, getPatientWithNotes, saveDoctorNote, toLocalDateOnlyString } from '@/lib/api';
+import { formatDateOnlyForDisplay, getPatientWithNotes, saveDoctorNote, deleteDoctorNote, toLocalDateOnlyString } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 const NotesDetail = () => {
@@ -45,6 +45,24 @@ const NotesDetail = () => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to save doctor note',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteDoctorNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient', patientId, 'notes'] });
+      toast({
+        title: 'Success',
+        description: 'Doctor note deleted successfully',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete doctor note',
         variant: 'destructive',
       });
     },
@@ -152,6 +170,12 @@ const NotesDetail = () => {
     setEditNoteContent('');
   };
 
+  const handleDeleteNote = (noteId: string) => {
+    if (confirm('Are you sure you want to delete this note? This action cannot be undone.')) {
+      deleteMutation.mutate(noteId);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -257,15 +281,27 @@ const NotesDetail = () => {
                           {note.time}
                         </span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditNote(note)}
-                        className="h-8"
-                      >
-                        <Edit2 className="h-3.5 w-3.5 mr-1.5" />
-                        Edit
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditNote(note)}
+                          className="h-8"
+                        >
+                          <Edit2 className="h-3.5 w-3.5 mr-1.5" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteNote(note.id)}
+                          className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                     <p className="text-foreground leading-relaxed">{note.content}</p>
                   </>

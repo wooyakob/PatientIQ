@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { ArrowLeft, Smile, MessageSquare, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Smile, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { getPatient } from '@/lib/api';
@@ -115,24 +115,11 @@ const SentimentDetail = () => {
           </div>
 
           <p className="text-sm text-muted-foreground leading-relaxed">{config.description}</p>
-        </div>
-
-        <div className="glass-card p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="neo-card p-2.5 rounded-xl">
-              <MessageSquare className="h-5 w-5 text-primary" />
-            </div>
-            <h3 className="font-semibold text-foreground">Patient's Private Notes</h3>
-          </div>
-          
-          <div className="neo-inset p-5 rounded-xl">
-            <p className="text-foreground italic leading-relaxed">"{patient.privateNotes}"</p>
-          </div>
 
           <div className="mt-6 pt-4 border-t border-border">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <TrendingUp className="h-3.5 w-3.5" />
-              <span>Sentiment analysis performed using natural language processing</span>
+              <span>Sentiment analysis performed using natural language processing on patient notes</span>
             </div>
           </div>
         </div>

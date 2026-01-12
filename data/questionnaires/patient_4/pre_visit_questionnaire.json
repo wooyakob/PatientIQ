@@ -1,0 +1,194 @@
+[{
+  "questionnaire_type": "pre_visit",
+  "patient_id": "4",
+  "patient_name": "Aisha Khan",
+  "date_completed": "2025-01-11",
+  "sections": {
+    "current_medications": {
+      "description": "List all medications you are currently taking",
+      "medications": [
+        {
+          "name": "Hypertonic Saline 7%",
+          "dosage": "4 mL",
+          "frequency": "Twice daily via nebulizer",
+          "purpose": "Thin mucus and improve clearance",
+          "side_effects": "Occasional throat irritation"
+        },
+        {
+          "name": "Albuterol",
+          "dosage": "2.5 mg",
+          "frequency": "Before each nebulizer treatment",
+          "purpose": "Open airways for better mucus clearance",
+          "side_effects": "Mild jitteriness"
+        },
+        {
+          "name": "Azithromycin",
+          "dosage": "500 mg",
+          "frequency": "Three times per week (Mon, Wed, Fri)",
+          "purpose": "Prevent respiratory infections",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Budesonide",
+          "dosage": "0.5 mg",
+          "frequency": "Twice daily via nebulizer",
+          "purpose": "Reduce airway inflammation",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Guaifenesin",
+          "dosage": "600 mg",
+          "frequency": "Twice daily",
+          "purpose": "Additional mucus thinning",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Vitamin D3",
+          "dosage": "2000 IU",
+          "frequency": "Once daily",
+          "purpose": "Immune support",
+          "side_effects": "None reported"
+        }
+      ]
+    },
+    "allergies": {
+      "description": "List any known allergies (medications, food, environmental)",
+      "drug_allergies": [
+        "Amoxicillin - causes hives"
+      ],
+      "food_allergies": [
+        "Tree nuts - anaphylaxis risk, carries EpiPen"
+      ],
+      "environmental_allergies": [
+        "Ragweed",
+        "Mold"
+      ]
+    },
+    "current_symptoms": {
+      "description": "Describe any symptoms you are currently experiencing",
+      "respiratory_symptoms": {
+        "shortness_of_breath": "Moderate dyspnea with exertion, can walk about half a mile before needing rest",
+        "coughing": "Daily productive cough, worse in mornings. Requires 30-45 minutes of airway clearance each morning.",
+        "wheezing": "Intermittent wheezing, especially during exacerbations",
+        "chest_tightness": "Occasional chest tightness, usually relieved by airway clearance",
+        "sputum_production": "Large amounts daily, approximately 3-4 tablespoons. Color varies from clear to yellow-green. Tracks color and consistency in journal."
+      },
+      "general_symptoms": {
+        "fatigue": "Moderate fatigue, worse during infection flare-ups",
+        "fever": "No current fever, last fever 3 months ago during exacerbation",
+        "night_sweats": "Occasional night sweats during infections",
+        "weight_changes": "Stable weight currently",
+        "sleep_quality": "Moderate - wakes once or twice to cough, uses extra pillow"
+      }
+    },
+    "pain_assessment": {
+      "description": "Rate your pain levels and describe location",
+      "chest_pain": {
+        "severity": "3/10",
+        "frequency": "Daily, especially during prolonged coughing episodes",
+        "triggers": "Airway clearance therapy, severe coughing fits"
+      },
+      "other_pain": {
+        "location": "Ribcage muscles",
+        "severity": "4/10",
+        "description": "Muscle soreness from coughing and chest physiotherapy"
+      }
+    },
+    "functional_status": {
+      "description": "Rate your ability to perform daily activities",
+      "walking_distance": "Can walk half a mile before moderate dyspnea",
+      "stair_climbing": "Can climb 2 flights with one rest break",
+      "self_care_activities": "Independent with all activities, though morning routine takes 2 hours due to treatments",
+      "work_status": "Working part-time as graphic designer from home, flexible schedule accommodates treatment needs",
+      "exercise_tolerance": "Does gentle yoga 3 times per week, walking 20-30 minutes daily"
+    },
+    "quality_of_life": {
+      "description": "Rate how your condition affects your daily life",
+      "physical_limitations": "Moderate - avoids strenuous activities, plans activities around treatment schedule",
+      "emotional_wellbeing": "Generally good with occasional anxiety during exacerbations. Participates in online support group.",
+      "social_activities": "Somewhat limited - avoids large crowds during flu season, selective about social events",
+      "sleep_quality": "Fair - generally gets 6-7 hours with occasional interruptions"
+    },
+    "environmental_exposures": {
+      "description": "Note any environmental factors affecting your health",
+      "occupational_exposures": "Works from home, no significant exposures. Previously worked in office environment.",
+      "home_environment": "Single-family home, replaced carpets with hardwood. HEPA air filters in bedroom and office. Regular HVAC maintenance.",
+      "air_quality_concerns": "Monitors air quality daily, stays indoors during poor air quality. Lives near coast, benefits from ocean air.",
+      "recent_travel": "Traveled to Seattle 2 months ago, brought portable nebulizer"
+    },
+    "compliance": {
+      "description": "How well are you following your treatment plan",
+      "medication_adherence": "90% compliant - maintains detailed medication log. Occasionally misses evening nebulizer when traveling.",
+      "oxygen_usage": "Not currently requiring oxygen",
+      "pulmonary_rehabilitation": "Completed program 1 year ago, continues home exercise program",
+      "dietary_restrictions": "Follows anti-inflammatory diet, high protein intake. Avoids dairy during exacerbations."
+    },
+    "emergency_contacts": {
+      "primary_contact": {
+        "name": "Tariq Khan",
+        "relationship": "Husband",
+        "phone": "760-555-8934"
+      },
+      "secondary_contact": {
+        "name": "Fatima Khan",
+        "relationship": "Sister",
+        "phone": "760-555-3421"
+      }
+    },
+    "recent_healthcare": {
+      "description": "Recent medical visits or hospitalizations",
+      "recent_er_visits": [],
+      "recent_hospitalizations": [
+        {
+          "date": "2024-10-15",
+          "duration": "3 days",
+          "reason": "Pulmonary exacerbation with Pseudomonas infection",
+          "treatment": "IV tobramycin and ceftazidime, chest physiotherapy"
+        }
+      ],
+      "recent_procedures": [
+        {
+          "procedure": "Chest CT scan",
+          "date": "2024-11-01",
+          "result": "Bronchiectasis stable compared to previous, predominantly in lower lobes and lingula"
+        },
+        {
+          "procedure": "Pulmonary function test",
+          "date": "2024-11-01",
+          "result": "FEV1 68% predicted, mild obstruction, slight improvement from prior"
+        },
+        {
+          "procedure": "Sputum culture",
+          "date": "2024-12-15",
+          "result": "Normal respiratory flora, no growth of pathogenic organisms"
+        }
+      ],
+      "upcoming_appointments": [
+        {
+          "appointment_type": "Pulmonology follow-up",
+          "date": "2025-01-20",
+          "purpose": "Routine monitoring and review of recent CT results"
+        },
+        {
+          "appointment_type": "Respiratory therapy",
+          "date": "2025-02-05",
+          "purpose": "Review and optimize airway clearance techniques"
+        }
+      ]
+    },
+    "additional_notes": {
+      "patient_concerns": "Concerned about increasing frequency of exacerbations (3 in past year vs 1-2 previously). Worried about antibiotic resistance. Wants to discuss preventive strategies. Planning pregnancy in next 1-2 years and has questions about disease management during pregnancy.",
+      "goals_for_visit": "Reduce exacerbation frequency, optimize airway clearance regimen, discuss pregnancy planning with bronchiectasis",
+      "questions_for_doctor": [
+        "Are there any new treatments available that could reduce my exacerbations?",
+        "Should I consider changing my prophylactic antibiotic?",
+        "What additional preventive measures can I take?",
+        "How should I manage my condition if I become pregnant?",
+        "Should I get vaccinated for RSV or other respiratory viruses?",
+        "Is there a specialist in bronchiectasis and pregnancy I could consult?",
+        "Should I increase the frequency of my nebulizer treatments?"
+      ]
+    }
+  }
+}
+]

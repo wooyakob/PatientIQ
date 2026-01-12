@@ -1,11 +1,13 @@
+import json
 from datetime import datetime
-from typing import List
+from pathlib import Path
+from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.database import db
-from backend.models import Patient
+from backend.models import Patient, WearableData
 
 
 app = FastAPI(
@@ -57,6 +59,15 @@ async def get_patient(patient_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching patient: {str(e)}")
+
+
+@app.get("/api/patients/{patient_id}/wearables", response_model=WearableData)
+async def get_patient_wearables(patient_id: str, days: int = 30):
+    """Get wearable data (daily entries) for a patient"""
+    try:
+        return db.get_wearables_for_patient(patient_id, days=days)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching wearable data: {str(e)}")
 
 
 @app.post("/api/patients")
@@ -112,6 +123,21 @@ async def save_doctor_note(note: dict):
         raise HTTPException(status_code=500, detail=f"Error saving doctor note: {str(e)}")
 
 
+@app.delete("/api/doctor-notes/{note_id}")
+async def delete_doctor_note(note_id: str):
+    """Delete a doctor note"""
+    try:
+        success = db.delete_doctor_note(note_id)
+        if success:
+            return {"message": "Doctor note deleted successfully", "note_id": note_id}
+        else:
+            raise HTTPException(status_code=404, detail="Note not found or failed to delete")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting doctor note: {str(e)}")
+
+
 # Patient Notes Endpoints
 @app.get("/api/patients/{patient_id}/patient-notes")
 async def get_patient_notes(patient_id: str):
@@ -134,6 +160,43 @@ async def get_private_messages(doctor_id: str, limit: int = 50):
         raise HTTPException(status_code=500, detail=f"Error fetching private messages: {str(e)}")
 
 
+@app.post("/api/messages/private")
+async def send_private_message(payload: dict):
+    try:
+        to_id = str(payload.get("to_id") or "").strip()
+        to_name = str(payload.get("to_name") or "").strip()
+        subject = str(payload.get("subject") or "").strip()
+        content = str(payload.get("content") or "").strip()
+
+        if not to_id or not to_name or not subject or not content:
+            raise HTTPException(status_code=400, detail="Missing required fields: to_id, to_name, subject, content")
+
+        # For now, enforce that private messages sent from the UI are from Tiffany Mitchell.
+        message_id = f"msg_private_{int(datetime.now().timestamp())}"
+        message = {
+            "id": message_id,
+            "message_type": "private",
+            "from_id": "1",
+            "from_name": "Tiffany Mitchell",
+            "to_id": to_id,
+            "to_name": to_name,
+            "subject": subject,
+            "content": content,
+            "timestamp": datetime.now().isoformat(),
+            "read": False,
+            "priority": str(payload.get("priority") or "normal"),
+        }
+
+        success = db.save_private_message(message_id, message)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send private message")
+        return {"message": "Private message sent", "id": message_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending private message: {str(e)}")
+
+
 @app.get("/api/messages/public")
 async def get_public_messages(limit: int = 50):
     """Get public messages for all Scripps staff"""
@@ -142,6 +205,39 @@ async def get_public_messages(limit: int = 50):
         return {"messages": messages, "count": len(messages)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching public messages: {str(e)}")
+
+
+@app.post("/api/messages/public")
+async def send_public_message(payload: dict):
+    try:
+        subject = str(payload.get("subject") or "").strip()
+        content = str(payload.get("content") or "").strip()
+
+        if not subject or not content:
+            raise HTTPException(status_code=400, detail="Missing required fields: subject, content")
+
+        message_id = f"msg_public_{int(datetime.now().timestamp())}"
+        message = {
+            "id": message_id,
+            "message_type": "public",
+            "from_id": "1",
+            "from_name": "Tiffany Mitchell",
+            "to_name": "All Scripps Staff",
+            "subject": subject,
+            "content": content,
+            "timestamp": datetime.now().isoformat(),
+            "read": False,
+            "priority": str(payload.get("priority") or "normal"),
+        }
+
+        success = db.save_public_message(message_id, message)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send public message")
+        return {"message": "Public message sent", "id": message_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending public message: {str(e)}")
 
 
 @app.post("/api/messages/private/{message_id}/read")
@@ -220,5 +316,81 @@ async def update_appointment_status(appointment_id: str, status: str):
         raise HTTPException(
             status_code=500, detail=f"Error updating appointment status: {str(e)}"
         )
+
+
+@app.get("/api/questionnaires/pre-visit/{patient_id}")
+async def get_pre_visit_questionnaire(patient_id: str):
+    try:
+        root = Path(__file__).resolve().parent.parent
+        path = root / "data" / "questionnaires" / f"patient_{patient_id}" / "pre_visit_questionnaire.json"
+
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="Pre-visit questionnaire not found")
+
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, list):
+            if len(data) == 0:
+                raise HTTPException(status_code=404, detail="Pre-visit questionnaire not found")
+            data = data[0]
+
+        if not isinstance(data, dict):
+            raise HTTPException(status_code=500, detail="Invalid questionnaire format")
+
+        return data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching questionnaire: {str(e)}")
+
+
+@app.post("/api/questionnaires/pre-visit/status")
+async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)):
+    try:
+        patient_ids = payload.get("patient_ids")
+        if not isinstance(patient_ids, list):
+            raise HTTPException(status_code=400, detail="patient_ids must be a list")
+
+        root = Path(__file__).resolve().parent.parent
+        statuses = []
+        for pid in patient_ids:
+            patient_id = str(pid)
+            path = root / "data" / "questionnaires" / f"patient_{patient_id}" / "pre_visit_questionnaire.json"
+            if not path.exists():
+                statuses.append(
+                    {
+                        "patient_id": patient_id,
+                        "exists": False,
+                        "completed": False,
+                        "date_completed": None,
+                    }
+                )
+                continue
+
+            date_completed = None
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+                    date_completed = data[0].get("date_completed")
+                elif isinstance(data, dict):
+                    date_completed = data.get("date_completed")
+            except Exception:
+                date_completed = None
+
+            completed = bool(date_completed)
+
+            statuses.append(
+                {
+                    "patient_id": patient_id,
+                    "exists": True,
+                    "completed": completed,
+                    "date_completed": date_completed,
+                }
+            )
+
+        return {"statuses": statuses}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching questionnaire status: {str(e)}")
 
 
