@@ -1,0 +1,209 @@
+[{
+  "questionnaire_type": "pre_visit",
+  "patient_id": "3",
+  "patient_name": "Robert Chen",
+  "date_completed": "2025-01-08",
+  "sections": {
+    "current_medications": {
+      "description": "List all medications you are currently taking",
+      "medications": [
+        {
+          "name": "Nintedanib (Ofev)",
+          "dosage": "150 mg",
+          "frequency": "Twice daily with food",
+          "purpose": "Slow progression of pulmonary fibrosis",
+          "side_effects": "Diarrhea, nausea, loss of appetite"
+        },
+        {
+          "name": "Prednisone",
+          "dosage": "5 mg",
+          "frequency": "Once daily in morning",
+          "purpose": "Reduce inflammation",
+          "side_effects": "Insomnia, increased appetite"
+        },
+        {
+          "name": "N-Acetylcysteine",
+          "dosage": "600 mg",
+          "frequency": "Three times daily",
+          "purpose": "Antioxidant support",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Furosemide (Lasix)",
+          "dosage": "20 mg",
+          "frequency": "Once daily in morning",
+          "purpose": "Prevent fluid retention",
+          "side_effects": "Frequent urination"
+        },
+        {
+          "name": "Pantoprazole",
+          "dosage": "40 mg",
+          "frequency": "Once daily",
+          "purpose": "GERD prevention",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Aspirin",
+          "dosage": "81 mg",
+          "frequency": "Once daily",
+          "purpose": "Cardiovascular protection",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Atorvastatin",
+          "dosage": "20 mg",
+          "frequency": "Once daily at bedtime",
+          "purpose": "Cholesterol management",
+          "side_effects": "None reported"
+        }
+      ]
+    },
+    "allergies": {
+      "description": "List any known allergies (medications, food, environmental)",
+      "drug_allergies": [
+        "Codeine - causes severe nausea"
+      ],
+      "food_allergies": [],
+      "environmental_allergies": [
+        "Mold",
+        "Strong chemical fumes"
+      ]
+    },
+    "current_symptoms": {
+      "description": "Describe any symptoms you are currently experiencing",
+      "respiratory_symptoms": {
+        "shortness_of_breath": "Severe and progressive. Occurs with minimal exertion such as walking to bathroom. Requires supplemental oxygen continuously.",
+        "coughing": "Chronic dry, non-productive cough throughout the day. Particularly bothersome at night.",
+        "wheezing": "Minimal wheezing",
+        "chest_tightness": "Moderate chest tightness, constant dull ache",
+        "sputum_production": "Minimal, occasionally small amounts of clear mucus"
+      },
+      "general_symptoms": {
+        "fatigue": "Severe fatigue, exhausted by simple activities. Requires frequent rest periods.",
+        "fever": "No fever",
+        "night_sweats": "Occasional night sweats",
+        "weight_changes": "Lost 15 lbs over past year despite trying to maintain weight",
+        "sleep_quality": "Very poor - wakes every 2-3 hours due to coughing and dyspnea"
+      }
+    },
+    "pain_assessment": {
+      "description": "Rate your pain levels and describe location",
+      "chest_pain": {
+        "severity": "5/10",
+        "frequency": "Constant, worsens with coughing",
+        "triggers": "Deep breathing, coughing fits, physical activity"
+      },
+      "other_pain": {
+        "location": "Fingertips (clubbing pain)",
+        "severity": "3/10",
+        "description": "Discomfort in fingertips, noticed increased clubbing"
+      }
+    },
+    "functional_status": {
+      "description": "Rate your ability to perform daily activities",
+      "walking_distance": "Limited to 20-30 feet before severe dyspnea, uses walker with oxygen",
+      "stair_climbing": "Unable to climb stairs without extreme difficulty",
+      "self_care_activities": "Requires assistance with bathing, dressing. Wife helps with most activities.",
+      "work_status": "Fully retired, former engineer. Unable to work for past 3 years.",
+      "exercise_tolerance": "Minimal - participates in seated exercises only"
+    },
+    "quality_of_life": {
+      "description": "Rate how your condition affects your daily life",
+      "physical_limitations": "Extreme limitations - mostly homebound, cannot perform basic tasks without assistance",
+      "emotional_wellbeing": "Moderate to severe depression. Sees therapist monthly. Anxious about disease progression.",
+      "social_activities": "Very isolated - rarely sees friends or family outside of immediate household",
+      "sleep_quality": "Poor - requires sleeping in recliner, cannot lie flat"
+    },
+    "environmental_exposures": {
+      "description": "Note any environmental factors affecting your health",
+      "occupational_exposures": "Worked as industrial engineer for 35 years. Exposure to metal dust, silica, and various chemicals. Potential asbestos exposure at job sites in 1980s-1990s.",
+      "home_environment": "Single-level home, recently modified with ramps. Air filtration system installed. Wife removed all carpeting.",
+      "air_quality_concerns": "Extremely sensitive to air quality. Cannot go outside on poor air quality days.",
+      "recent_travel": "Unable to travel due to oxygen requirements and disease severity"
+    },
+    "compliance": {
+      "description": "How well are you following your treatment plan",
+      "medication_adherence": "95% compliant - uses pill organizer and medication tracking app",
+      "oxygen_usage": "Continuous oxygen at 4-5 L/min via concentrator, 24/7 use. Increases to 6 L/min with any activity.",
+      "pulmonary_rehabilitation": "Unable to attend due to severity of disease. Home health PT visits twice weekly.",
+      "dietary_restrictions": "Following high-calorie, high-protein diet to prevent further weight loss. Small frequent meals due to early satiety."
+    },
+    "emergency_contacts": {
+      "primary_contact": {
+        "name": "Linda Chen",
+        "relationship": "Wife",
+        "phone": "858-555-2901"
+      },
+      "secondary_contact": {
+        "name": "David Chen",
+        "relationship": "Son",
+        "phone": "858-555-7823"
+      }
+    },
+    "recent_healthcare": {
+      "description": "Recent medical visits or hospitalizations",
+      "recent_er_visits": [],
+      "recent_hospitalizations": [
+        {
+          "date": "2024-06-12",
+          "duration": "5 days",
+          "reason": "Acute respiratory failure",
+          "treatment": "High-flow oxygen, antibiotics for suspected infection"
+        }
+      ],
+      "recent_procedures": [
+        {
+          "procedure": "High-resolution CT chest",
+          "date": "2024-10-05",
+          "result": "Progressive interstitial changes, increased honeycombing in bilateral lower lobes"
+        },
+        {
+          "procedure": "Pulmonary function test",
+          "date": "2024-10-05",
+          "result": "FVC 52% predicted, DLCO 38% predicted - severe restrictive pattern"
+        },
+        {
+          "procedure": "6-minute walk test",
+          "date": "2024-10-05",
+          "result": "Unable to complete - severe desaturation to 78% after 50 feet"
+        },
+        {
+          "procedure": "Echocardiogram",
+          "date": "2024-09-20",
+          "result": "Mild pulmonary hypertension, RVSP 45 mmHg"
+        }
+      ],
+      "upcoming_appointments": [
+        {
+          "appointment_type": "Pulmonology follow-up",
+          "date": "2025-01-15",
+          "purpose": "Discuss disease progression and treatment options"
+        },
+        {
+          "appointment_type": "Lung transplant evaluation",
+          "date": "2025-02-01",
+          "purpose": "Initial consultation for transplant candidacy"
+        },
+        {
+          "appointment_type": "Home health nurse",
+          "date": "2025-01-14",
+          "purpose": "Weekly oxygen monitoring and medication review"
+        }
+      ]
+    },
+    "additional_notes": {
+      "patient_concerns": "Very concerned about rapid disease progression. Fearful of suffocation. Worried about being a burden on family. Interested in lung transplant but concerned about age and complications. Has completed advance directive.",
+      "goals_for_visit": "Understand prognosis, discuss palliative care options, review transplant eligibility, optimize symptom management",
+      "questions_for_doctor": [
+        "How much time do I realistically have?",
+        "Am I a good candidate for lung transplant at my age?",
+        "What can be done to reduce my coughing?",
+        "Should I stop the nintedanib given the side effects?",
+        "What palliative care services are available?",
+        "How will I know when it's time for hospice?",
+        "Are there any clinical trials I could participate in?"
+      ]
+    }
+  }
+}
+]

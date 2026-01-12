@@ -1,0 +1,192 @@
+[{
+  "questionnaire_type": "pre_visit",
+  "patient_id": "2",
+  "patient_name": "Maria Garcia",
+  "date_completed": "2025-01-09",
+  "sections": {
+    "current_medications": {
+      "description": "List all medications you are currently taking",
+      "medications": [
+        {
+          "name": "Tiotropium Bromide (Spiriva)",
+          "dosage": "18 mcg",
+          "frequency": "Once daily via inhaler",
+          "purpose": "Long-acting bronchodilator for COPD",
+          "side_effects": "Dry mouth occasionally"
+        },
+        {
+          "name": "Salmeterol/Fluticasone (Advair)",
+          "dosage": "250/50 mcg",
+          "frequency": "Twice daily",
+          "purpose": "Combination therapy for COPD management",
+          "side_effects": "Hoarseness, rinses mouth after use"
+        },
+        {
+          "name": "Albuterol Inhaler",
+          "dosage": "90 mcg",
+          "frequency": "As needed, usually 2-3 times daily",
+          "purpose": "Rescue inhaler for shortness of breath",
+          "side_effects": "Slight tremor in hands"
+        },
+        {
+          "name": "Prednisone",
+          "dosage": "10 mg",
+          "frequency": "Daily maintenance dose",
+          "purpose": "Reduce airway inflammation",
+          "side_effects": "Weight gain, mood changes"
+        },
+        {
+          "name": "Azithromycin",
+          "dosage": "250 mg",
+          "frequency": "Three times per week (Mon, Wed, Fri)",
+          "purpose": "Prevent COPD exacerbations",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Omeprazole",
+          "dosage": "20 mg",
+          "frequency": "Once daily",
+          "purpose": "GERD management",
+          "side_effects": "None reported"
+        }
+      ]
+    },
+    "allergies": {
+      "description": "List any known allergies (medications, food, environmental)",
+      "drug_allergies": [
+        "Sulfa drugs - causes severe rash"
+      ],
+      "food_allergies": [],
+      "environmental_allergies": [
+        "Strong perfumes/fragrances",
+        "Cigarette smoke",
+        "Dust"
+      ]
+    },
+    "current_symptoms": {
+      "description": "Describe any symptoms you are currently experiencing",
+      "respiratory_symptoms": {
+        "shortness_of_breath": "Moderate to severe, especially with exertion. Difficulty walking more than 100 yards without rest.",
+        "coughing": "Daily productive cough, worse in mornings. Coughing fits 4-5 times per day.",
+        "wheezing": "Frequent wheezing, present daily, worse at night",
+        "chest_tightness": "Constant mild tightness, becomes severe during exacerbations",
+        "sputum_production": "Daily, thick yellowish-green sputum, approximately 2 tablespoons per day"
+      },
+      "general_symptoms": {
+        "fatigue": "Significant fatigue, limits daily activities. Needs rest periods throughout day.",
+        "fever": "No current fever, had low-grade fever 2 weeks ago",
+        "night_sweats": "Occasional night sweats",
+        "weight_changes": "Unintentional weight loss of 8 lbs in past 6 months",
+        "sleep_quality": "Poor - wakes 3-4 times per night due to breathing difficulty"
+      }
+    },
+    "pain_assessment": {
+      "description": "Rate your pain levels and describe location",
+      "chest_pain": {
+        "severity": "4/10",
+        "frequency": "Daily, especially during coughing fits",
+        "triggers": "Coughing, deep breathing, lying flat"
+      },
+      "other_pain": {
+        "location": "Shoulders and back",
+        "severity": "3/10",
+        "description": "Muscle soreness from labored breathing"
+      }
+    },
+    "functional_status": {
+      "description": "Rate your ability to perform daily activities",
+      "walking_distance": "Limited to 100-150 yards before needing rest",
+      "stair_climbing": "Can climb half flight with multiple stops, severe breathlessness",
+      "self_care_activities": "Needs assistance with bathing and dressing on bad days",
+      "work_status": "Retired on disability, unable to work",
+      "exercise_tolerance": "Very limited - uses portable oxygen concentrator for any activity"
+    },
+    "quality_of_life": {
+      "description": "Rate how your condition affects your daily life",
+      "physical_limitations": "Severe - cannot perform most household tasks without assistance",
+      "emotional_wellbeing": "Moderate anxiety and depression related to disease progression",
+      "social_activities": "Significantly reduced - rarely leaves home due to mobility issues",
+      "sleep_quality": "Poor - wakes frequently, uses 3 pillows to sleep semi-upright"
+    },
+    "environmental_exposures": {
+      "description": "Note any environmental factors affecting your health",
+      "occupational_exposures": "Previously worked in textile factory for 20 years, exposed to lint and chemicals",
+      "home_environment": "Lives in single-story home with granddaughter, air purifier in bedroom",
+      "air_quality_concerns": "Very sensitive to air quality, stays indoors on poor air quality days",
+      "recent_travel": "Unable to travel due to oxygen dependence"
+    },
+    "compliance": {
+      "description": "How well are you following your treatment plan",
+      "medication_adherence": "85% compliant - sometimes forgets evening doses",
+      "oxygen_usage": "Uses oxygen 16 hours per day at 2-3 L/min, as prescribed",
+      "pulmonary_rehabilitation": "Completed program 6 months ago, trying to maintain home exercises",
+      "dietary_restrictions": "Following low-sodium diet, trying to increase protein intake"
+    },
+    "emergency_contacts": {
+      "primary_contact": {
+        "name": "Isabella Garcia",
+        "relationship": "Granddaughter",
+        "phone": "619-555-8902"
+      },
+      "secondary_contact": {
+        "name": "Father Ricardo Martinez",
+        "relationship": "Parish priest/family friend",
+        "phone": "619-555-4567"
+      }
+    },
+    "recent_healthcare": {
+      "description": "Recent medical visits or hospitalizations",
+      "recent_er_visits": [
+        {
+          "date": "2024-11-20",
+          "reason": "Acute COPD exacerbation",
+          "outcome": "Treated and released same day"
+        }
+      ],
+      "recent_hospitalizations": [
+        {
+          "date": "2024-08-15",
+          "duration": "4 days",
+          "reason": "Severe COPD exacerbation with respiratory infection",
+          "treatment": "IV antibiotics, systemic steroids, oxygen therapy"
+        }
+      ],
+      "recent_procedures": [
+        {
+          "procedure": "Pulmonary function test",
+          "date": "2024-09-10",
+          "result": "FEV1 45% of predicted, severe obstruction"
+        },
+        {
+          "procedure": "Chest X-ray",
+          "date": "2024-11-20",
+          "result": "Hyperinflation consistent with COPD, no acute infiltrates"
+        }
+      ],
+      "upcoming_appointments": [
+        {
+          "appointment_type": "Pulmonology follow-up",
+          "date": "2025-01-18",
+          "purpose": "Review recent exacerbation and medication adjustment"
+        },
+        {
+          "appointment_type": "Oxygen equipment check",
+          "date": "2025-01-30",
+          "purpose": "Home medical equipment evaluation"
+        }
+      ]
+    },
+    "additional_notes": {
+      "patient_concerns": "Very worried about increasing frequency of exacerbations. Concerned about becoming dependent on family. Difficulty affording medications on fixed income.",
+      "goals_for_visit": "Better control of symptoms, reduce exacerbation frequency, discuss advance directives",
+      "questions_for_doctor": [
+        "Is there anything else that can be done to improve my breathing?",
+        "Should I increase my oxygen flow rate?",
+        "Am I a candidate for any clinical trials?",
+        "How can I prevent future hospitalizations?",
+        "What are my options if medications stop working?"
+      ]
+    }
+  }
+}
+]

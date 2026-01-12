@@ -1,0 +1,248 @@
+[{
+  "questionnaire_type": "pre_visit",
+  "patient_id": "5",
+  "patient_name": "Emily Johnson",
+  "date_completed": "2025-01-12",
+  "sections": {
+    "current_medications": {
+      "description": "List all medications you are currently taking",
+      "medications": [
+        {
+          "name": "Elexacaftor/Tezacaftor/Ivacaftor (Trikafta)",
+          "dosage": "2 tablets morning, 1 tablet evening",
+          "frequency": "Twice daily with fat-containing food",
+          "purpose": "CFTR modulator therapy - cornerstone of CF treatment",
+          "side_effects": "Occasional headaches, elevated liver enzymes (monitored)"
+        },
+        {
+          "name": "Hypertonic Saline 7%",
+          "dosage": "4 mL",
+          "frequency": "Three times daily via nebulizer",
+          "purpose": "Mucus clearance",
+          "side_effects": "Throat irritation, coughing during treatment"
+        },
+        {
+          "name": "Dornase alfa (Pulmozyme)",
+          "dosage": "2.5 mg",
+          "frequency": "Once daily via nebulizer",
+          "purpose": "Break down DNA in mucus to thin secretions",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Azithromycin",
+          "dosage": "500 mg",
+          "frequency": "Monday, Wednesday, Friday",
+          "purpose": "Anti-inflammatory and prevent infections",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Pancrelipase (Creon)",
+          "dosage": "36,000 units",
+          "frequency": "With all meals and snacks (5-6 times daily)",
+          "purpose": "Pancreatic enzyme replacement for digestion",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "ADEK Vitamins",
+          "dosage": "2 softgels",
+          "frequency": "Once daily",
+          "purpose": "Fat-soluble vitamin supplementation",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Vitamin D3",
+          "dosage": "2000 IU",
+          "frequency": "Once daily",
+          "purpose": "Maintain bone health",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Ibuprofen",
+          "dosage": "800 mg",
+          "frequency": "Twice daily",
+          "purpose": "Anti-inflammatory for lung disease",
+          "side_effects": "Occasional stomach upset"
+        },
+        {
+          "name": "Omeprazole",
+          "dosage": "20 mg",
+          "frequency": "Once daily",
+          "purpose": "Reduce stomach acid for better enzyme function",
+          "side_effects": "None reported"
+        },
+        {
+          "name": "Calcium/Vitamin D supplement",
+          "dosage": "500 mg calcium/400 IU D",
+          "frequency": "Twice daily",
+          "purpose": "Bone health",
+          "side_effects": "None reported"
+        }
+      ]
+    },
+    "allergies": {
+      "description": "List any known allergies (medications, food, environmental)",
+      "drug_allergies": [
+        "Sulfamethoxazole/Trimethoprim - causes severe rash"
+      ],
+      "food_allergies": [],
+      "environmental_allergies": [
+        "Aspergillus (ABPA history - managed)"
+      ]
+    },
+    "current_symptoms": {
+      "description": "Describe any symptoms you are currently experiencing",
+      "respiratory_symptoms": {
+        "shortness_of_breath": "Mild dyspnea, significantly improved since starting Trikafta 2 years ago. Can walk over a mile without stopping.",
+        "coughing": "Productive cough throughout day, less severe than before Trikafta. Performs airway clearance 3x daily for 30 minutes each.",
+        "wheezing": "Minimal, only during respiratory infections",
+        "chest_tightness": "Rare, only during exacerbations",
+        "sputum_production": "Moderate amounts, 2-3 tablespoons daily. Usually clear to white, tracks color changes."
+      },
+      "general_symptoms": {
+        "fatigue": "Mild fatigue, much improved on Trikafta. Can work full time.",
+        "fever": "No current fever",
+        "night_sweats": "Occasional, especially after intense workouts",
+        "weight_changes": "Gained 12 lbs since starting Trikafta, now at healthy weight",
+        "sleep_quality": "Good - sleeps 7-8 hours, rarely woken by cough"
+      },
+      "digestive_symptoms": {
+        "abdominal_pain": "Occasional cramping if forgets enzymes with meals",
+        "bowel_movements": "Regular, 1-2 times daily. Occasionally loose if enzyme dose is off.",
+        "appetite": "Good appetite, eating 2500-3000 calories daily",
+        "nausea": "None currently",
+        "bloating": "Occasional if high-fat meal without adequate enzymes"
+      }
+    },
+    "pain_assessment": {
+      "description": "Rate your pain levels and describe location",
+      "chest_pain": {
+        "severity": "2/10",
+        "frequency": "Occasional, during airway clearance or coughing",
+        "triggers": "Chest physiotherapy vest, prolonged coughing"
+      },
+      "other_pain": {
+        "location": "Right upper abdomen",
+        "severity": "2/10",
+        "description": "Occasional discomfort, possibly related to liver (monitoring for Trikafta side effect)"
+      }
+    },
+    "functional_status": {
+      "description": "Rate your ability to perform daily activities",
+      "walking_distance": "Can walk over a mile comfortably, exercises regularly",
+      "stair_climbing": "Can climb multiple flights without difficulty",
+      "self_care_activities": "Fully independent with all activities",
+      "work_status": "Working full-time as digital marketing coordinator, excellent attendance",
+      "exercise_tolerance": "Exercises 5 times per week - combination of cardio and strength training. Runs 2-3 miles at a time."
+    },
+    "quality_of_life": {
+      "description": "Rate how your condition affects your daily life",
+      "physical_limitations": "Minimal limitations since Trikafta. Can participate in most activities. Treatment time (3 hours daily) is main constraint.",
+      "emotional_wellbeing": "Very good. Trikafta has been life-changing. Occasional anxiety about long-term prognosis. Active in CF community.",
+      "social_activities": "Very active socially, careful during cold/flu season. Advocates for CF awareness.",
+      "sleep_quality": "Excellent - much improved since starting Trikafta"
+    },
+    "environmental_exposures": {
+      "description": "Note any environmental factors affecting your health",
+      "occupational_exposures": "Office environment, works hybrid schedule. No significant exposures.",
+      "home_environment": "Apartment living, maintains clean environment. Avoids hot tubs, jacuzzis. HEPA filters throughout home. Regular bathroom cleaning to prevent mold/bacteria.",
+      "air_quality_concerns": "Monitors air quality, stays indoors on poor air days",
+      "recent_travel": "Traveled to Colorado for skiing 1 month ago with portable equipment"
+    },
+    "compliance": {
+      "description": "How well are you following your treatment plan",
+      "medication_adherence": "98% compliant - extremely dedicated to treatment regimen. Uses smartphone reminders and tracking app.",
+      "oxygen_usage": "Not required",
+      "pulmonary_rehabilitation": "Not currently enrolled, maintains independent exercise program",
+      "dietary_restrictions": "High-calorie, high-fat diet (2500-3000 calories daily). Takes enzymes with all meals. Generous salt intake."
+    },
+    "emergency_contacts": {
+      "primary_contact": {
+        "name": "Sarah Johnson",
+        "relationship": "Mother",
+        "phone": "949-555-2847"
+      },
+      "secondary_contact": {
+        "name": "Michael Anderson",
+        "relationship": "Boyfriend",
+        "phone": "949-555-6193"
+      }
+    },
+    "recent_healthcare": {
+      "description": "Recent medical visits or hospitalizations",
+      "recent_er_visits": [],
+      "recent_hospitalizations": [
+        {
+          "date": "2023-12-10",
+          "duration": "10 days",
+          "reason": "Pulmonary exacerbation with Pseudomonas",
+          "treatment": "IV tobramycin and cefepime, aggressive airway clearance"
+        }
+      ],
+      "recent_procedures": [
+        {
+          "procedure": "Pulmonary function test",
+          "date": "2024-12-15",
+          "result": "FEV1 78% predicted - best ever! Up from 45% pre-Trikafta"
+        },
+        {
+          "procedure": "Chest X-ray",
+          "date": "2024-12-15",
+          "result": "Stable bronchiectasis, improved aeration compared to prior"
+        },
+        {
+          "procedure": "OGTT (Oral Glucose Tolerance Test)",
+          "date": "2024-11-01",
+          "result": "Normal glucose tolerance, no evidence of CFRD currently"
+        },
+        {
+          "procedure": "Liver function tests",
+          "date": "2025-01-05",
+          "result": "Mildly elevated ALT (55), stable, within acceptable range on Trikafta"
+        },
+        {
+          "procedure": "Sputum culture",
+          "date": "2024-12-15",
+          "result": "Pseudomonas aeruginosa (chronic), mucoid. Staphylococcus aureus. Sensitive to usual antibiotics."
+        },
+        {
+          "procedure": "DEXA scan",
+          "date": "2024-08-20",
+          "result": "Mild osteopenia, improved from prior. Continue calcium and vitamin D."
+        }
+      ],
+      "upcoming_appointments": [
+        {
+          "appointment_type": "CF Clinic quarterly visit",
+          "date": "2025-01-28",
+          "purpose": "Routine monitoring - PFTs, cultures, weight check, medication review"
+        },
+        {
+          "appointment_type": "Endocrinology",
+          "date": "2025-02-15",
+          "purpose": "Annual diabetes screening and bone health follow-up"
+        },
+        {
+          "appointment_type": "Nutrition consultation",
+          "date": "2025-03-01",
+          "purpose": "Dietary review and weight maintenance strategies"
+        }
+      ]
+    },
+    "additional_notes": {
+      "patient_concerns": "Grateful for Trikafta's impact but concerned about long-term side effects, especially liver function. Interested in family planning - wants to discuss pregnancy with CF. Occasional anxiety about antibiotic resistance with chronic Pseudomonas. Wondering if she should consider eradication therapy. Also concerned about CFRD risk as she ages.",
+      "goals_for_visit": "Maintain current excellent health status, discuss family planning, review infection control strategies, optimize nutrition",
+      "questions_for_doctor": [
+        "How are my liver enzymes looking on Trikafta long-term?",
+        "Should we try to eradicate my chronic Pseudomonas?",
+        "What do I need to know about pregnancy planning with CF?",
+        "Should I see a high-risk OB specialist before conceiving?",
+        "Are there any new developments in CF treatment I should know about?",
+        "How often should I have diabetes screening?",
+        "Should I increase my bone health supplements?",
+        "Are there any clinical trials I might be eligible for?",
+        "What's the latest research on CF life expectancy with modulators?"
+      ]
+    }
+  }
+}
+]

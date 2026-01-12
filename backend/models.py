@@ -13,8 +13,9 @@ class SentimentLevel(str, Enum):
 
 
 class WearableData(BaseModel):
-    heart_rate: List[int] = Field(default_factory=list, description="7-day heart rate readings")
-    step_count: List[int] = Field(default_factory=list, description="7-day step count readings")
+    timestamps: List[str] = Field(default_factory=list, description="Wearable entry timestamps (daily, last 30 days)")
+    heart_rate: List[int] = Field(default_factory=list, description="Daily heart rate readings (last 30 days)")
+    step_count: List[int] = Field(default_factory=list, description="Daily step count readings (last 30 days)")
 
 
 class DoctorNote(BaseModel):

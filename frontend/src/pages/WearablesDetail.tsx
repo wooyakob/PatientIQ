@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { getPatient } from '@/lib/api';
+import { getPatient, getPatientWearables } from '@/lib/api';
 
 const WearablesDetail = () => {
   const { id } = useParams();
@@ -21,7 +21,18 @@ const WearablesDetail = () => {
     enabled: Boolean(patientId),
   });
 
-  if (isLoading) {
+  const {
+    data: wearables,
+    isLoading: isWearablesLoading,
+    isError: isWearablesError,
+    error: wearablesError,
+  } = useQuery({
+    queryKey: ['patient-wearables', patientId, 30],
+    queryFn: () => getPatientWearables(patientId, 30),
+    enabled: Boolean(patientId),
+  });
+
+  if (isLoading || isWearablesLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -31,12 +42,12 @@ const WearablesDetail = () => {
     );
   }
 
-  if (isError) {
+  if (isError || isWearablesError) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Failed to load wearable data</h1>
-          <p className="text-muted-foreground mb-6">{(error as Error).message}</p>
+          <p className="text-muted-foreground mb-6">{((error ?? wearablesError) as Error).message}</p>
           <Button onClick={() => navigate('/')}>Return to Dashboard</Button>
         </div>
       </div>
@@ -54,9 +65,20 @@ const WearablesDetail = () => {
     );
   }
 
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const heartRates = patient.wearableData.heartRate ?? [];
-  const stepCounts = patient.wearableData.stepCount ?? [];
+  const formatTimestampLabel = (ts: string, fallback: string) => {
+    const d = new Date(ts);
+    return Number.isNaN(d.getTime())
+      ? fallback
+      : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const timestamps = wearables?.timestamps ?? [];
+  const heartRates = wearables?.heartRate ?? [];
+  const stepCounts = wearables?.stepCount ?? [];
+
+  const availablePoints = Math.min(heartRates.length, stepCounts.length);
+  const pointsToShow = Math.min(30, availablePoints);
+
   const avgHeartRate = Math.round(heartRates.reduce((a, b) => a + b, 0) / (heartRates.length || 1));
   const avgSteps = Math.round(stepCounts.reduce((a, b) => a + b, 0) / (stepCounts.length || 1));
   const maxHeartRate = heartRates.length ? Math.max(...heartRates) : 0;
@@ -65,6 +87,9 @@ const WearablesDetail = () => {
 
   const heartRateTrend = heartRates.length >= 2 ? heartRates[heartRates.length - 1] - heartRates[0] : 0;
   const stepsTrend = stepCounts.length >= 2 ? stepCounts[stepCounts.length - 1] - stepCounts[0] : 0;
+
+  const heartRateScaleMax = Math.max(maxHeartRate, 1);
+  const stepScaleMax = Math.max(maxSteps, 1);
 
   const getTrendIcon = (trend: number) => {
     if (trend > 2) return <TrendingUp className="h-4 w-4 text-emerald-500" />;
@@ -92,7 +117,7 @@ const WearablesDetail = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">Wearable Data Analysis</h1>
-              <p className="text-muted-foreground">7-day overview for {patient.name}</p>
+              <p className="text-muted-foreground">30-day overview for {patient.name}</p>
             </div>
           </div>
 
@@ -129,22 +154,28 @@ const WearablesDetail = () => {
               </div>
               <div className="flex items-center gap-1">
                 {getTrendIcon(heartRateTrend)}
-                <span className="text-xs text-muted-foreground">7d trend</span>
+                <span className="text-xs text-muted-foreground">30d trend</span>
               </div>
             </div>
             <div className="space-y-3">
-              {heartRates.slice(0, 7).map((rate, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground w-8">{days[index]}</span>
-                  <div className="flex-1 neo-inset h-6 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full gradient-primary rounded-full transition-all duration-500"
-                      style={{ width: `${(rate / 100) * 100}%` }}
-                    />
+              {heartRates.slice(-pointsToShow).map((rate, index) => {
+                const tsIndex = timestamps.length - pointsToShow + index;
+                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
+                return (
+                  <div key={index} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-16">
+                      {formatTimestampLabel(ts ?? '', `Day ${index + 1}`)}
+                    </span>
+                    <div className="flex-1 neo-inset h-6 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full gradient-primary rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, (rate / heartRateScaleMax) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-foreground w-12">{rate} bpm</span>
                   </div>
-                  <span className="text-sm font-medium text-foreground w-12">{rate} bpm</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -156,22 +187,28 @@ const WearablesDetail = () => {
               </div>
               <div className="flex items-center gap-1">
                 {getTrendIcon(stepsTrend)}
-                <span className="text-xs text-muted-foreground">7d trend</span>
+                <span className="text-xs text-muted-foreground">30d trend</span>
               </div>
             </div>
             <div className="space-y-3">
-              {stepCounts.slice(0, 7).map((steps, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground w-8">{days[index]}</span>
-                  <div className="flex-1 neo-inset h-6 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full gradient-primary rounded-full transition-all duration-500"
-                      style={{ width: `${(steps / 10000) * 100}%` }}
-                    />
+              {stepCounts.slice(-pointsToShow).map((steps, index) => {
+                const tsIndex = timestamps.length - pointsToShow + index;
+                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
+                return (
+                  <div key={index} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-16">
+                      {formatTimestampLabel(ts ?? '', `Day ${index + 1}`)}
+                    </span>
+                    <div className="flex-1 neo-inset h-6 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full gradient-primary rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, (steps / stepScaleMax) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-foreground w-16">{steps.toLocaleString()}</span>
                   </div>
-                  <span className="text-sm font-medium text-foreground w-16">{steps.toLocaleString()}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

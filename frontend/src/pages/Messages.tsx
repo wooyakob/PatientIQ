@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getPrivateMessages, getPublicMessages, sendPrivateMessage, sendPublicMessage, ApiStaffMessage } from '@/lib/api';
 
 interface StaffMember {
   id: string;
@@ -18,103 +20,141 @@ interface Message {
   id: string;
   senderId: string;
   senderName: string;
+  recipientName?: string;
+  subject: string;
   content: string;
   timestamp: string;
   isPinned: boolean;
   isPrivate: boolean;
   recipientId?: string;
+  read?: boolean;
+  priority?: string;
 }
 
 const mockStaff: StaffMember[] = [
-  { id: '1', name: 'Dr. Amanda Foster', role: 'Cardiologist', avatar: 'AF', status: 'online' },
-  { id: '2', name: 'Nurse Rebecca Adams', role: 'Head Nurse', avatar: 'RA', status: 'online' },
-  { id: '3', name: 'Dr. Michael Patel', role: 'Oncologist', avatar: 'MP', status: 'away' },
-  { id: '4', name: 'Nurse David Kim', role: 'ICU Nurse', avatar: 'DK', status: 'online' },
-  { id: '5', name: 'Dr. Sarah Johnson', role: 'Neurologist', avatar: 'SJ', status: 'offline' },
-  { id: '6', name: 'Nurse Emily Chen', role: 'ER Nurse', avatar: 'EC', status: 'online' },
-  { id: '7', name: 'Dr. Robert Williams', role: 'General Practitioner', avatar: 'RW', status: 'away' },
+  { id: 'admin_1', name: 'Medical Records', role: 'Administration', avatar: 'MR', status: 'online' },
+  { id: 'admin_2', name: 'Appointment Desk', role: 'Scheduling', avatar: 'AD', status: 'online' },
+  { id: 'pharmacy_1', name: 'Scripps Pharmacy', role: 'Pharmacy', avatar: 'SP', status: 'away' },
+  { id: 'nurse_1', name: 'Sarah Johnson, RN', role: 'Nursing', avatar: 'SJ', status: 'online' },
+  { id: 'radiologist_1', name: 'Dr. Michael Chen, Radiology', role: 'Radiology', avatar: 'RC', status: 'online' },
+  { id: 'insurance_1', name: 'Insurance Verification', role: 'Insurance', avatar: 'IV', status: 'away' },
+  { id: 'lab_1', name: 'Clinical Lab', role: 'Laboratory', avatar: 'CL', status: 'online' },
+  { id: 'hr_dept', name: 'Human Resources', role: 'HR', avatar: 'HR', status: 'offline' },
+  { id: 'quality_dept', name: 'Quality Assurance', role: 'Quality', avatar: 'QA', status: 'online' },
 ];
 
-const mockMessages: Message[] = [
-  {
-    id: '1',
-    senderId: '1',
-    senderName: 'Dr. Amanda Foster',
-    content: 'Reminder: Monthly staff meeting tomorrow at 9 AM in Conference Room B. Attendance is mandatory.',
-    timestamp: '2024-01-15T08:00:00',
-    isPinned: true,
-    isPrivate: false,
-  },
-  {
-    id: '2',
-    senderId: '2',
-    senderName: 'Nurse Rebecca Adams',
-    content: 'New COVID-19 protocols in effect starting Monday. Please review the updated guidelines in the shared drive.',
-    timestamp: '2024-01-14T14:30:00',
-    isPinned: true,
-    isPrivate: false,
-  },
-  {
-    id: '3',
-    senderId: '3',
-    senderName: 'Dr. Michael Patel',
-    content: 'Can someone cover my rounds this afternoon? I have an emergency consultation.',
-    timestamp: '2024-01-15T10:15:00',
-    isPinned: false,
-    isPrivate: false,
-  },
-  {
-    id: '4',
-    senderId: '4',
-    senderName: 'Nurse David Kim',
-    content: 'Patient in Room 204 needs attention. Vitals are stable but showing slight irregularities.',
-    timestamp: '2024-01-15T11:00:00',
-    isPinned: false,
-    isPrivate: true,
-    recipientId: 'current-user',
-  },
-];
-
-const currentUserId = 'current-user';
+const currentDoctorId = '1';
+const currentDoctorName = 'Tiffany Mitchell';
 
 export default function Messages() {
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const queryClient = useQueryClient();
+
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [newSubject, setNewSubject] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'private'>('all');
+
+  const [pinnedIds, setPinnedIds] = useState<Record<string, boolean>>({});
+
+  const { data: privateMessages } = useQuery({
+    queryKey: ['messages', 'private', currentDoctorId],
+    queryFn: () => getPrivateMessages(currentDoctorId, 100),
+  });
+
+  const { data: publicMessages } = useQuery({
+    queryKey: ['messages', 'public'],
+    queryFn: () => getPublicMessages(100),
+  });
+
+  const sendPrivateMutation = useMutation({
+    mutationFn: sendPrivateMessage,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['messages', 'private', currentDoctorId] });
+      setNewSubject('');
+      setNewMessage('');
+      setSelectedStaff(null);
+    },
+  });
+
+  const sendPublicMutation = useMutation({
+    mutationFn: sendPublicMessage,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['messages', 'public'] });
+      setNewSubject('');
+      setNewMessage('');
+      setSelectedStaff(null);
+    },
+  });
 
   const filteredStaff = mockStaff.filter(staff =>
     staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     staff.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const pinnedMessages = messages.filter(m => m.isPinned);
-  const regularMessages = messages.filter(m => !m.isPinned && (activeTab === 'all' ? !m.isPrivate : m.isPrivate));
+  const toUiMessage = (m: ApiStaffMessage): Message => {
+    const isPrivate = m.message_type === 'private';
+    return {
+      id: m.id,
+      senderId: m.from_id,
+      senderName: m.from_name,
+      recipientName: isPrivate ? m.to_name : undefined,
+      subject: m.subject,
+      content: m.content,
+      timestamp: m.timestamp,
+      isPinned: Boolean(pinnedIds[m.id]),
+      isPrivate,
+      recipientId: isPrivate ? m.to_id : undefined,
+      read: m.read,
+      priority: m.priority,
+    };
+  };
+
+  const getPrivateDirectionLabel = (message: Message): string => {
+    if (!message.isPrivate) return '';
+
+    const isSent = message.senderId === currentDoctorId;
+    const counterparty = isSent
+      ? (message.recipientName ?? 'recipient')
+      : (message.senderName ?? 'sender');
+
+    return isSent ? `Sent (to ${counterparty})` : `Received (from ${counterparty})`;
+  };
+
+  const publicUiMessages: Message[] = (publicMessages ?? [])
+    .map(toUiMessage)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  const privateUiMessages: Message[] = (privateMessages ?? [])
+    .map(toUiMessage)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  const pinnedMessages = publicUiMessages.filter((m) => m.isPinned);
+  const regularMessages = (activeTab === 'private' ? privateUiMessages : publicUiMessages).filter(
+    (m) => !m.isPinned
+  );
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+    if (!newSubject.trim() || !newMessage.trim()) return;
 
-    const message: Message = {
-      id: Date.now().toString(),
-      senderId: currentUserId,
-      senderName: 'You',
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      isPinned: false,
-      isPrivate: !!selectedStaff,
-      recipientId: selectedStaff?.id,
-    };
+    if (selectedStaff) {
+      sendPrivateMutation.mutate({
+        to_id: selectedStaff.id,
+        to_name: selectedStaff.name,
+        subject: newSubject.trim(),
+        content: newMessage.trim(),
+      });
+      return;
+    }
 
-    setMessages([message, ...messages]);
-    setNewMessage('');
-    setSelectedStaff(null);
+    sendPublicMutation.mutate({
+      subject: newSubject.trim(),
+      content: newMessage.trim(),
+    });
   };
 
   const togglePin = (messageId: string) => {
-    setMessages(messages.map(m =>
-      m.id === messageId ? { ...m, isPinned: !m.isPinned } : m
-    ));
+    setPinnedIds((prev) => ({ ...prev, [messageId]: !prev[messageId] }));
   };
 
   const formatTime = (timestamp: string) => {
@@ -211,16 +251,24 @@ export default function Messages() {
                 )}
               </div>
               <div className="flex gap-3">
-                <Textarea
-                  placeholder={selectedStaff ? `Message ${selectedStaff.name}...` : "Message all staff..."}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className="bg-muted/50 border-border/50 resize-none"
-                  rows={2}
-                />
+                <div className="flex-1 space-y-2">
+                  <Input
+                    placeholder={selectedStaff ? `Subject (to ${selectedStaff.name})` : 'Subject (announcement)'}
+                    value={newSubject}
+                    onChange={(e) => setNewSubject(e.target.value)}
+                    className="bg-muted/50 border-border/50"
+                  />
+                  <Textarea
+                    placeholder={selectedStaff ? `Message ${selectedStaff.name}...` : "Message all staff..."}
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="bg-muted/50 border-border/50 resize-none"
+                    rows={2}
+                  />
+                </div>
                 <Button
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
+                  disabled={!newSubject.trim() || !newMessage.trim() || sendPrivateMutation.isPending || sendPublicMutation.isPending}
                   className="gradient-primary shrink-0"
                 >
                   <Send className="h-4 w-4" />
@@ -249,6 +297,7 @@ export default function Messages() {
                               {formatDate(message.timestamp)} at {formatTime(message.timestamp)}
                             </span>
                           </div>
+                          <p className="text-sm font-medium text-foreground">{message.subject}</p>
                           <p className="text-sm text-foreground/80">{message.content}</p>
                         </div>
                         <button
@@ -294,7 +343,7 @@ export default function Messages() {
               <div className="space-y-3">
                 {regularMessages.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">
-                    No {activeTab === 'private' ? 'private' : ''} messages yet
+                    {activeTab === 'private' ? 'No private messages yet' : 'No public messages yet'}
                   </p>
                 ) : (
                   regularMessages.map((message) => (
@@ -307,14 +356,27 @@ export default function Messages() {
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-sm font-medium text-foreground">{message.senderName}</span>
                             {message.isPrivate && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                                Private
+                              <span
+                                className={cn(
+                                  "text-xs px-2 py-0.5 rounded-full",
+                                  message.senderId === currentDoctorId
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-emerald-500/10 text-emerald-600"
+                                )}
+                              >
+                                {getPrivateDirectionLabel(message)}
+                              </span>
+                            )}
+                            {!message.isPrivate && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-foreground">
+                                Public
                               </span>
                             )}
                             <span className="text-xs text-muted-foreground">
                               {formatDate(message.timestamp)} at {formatTime(message.timestamp)}
                             </span>
                           </div>
+                          <p className="text-sm font-medium text-foreground">{message.subject}</p>
                           <p className="text-sm text-foreground/80">{message.content}</p>
                         </div>
                         <button

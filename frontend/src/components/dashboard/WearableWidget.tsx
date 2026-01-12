@@ -7,15 +7,17 @@ interface WearableWidgetProps {
 }
 
 export function WearableWidget({ patient }: WearableWidgetProps) {
+  const heartRates = patient.wearableData.heartRate ?? [];
+  const stepCounts = patient.wearableData.stepCount ?? [];
+
   const avgHeartRate = Math.round(
-    patient.wearableData.heartRate.reduce((a, b) => a + b, 0) / 7
+    heartRates.reduce((a, b) => a + b, 0) / (heartRates.length || 1)
   );
   const avgSteps = Math.round(
-    patient.wearableData.stepCount.reduce((a, b) => a + b, 0) / 7
+    stepCounts.reduce((a, b) => a + b, 0) / (stepCounts.length || 1)
   );
-
-  const heartRateMin = Math.min(...patient.wearableData.heartRate);
-  const heartRateMax = Math.max(...patient.wearableData.heartRate);
+  const heartRateMin = heartRates.length ? Math.min(...heartRates) : 0;
+  const heartRateMax = heartRates.length ? Math.max(...heartRates) : 0;
 
   return (
     <Link
@@ -32,7 +34,7 @@ export function WearableWidget({ patient }: WearableWidgetProps) {
         <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       
-      <p className="text-xs text-muted-foreground mb-4">7-Day Averages</p>
+      <p className="text-xs text-muted-foreground mb-4">30-Day Averages</p>
       
       <div className="grid grid-cols-2 gap-4">
         <div className="neo-inset rounded-xl p-4">

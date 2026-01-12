@@ -17,7 +17,8 @@ const sentimentColors = {
 
 export function PatientCard({ patient, onClick, index }: PatientCardProps) {
   const avgHeartRate = Math.round(
-    patient.wearableData.heartRate.reduce((a, b) => a + b, 0) / 7
+    patient.wearableData.heartRate.reduce((a, b) => a + b, 0) /
+      (patient.wearableData.heartRate.length || 1)
   );
 
   return (
