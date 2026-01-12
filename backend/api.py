@@ -373,7 +373,8 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
                     date_completed = data[0].get("date_completed")
                 elif isinstance(data, dict):
                     date_completed = data.get("date_completed")
-            except Exception:
+            except (json.JSONDecodeError, IOError) as e:
+                # Log the specific error e
                 date_completed = None
 
             completed = bool(date_completed)
