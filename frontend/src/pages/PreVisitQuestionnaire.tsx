@@ -145,7 +145,7 @@ export default function PreVisitQuestionnaire() {
                     {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
                   </div>
 
-                  <ValueRenderer value={section} />
+                  <ValueRenderer value={Object.fromEntries(Object.entries(section).filter(([key]) => key !== 'description'))} />
                 </div>
               );
             })
