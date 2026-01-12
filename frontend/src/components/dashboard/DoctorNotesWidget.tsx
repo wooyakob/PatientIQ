@@ -1,4 +1,4 @@
-import { Patient } from '@/lib/api';
+import { formatDateOnlyForDisplay, Patient } from '@/lib/api';
 import { FileText, ExternalLink, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -8,15 +8,7 @@ interface DoctorNotesWidgetProps {
 
 export function DoctorNotesWidget({ patient }: DoctorNotesWidgetProps) {
   const latestNote = patient.doctorNotes[0];
-  const latestDate = latestNote ? new Date(latestNote.date) : null;
-  const latestDateLabel =
-    latestDate && !Number.isNaN(latestDate.getTime())
-      ? latestDate.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        })
-      : '';
+  const latestDateLabel = latestNote ? formatDateOnlyForDisplay(latestNote.date) : '';
 
   return (
     <Link

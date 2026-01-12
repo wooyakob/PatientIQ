@@ -48,6 +48,37 @@ export interface Patient {
   doctorNotes: DoctorNote[];
 }
 
+export function toLocalDateOnlyString(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function parseDateOnlyToLocalDate(dateString: string): Date | null {
+  const s = (dateString ?? "").trim();
+  if (!s) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = new Date(`${s}T00:00:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export function formatDateOnlyForDisplay(dateString: string): string {
+  const d = parseDateOnlyToLocalDate(dateString);
+  return d
+    ? d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
+}
+
 const toPatient = (api: ApiPatient, doctorNotes: DoctorNote[] = []): Patient => {
   return {
     id: api.id,
@@ -115,4 +146,20 @@ export async function getDoctorNotes(patientId: string): Promise<DoctorNote[]> {
 export async function getPatientWithNotes(patientId: string): Promise<Patient> {
   const [patient, notes] = await Promise.all([getPatient(patientId), getDoctorNotes(patientId)]);
   return { ...patient, doctorNotes: notes };
+}
+
+export interface SaveDoctorNoteRequest {
+  visit_date: string;
+  doctor_name: string;
+  doctor_id: string;
+  visit_notes: string;
+  patient_name: string;
+  patient_id: string;
+}
+
+export async function saveDoctorNote(note: SaveDoctorNoteRequest): Promise<{ message: string; note_id: string }> {
+  return apiFetch<{ message: string; note_id: string }>("/api/doctor-notes", {
+    method: "POST",
+    body: JSON.stringify(note),
+  });
 }

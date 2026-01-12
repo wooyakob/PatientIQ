@@ -3,6 +3,8 @@ import re
 import threading
 from datetime import date, datetime, timedelta
 from typing import List, Optional
+
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from couchbase.auth import PasswordAuthenticator
 from couchbase.cluster import Cluster
 from couchbase.options import ClusterOptions, QueryOptions
@@ -40,6 +42,20 @@ class CouchbaseDB:
         self.bucket_name = os.getenv("COUCHBASE_BUCKET", "Scripps")
         self.research_bucket_name = os.getenv("COUCHBASE_RESEARCH_BUCKET", "Research")
 
+        # Connection tuning
+        self.wait_until_ready_seconds = int(os.getenv("CLUSTER_WAIT_UNTIL_READY_SECONDS", "30"))
+        self.cluster_tls_verify = (os.getenv("CLUSTER_TLS_VERIFY") or "").strip().lower()
+        self.cluster_ssl_no_verify = (os.getenv("CLUSTER_SSL_NO_VERIFY") or "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        self.cluster_disable_tls = (os.getenv("CLUSTER_DISABLE_TLS") or "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+
         # Connection state
         self.cluster = None
         self.bucket = None
@@ -63,13 +79,14 @@ class CouchbaseDB:
             return
 
         try:
-            print(f"Connecting to Couchbase at {self.endpoint}...")
+            connstr = self._build_connection_string(self.endpoint)
+            print(f"Connecting to Couchbase at {connstr}...")
             auth = PasswordAuthenticator(self.username, self.password)
             options = ClusterOptions(auth)
             options.apply_profile("wan_development")
 
-            self.cluster = Cluster(self.endpoint, options)
-            self.cluster.wait_until_ready(timedelta(seconds=10))
+            self.cluster = Cluster(connstr, options)
+            self.cluster.wait_until_ready(timedelta(seconds=self.wait_until_ready_seconds))
 
             self.bucket = self.cluster.bucket(self.bucket_name)
 
@@ -107,10 +124,41 @@ class CouchbaseDB:
             self._connection_error = e
             print(f"Warning: Could not connect to Couchbase: {e}")
             print("   Please verify the cluster is running and accessible.")
+            if "UnAmbiguousTimeoutException" in str(e) or "unambiguous_timeout" in str(e):
+                print(
+                    "   Timeout hints: For Capella, TLS is required. If you don't have the CA cert "
+                    "configured for local dev, try setting CLUSTER_TLS_VERIFY=none (or add ?tls_verify=none "
+                    "to CLUSTER_CONNECTION_STRING)."
+                )
             print(
                 "   Expected structure: Scripps bucket with People/Notes/Wearables/Calendar/Messages scopes "
                 "and Research bucket with Pubmed/Pulmonary collection"
             )
+
+    def _build_connection_string(self, connstr: Optional[str]) -> str:
+        if not connstr:
+            return ""
+
+        # Allow explicitly disabling TLS for local clusters.
+        if self.cluster_disable_tls and connstr.startswith("couchbases://"):
+            connstr = "couchbase://" + connstr.removeprefix("couchbases://")
+
+        # If you're using Capella (couchbases://) and don't want to manage certificates locally,
+        # allow opting into no-verify mode.
+        wants_no_verify = self.cluster_ssl_no_verify or self.cluster_tls_verify == "none"
+        if wants_no_verify and connstr.startswith("couchbases://"):
+            # Normalize by ensuring we have a query string and setting tls_verify=none.
+            parts = urlsplit(connstr)
+            query = dict(parse_qsl(parts.query, keep_blank_values=True))
+            if "tls_verify" not in query and "ssl" not in query:
+                query["tls_verify"] = "none"
+            new_query = urlencode(query)
+
+            # Some examples use a trailing '/?'; ensure urlunsplit doesn't drop the path if missing.
+            path = parts.path or "/"
+            connstr = urlunsplit((parts.scheme, parts.netloc, path, new_query, parts.fragment))
+
+        return connstr
 
     def _check_connection(self):
         """Check if database is connected"""

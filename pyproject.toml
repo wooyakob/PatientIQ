@@ -20,6 +20,11 @@ dev = [
   "ruff",
 ]
 
+notebooks = [
+  "ipykernel>=6.0.0",
+  "jupyterlab>=4.0.0",
+]
+
 [tool.uv]
 managed = true
 
