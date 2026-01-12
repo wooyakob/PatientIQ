@@ -1,8 +1,0 @@
-{
-    "query": {
-        "query": "your_query_here"
-    },
-    "fields": [
-        "*"
-    ]
-}

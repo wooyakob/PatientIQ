@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from fastapi import FastAPI, HTTPException
@@ -81,6 +82,34 @@ async def get_patient_doctor_notes(patient_id: str):
         return {"patient_id": patient_id, "notes": notes, "count": len(notes)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching doctor notes: {str(e)}")
+
+
+@app.post("/api/doctor-notes")
+async def save_doctor_note(note: dict):
+    """Save a doctor note"""
+    try:
+        # Validate required fields
+        required_fields = ["visit_date", "doctor_name", "doctor_id", "visit_notes", "patient_name", "patient_id"]
+        missing_fields = [field for field in required_fields if field not in note or not note[field]]
+
+        if missing_fields:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing required fields: {', '.join(missing_fields)}"
+            )
+
+        # Generate note ID using patient_id and timestamp
+        note_id = f"note_{note['patient_id']}_{note['visit_date']}_{int(datetime.now().timestamp())}"
+
+        success = db.save_doctor_note(note_id, note)
+        if success:
+            return {"message": "Doctor note saved successfully", "note_id": note_id}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save doctor note")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving doctor note: {str(e)}")
 
 
 # Patient Notes Endpoints

@@ -1,15 +1,18 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { ArrowLeft, FileText, Calendar, Clock, Plus } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, Clock, Plus, Edit2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getPatientWithNotes } from '@/lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatDateOnlyForDisplay, getPatientWithNotes, saveDoctorNote, toLocalDateOnlyString } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 const NotesDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const patientId = id ?? '';
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const {
     data: patient,
@@ -21,8 +24,31 @@ const NotesDetail = () => {
     queryFn: () => getPatientWithNotes(patientId),
     enabled: Boolean(patientId),
   });
+
   const [showNewNote, setShowNewNote] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editNoteContent, setEditNoteContent] = useState('');
+
+  const saveMutation = useMutation({
+    mutationFn: saveDoctorNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient', patientId, 'notes'] });
+      toast({
+        title: 'Success',
+        description: 'Doctor note saved successfully',
+      });
+      setNewNoteContent('');
+      setShowNewNote(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save doctor note',
+        variant: 'destructive',
+      });
+    },
+  });
 
   if (isLoading) {
     return (
@@ -58,11 +84,72 @@ const NotesDetail = () => {
   }
 
   const handleAddNote = () => {
-    if (newNoteContent.trim()) {
-      // In a real app, this would save to a database
-      setNewNoteContent('');
-      setShowNewNote(false);
+    if (!newNoteContent.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter note content',
+        variant: 'destructive',
+      });
+      return;
     }
+
+    const noteData = {
+      visit_date: toLocalDateOnlyString(new Date()),
+      doctor_name: 'Tiffany Mitchell',
+      doctor_id: '1',
+      visit_notes: newNoteContent.trim(),
+      patient_name: patient.name,
+      patient_id: patientId,
+    };
+
+    saveMutation.mutate(noteData);
+  };
+
+  const handleEditNote = (note: any) => {
+    setEditingNoteId(note.id);
+    setEditNoteContent(note.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editNoteContent.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter note content',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const noteToEdit = patient?.doctorNotes.find(n => n.id === editingNoteId);
+    if (!noteToEdit) {
+      toast({
+        title: 'Error',
+        description: 'Note not found',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const noteData = {
+      visit_date: noteToEdit.date,
+      doctor_name: 'Tiffany Mitchell',
+      doctor_id: '1',
+      visit_notes: editNoteContent.trim(),
+      patient_name: patient?.name || '',
+      patient_id: patientId,
+    };
+
+    saveMutation.mutate(noteData, {
+      onSuccess: () => {
+        setEditingNoteId(null);
+        setEditNoteContent('');
+      }
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingNoteId(null);
+    setEditNoteContent('');
   };
 
   return (
@@ -115,38 +202,74 @@ const NotesDetail = () => {
               />
               <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
                 <Button variant="ghost" onClick={() => setShowNewNote(false)}>Cancel</Button>
-                <Button onClick={handleAddNote}>Save Note</Button>
+                <Button onClick={handleAddNote} disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? 'Saving...' : 'Save Note'}
+                </Button>
               </div>
             </div>
           )}
 
           <div className="space-y-4">
             {patient.doctorNotes.map((note, index) => (
-              <div 
+              <div
                 key={note.id}
                 className="neo-card p-5 rounded-xl animate-slide-up"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
-                    {(() => {
-                      const d = new Date(note.date);
-                      return !Number.isNaN(d.getTime())
-                        ? d.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })
-                        : '';
-                    })()}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    {note.time}
-                  </span>
-                </div>
-                <p className="text-foreground leading-relaxed">{note.content}</p>
+                {editingNoteId === note.id ? (
+                  <>
+                    <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {formatDateOnlyForDisplay(note.date)}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        {note.time}
+                      </span>
+                    </div>
+                    <textarea
+                      value={editNoteContent}
+                      onChange={(e) => setEditNoteContent(e.target.value)}
+                      placeholder="Enter your clinical notes here..."
+                      className="w-full h-32 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none resize-none text-sm leading-relaxed mb-3"
+                    />
+                    <div className="flex justify-end gap-3 pt-3 border-t border-border">
+                      <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
+                        <X className="h-4 w-4 mr-1" />
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSaveEdit} disabled={saveMutation.isPending}>
+                        {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {formatDateOnlyForDisplay(note.date)}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {note.time}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditNote(note)}
+                        className="h-8"
+                      >
+                        <Edit2 className="h-3.5 w-3.5 mr-1.5" />
+                        Edit
+                      </Button>
+                    </div>
+                    <p className="text-foreground leading-relaxed">{note.content}</p>
+                  </>
+                )}
               </div>
             ))}
           </div>
