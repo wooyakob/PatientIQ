@@ -1,13 +1,19 @@
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.database import db
 from backend.models import Patient, WearableData
+
+# Add agents path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "agents" / "medical-agents"))
+# Use catalog-integrated version with tracing
+from research_agent_catalog import run_medical_research
 
 
 app = FastAPI(
@@ -395,3 +401,163 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
         raise HTTPException(status_code=500, detail=f"Error fetching questionnaire status: {str(e)}")
 
 
+
+
+# Medical Research Agent Endpoints
+@app.get("/api/patients/{patient_id}/research")
+async def get_patient_research(patient_id: str, question: Optional[str] = None):
+    """
+    Get medical research relevant to a patient's condition.
+    
+    Args:
+        patient_id: The patient's ID
+        question: Optional specific question (if not provided, uses default question about treatment options)
+    
+    Returns:
+        Dictionary with patient info, condition, papers, and clinical summary
+    """
+    try:
+        # Default question if none provided
+        if not question:
+            question = "What are evidence-based treatment options and practical next steps for this patient's condition?"
+        
+        # Run the medical research agent
+        result = run_medical_research(patient_id, question)
+        
+        if "error" in result:
+            raise HTTPException(status_code=404, detail=result["error"])
+        
+        return result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching research: {str(e)}")
+
+
+@app.post("/api/patients/{patient_id}/research/ask")
+async def ask_research_question(patient_id: str, payload: dict = Body(...)):
+    """
+    Ask a specific question about a patient's condition and get research-based answers.
+    Also saves the question to Research.Pubmed.questions collection.
+
+    Args:
+        patient_id: The patient's ID
+        payload: JSON with 'question' field
+
+    Returns:
+        Dictionary with patient info, condition, papers, answer, and question_id
+    """
+    try:
+        question = payload.get("question", "").strip()
+
+        if not question:
+            raise HTTPException(status_code=400, detail="Question is required")
+
+        # Save question to database
+        question_id = f"q_{int(datetime.now().timestamp() * 1000)}"
+        question_doc = {
+            "question_id": question_id,
+            "question_asked": question,
+            "doctor_name": "Tiffany Mitchell",
+            "timestamp": datetime.now().isoformat()
+        }
+
+        try:
+            db.save_research_question(question_id, question_doc)
+        except Exception as e:
+            # Log but don't fail if question save fails
+            print(f"Warning: Failed to save question: {e}")
+
+        # Run the medical research agent with the specific question
+        result = run_medical_research(patient_id, question)
+
+        if "error" in result:
+            raise HTTPException(status_code=404, detail=result["error"])
+
+        # Add question_id to result
+        result["question_id"] = question_id
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
+
+
+@app.post("/api/research/answers")
+async def save_research_answer(payload: dict = Body(...)):
+    """
+    Save a research answer with optional rating.
+
+    Args:
+        payload: JSON with question_asked, answer_provided, answer_rating (optional)
+
+    Returns:
+        Success message with answer_id
+    """
+    try:
+        question_asked = payload.get("question_asked", "").strip()
+        answer_provided = payload.get("answer_provided", "").strip()
+        answer_rating = payload.get("answer_rating")  # Optional, 1-5
+
+        if not question_asked or not answer_provided:
+            raise HTTPException(status_code=400, detail="question_asked and answer_provided are required")
+
+        if answer_rating is not None:
+            if not isinstance(answer_rating, int) or answer_rating < 1 or answer_rating > 5:
+                raise HTTPException(status_code=400, detail="answer_rating must be an integer between 1 and 5")
+
+        # Save answer to database
+        answer_id = f"a_{int(datetime.now().timestamp() * 1000)}"
+        answer_doc = {
+            "answer_id": answer_id,
+            "question_asked": question_asked,
+            "answer_provided": answer_provided,
+            "answer_rating": answer_rating,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        success = db.save_research_answer(answer_id, answer_doc)
+
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save answer")
+
+        return {"message": "Answer saved successfully", "answer_id": answer_id}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving answer: {str(e)}")
+
+
+@app.patch("/api/research/answers/{answer_id}/rating")
+async def update_answer_rating(answer_id: str, payload: dict = Body(...)):
+    """
+    Update the rating for a research answer.
+
+    Args:
+        answer_id: The answer's ID
+        payload: JSON with 'rating' field (1-5)
+
+    Returns:
+        Success message
+    """
+    try:
+        rating = payload.get("rating")
+
+        if not isinstance(rating, int) or rating < 1 or rating > 5:
+            raise HTTPException(status_code=400, detail="Rating must be an integer between 1 and 5")
+
+        success = db.update_answer_rating(answer_id, rating)
+
+        if not success:
+            raise HTTPException(status_code=404, detail="Answer not found or update failed")
+
+        return {"message": "Rating updated successfully", "answer_id": answer_id, "rating": rating}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating rating: {str(e)}")

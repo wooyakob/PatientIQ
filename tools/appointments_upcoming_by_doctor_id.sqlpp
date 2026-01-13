@@ -1,0 +1,39 @@
+/*
+name: appointments_upcoming_by_doctor_id
+
+description: >
+    Fetch upcoming appointments for a doctor, ordered chronologically (soonest first).
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "doctor_id": { "type": "string" },
+        "start_date": { "type": "string", "description": "YYYY-MM-DD" },
+        "limit": { "type": "integer", "default": 50 }
+      },
+      "required": ["doctor_id"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT a.id,
+       a.patient_id,
+       a.patient_name,
+       a.doctor_id,
+       a.doctor_name,
+       a.appointment_date,
+       a.appointment_time,
+       a.appointment_type,
+       a.status,
+       a.duration_minutes,
+       a.notes
+FROM `Scripps`.`Calendar`.`Appointments` a
+WHERE (a.doctor_id = $doctor_id OR a.doctor_id = TO_STRING($doctor_id))
+  AND ($start_date IS MISSING OR a.appointment_date >= $start_date)
+ORDER BY a.appointment_date ASC, a.appointment_time ASC
+LIMIT $limit;

@@ -1,0 +1,39 @@
+/*
+name: messages_private_inbox_by_doctor_id
+
+description: >
+    Fetch private messages received by a doctor (inbox), newest first.
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "doctor_id": { "type": "string" },
+        "unread_only": { "type": "boolean", "default": false },
+        "limit": { "type": "integer", "default": 50 }
+      },
+      "required": ["doctor_id"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT m.id,
+       m.message_type,
+       m.from_id,
+       m.from_name,
+       m.to_id,
+       m.to_name,
+       m.subject,
+       m.content,
+       m.timestamp,
+       m.read,
+       m.priority
+FROM `Scripps`.`Messages`.`Private` m
+WHERE (m.to_id = $doctor_id OR m.to_id = TO_STRING($doctor_id))
+  AND ($unread_only IS MISSING OR $unread_only = FALSE OR m.read = FALSE)
+ORDER BY m.timestamp DESC
+LIMIT $limit;

@@ -1,0 +1,40 @@
+/*
+name: appointments_by_patient_id_date_range
+
+description: >
+    Fetch a patient's appointments within a date range (inclusive), ordered chronologically.
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "patient_id": { "type": "string" },
+        "start_date": { "type": "string", "description": "YYYY-MM-DD" },
+        "end_date": { "type": "string", "description": "YYYY-MM-DD" },
+        "limit": { "type": "integer", "default": 100 }
+      },
+      "required": ["patient_id", "start_date", "end_date"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT a.id,
+       a.patient_id,
+       a.patient_name,
+       a.doctor_id,
+       a.doctor_name,
+       a.appointment_date,
+       a.appointment_time,
+       a.appointment_type,
+       a.status,
+       a.duration_minutes,
+       a.notes
+FROM `Scripps`.`Calendar`.`Appointments` a
+WHERE (a.patient_id = $patient_id OR a.patient_id = TO_STRING($patient_id))
+  AND a.appointment_date BETWEEN $start_date AND $end_date
+ORDER BY a.appointment_date ASC, a.appointment_time ASC
+LIMIT $limit;

@@ -1,0 +1,32 @@
+/*
+name: docnotes_recent_by_doctor_id
+
+description: >
+    Fetch the most recent doctor notes written by a specific doctor.
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "doctor_id": { "type": "string" },
+        "limit": { "type": "integer", "default": 25 }
+      },
+      "required": ["doctor_id"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT n.visit_date,
+       n.doctor_id,
+       n.doctor_name,
+       n.patient_id,
+       n.patient_name,
+       n.visit_notes
+FROM `Scripps`.`Notes`.`Doctor` n
+WHERE (n.doctor_id = $doctor_id OR n.doctor_id = TO_STRING($doctor_id))
+ORDER BY n.visit_date DESC
+LIMIT $limit;

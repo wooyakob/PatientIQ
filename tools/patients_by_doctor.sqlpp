@@ -1,0 +1,35 @@
+/*
+name: patients_by_doctor
+
+description: >
+    Fetch patients for a specific doctor (by doctor_name and/or doctor_id if present).
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "doctor_name": { "type": "string" },
+        "doctor_id": { "type": "string" },
+        "limit": { "type": "integer", "default": 200 }
+      }
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT p.patient_id,
+       p.patient_name,
+       p.patient_email,
+       p.patient_cell,
+       p.medical_conditions,
+       p.doctor_name,
+       p.age,
+       p.gender
+FROM `Scripps`.`People`.`Patients` p
+WHERE ($doctor_name IS NOT MISSING AND p.doctor_name = $doctor_name)
+   OR ($doctor_id IS NOT MISSING AND (p.doctor_id = $doctor_id OR p.doctor_id = TO_STRING($doctor_id)))
+ORDER BY p.patient_name ASC
+LIMIT $limit;

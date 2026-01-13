@@ -1,0 +1,88 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tavily Search API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.tavily.com"
+    }
+  ],
+  "paths": {
+    "/search": {
+      "post": {
+        "operationId": "tavily_search",
+        "summary": "Tavily web search",
+        "description": "Search the web using Tavily's Search API.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search query"
+                  },
+                  "search_depth": {
+                    "type": "string",
+                    "description": "basic or advanced",
+                    "default": "basic"
+                  },
+                  "topic": {
+                    "type": "string",
+                    "description": "general, news, finance, etc."
+                  },
+                  "max_results": {
+                    "type": "integer",
+                    "default": 5
+                  },
+                  "include_answer": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "include_raw_content": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

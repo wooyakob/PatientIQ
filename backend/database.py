@@ -848,6 +848,45 @@ class CouchbaseDB:
             print(f"Error updating appointment status: {e}")
             return False
 
+    def save_research_question(self, question_id: str, question_data: dict) -> bool:
+        """Save a research question to Research.Pubmed.questions collection"""
+        self._check_connection()
+        try:
+            research_bucket = self.cluster.bucket(self.research_bucket_name)
+            questions_collection = research_bucket.scope("Pubmed").collection("questions")
+            questions_collection.upsert(question_id, question_data)
+            return True
+        except Exception as e:
+            print(f"Error saving research question: {e}")
+            return False
+
+    def save_research_answer(self, answer_id: str, answer_data: dict) -> bool:
+        """Save a research answer to Research.Pubmed.answers collection"""
+        self._check_connection()
+        try:
+            research_bucket = self.cluster.bucket(self.research_bucket_name)
+            answers_collection = research_bucket.scope("Pubmed").collection("answers")
+            answers_collection.upsert(answer_id, answer_data)
+            return True
+        except Exception as e:
+            print(f"Error saving research answer: {e}")
+            return False
+
+    def update_answer_rating(self, answer_id: str, rating: int) -> bool:
+        """Update the rating for a research answer"""
+        self._check_connection()
+        try:
+            research_bucket = self.cluster.bucket(self.research_bucket_name)
+            answers_collection = research_bucket.scope("Pubmed").collection("answers")
+            answer = answers_collection.get(answer_id)
+            answer_data = answer.content_as[dict]
+            answer_data["answer_rating"] = rating
+            answers_collection.upsert(answer_id, answer_data)
+            return True
+        except Exception as e:
+            print(f"Error updating answer rating: {e}")
+            return False
+
 
 # Global database instance
 _db_instance = None

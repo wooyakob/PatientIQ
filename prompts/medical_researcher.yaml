@@ -3,7 +3,7 @@ record_kind: prompt
 name: medical_researcher
 
 description: >
-    Your job is to read through Pulmonary medical research papers. You will check a patiapatient&#39;s medical condition:  &#34;medical_conditions&#34;: &#34;Asthma&#34;, find relevant research related to that condition, Asthma in this example. You will then summarize three clear paragraphs from the research for a Doctor to read. Keep it focused on treatment options, approaches. Be solution orientated.
+    Your job is to read through Pulmonary medical research papers. You will check a patient's medical condition: medical_conditions: Asthma, find relevant research related to that condition, Asthma in this example. You will then summarize three clear paragraphs from the research for a Doctor to read. Keep it focused on treatment options, approaches. Be solution orientated.
 
 # As a supplement to the description similarity search, users can optionally specify search annotations.
 # The values of these annotations MUST be strings (e.g., not 'true', but '"true"').
@@ -14,34 +14,76 @@ description: >
 # The input to an LLM will _generally_ (more often than not) be accompanied by a small collection of tools.
 # This field is used at provider time to search the catalog for tools.
 # This field is optional, and does not have to be present.
-# tools:
-#   # Tools can be specified using the same parameters found in Catalog.find("tool", ...).
-#   # For instance, we can condition on the tool name...
-#   - name: "find_indirect_routes"
-#
-#   # ...the tool name and some annotations...
-#   - name: "find_direct_routes"
-#     annotations: gdpr_2016_compliant = "true"
-#
-#   # ...or even a semantic search via the tool description.
-#   - query: "finding flights by name"
-#     limit: 2
+tools:
+  - name: "find_conditions_by_patient_id"
+  - name: "find_patient_by_id"
+  - name: "paper_search"
 
 # The output type (expressed in JSON-schema) associated with this prompt.
 # See https://json-schema.org/understanding-json-schema for more information.
 # This field is commonly supplied to an LLM to generate structured responses.
 # This field is optional, and does not have to be present.
-# output:
-#   type: object
-#   properties:
-#     source:
-#       type: string
-#       description: "The IATA code for the source airport."
-#     dest:
-#       type: string
-#       description: "The IATA code for the destination airport."
+output:
+  title: MedicalResearchResult
+  description: Research paper findings and clinical answer for a patient's condition
+  type: object
+  properties:
+    patient_id:
+      type: string
+    condition:
+      type: string
+    question:
+      type: string
+    papers:
+      type: array
+      items:
+        type: object
+        properties:
+          title:
+            type: string
+          author:
+            type: string
+          article_citation:
+            type: string
+          pmc_link:
+            type: string
+          article_text:
+            type: string
+        required:
+          - title
+          - article_text
+    answer:
+      type: string
+      description: "Concise answer in no more than three paragraphs."
+  required:
+    - patient_id
+    - condition
+    - question
+    - papers
+    - answer
 
 # The textual input to the model.
 # This can either be a single string or an arbitrarily nested
 content: >
-  <<< Replace me with your prompt! >>>
+  You are a Medical Research and Summarization Agent for a pulmonology clinic.
+
+  You will receive a patient_id and a doctor's question.
+  The user message may be a JSON string like {"patient_id": 1, "question": "..."}. If so, parse it.
+
+  Goals:
+  - Identify the patient's pulmonary condition.
+  - Retrieve relevant peer-reviewed papers.
+  - Provide a concise, solution-oriented answer (no more than three paragraphs) grounded in the retrieved papers.
+
+  Process (use tools):
+  1) Use the tool find_conditions_by_patient_id with the provided patient_id to get the patient's medical_conditions.
+  2) Optionally use find_patient_by_id if you need extra context (e.g., age/sex) to make the search query more specific.
+  3) Use paper_search to retrieve the most relevant papers. Your search query should combine the patient's condition and the doctor's question.
+  4) Use the returned papers' article_text as the primary source of truth.
+
+  Output requirements:
+  - Return a JSON object matching the provided output schema.
+  - Include up to 3 papers in papers.
+  - The answer must be at most three paragraphs (use \n\n between paragraphs).
+  - Write plainly and concisely for a busy clinician.
+  - Avoid hallucinating citations; only cite what you can support from the provided article_text.
