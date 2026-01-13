@@ -1,0 +1,35 @@
+/*
+name: docnotes_by_patient_id_date_range
+
+description: >
+    Fetch doctor notes for a patient within a date range (inclusive).
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "patient_id": { "type": "string" },
+        "start_date": { "type": "string", "description": "YYYY-MM-DD" },
+        "end_date": { "type": "string", "description": "YYYY-MM-DD" },
+        "limit": { "type": "integer", "default": 100 }
+      },
+      "required": ["patient_id", "start_date", "end_date"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT n.visit_date,
+       n.doctor_id,
+       n.doctor_name,
+       n.patient_id,
+       n.patient_name,
+       n.visit_notes
+FROM `Scripps`.`Notes`.`Doctor` n
+WHERE (n.patient_id = $patient_id OR n.patient_id = TO_STRING($patient_id))
+  AND n.visit_date BETWEEN $start_date AND $end_date
+ORDER BY n.visit_date DESC
+LIMIT $limit;

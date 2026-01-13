@@ -68,7 +68,7 @@ vector_search:
   # This embedding model field value is directly passed to sentence transformers.
   # In the future, we will add support for other types of embedding models.
   embedding_model:
-    name: nvidia/llama-3.2-nv-embedqa-1b-v2
+    name: EMBEDDING_MODEL_NAME
     base_url: EMBEDDING_MODEL_ENDPOINT
 
   # The number of candidates (i.e., the K value) to request for when performing a vector top-k search.

@@ -12,6 +12,7 @@ interface Appointment {
   date: string;
   time: string;
   type: string;
+  startMs: number;
   questionnaires: {
     name: string;
     exists: boolean;
@@ -74,6 +75,24 @@ function formatTimeHHMM(time: string) {
   return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
+function parseAppointmentStartMs(dateString: string, timeString: string): number {
+  const d = String(dateString ?? '').trim();
+  if (!d) return Number.NaN;
+
+  const t = String(timeString ?? '').trim();
+  const m = t.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) {
+    const fallback = new Date(`${d}T00:00:00`);
+    return fallback.getTime();
+  }
+
+  const hh = String(m[1]).padStart(2, '0');
+  const mm = String(m[2]).padStart(2, '0');
+  const ss = String(m[3] ?? '00').padStart(2, '0');
+  const dt = new Date(`${d}T${hh}:${mm}:${ss}`);
+  return dt.getTime();
+}
+
 function formatAppointmentType(t: string) {
   const s = (t ?? '').trim().toLowerCase();
   if (!s) return '';
@@ -108,27 +127,44 @@ export default function Calendar() {
   const appointments: Appointment[] = (apiAppointments ?? []).map((a) => {
     const patientId = String(a.patient_id);
     const status = questionnaireStatusByPatient?.[patientId];
+    const startMs = parseAppointmentStartMs(a.appointment_date, a.appointment_time);
     return {
-    id: a.id,
-    patientId,
-    patientName: a.patient_name,
-    patientAvatar: toInitials(a.patient_name),
-    date: a.appointment_date,
-    time: formatTimeHHMM(a.appointment_time),
-    type: formatAppointmentType(a.appointment_type),
-    questionnaires: [
-      {
-        name: 'Pre-Visit Questionnaire',
-        exists: Boolean(status?.exists),
-        completed: Boolean(status?.completed),
-        completedAt: status?.date_completed ?? undefined,
-      },
-    ],
-  };
+      id: a.id,
+      patientId,
+      patientName: a.patient_name,
+      patientAvatar: toInitials(a.patient_name),
+      date: a.appointment_date,
+      time: formatTimeHHMM(a.appointment_time),
+      type: formatAppointmentType(a.appointment_type),
+      startMs,
+      questionnaires: [
+        {
+          name: 'Pre-Visit Questionnaire',
+          exists: Boolean(status?.exists),
+          completed: Boolean(status?.completed),
+          completedAt: status?.date_completed ?? undefined,
+        },
+      ],
+    };
   });
 
-  const groupedAppointments = groupAppointmentsByDate(appointments);
-  const sortedDates = Object.keys(groupedAppointments).sort();
+  const nowMs = Date.now();
+  const sortedAppointments = [...appointments].sort((a, b) => {
+    const aIsPast = a.startMs < nowMs;
+    const bIsPast = b.startMs < nowMs;
+
+    if (aIsPast !== bIsPast) return aIsPast ? 1 : -1;
+
+    // Upcoming: ascending (soonest first). Past: descending (most recent first).
+    if (!aIsPast && !bIsPast) return a.startMs - b.startMs;
+    return b.startMs - a.startMs;
+  });
+
+  const groupedAppointments = groupAppointmentsByDate(sortedAppointments);
+  for (const date of Object.keys(groupedAppointments)) {
+    groupedAppointments[date].sort((a, b) => a.startMs - b.startMs);
+  }
+  const sortedDates = Array.from(new Set(sortedAppointments.map((a) => a.date)));
 
   return (
     <div className="min-h-screen bg-background">

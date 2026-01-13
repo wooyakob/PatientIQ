@@ -1,0 +1,34 @@
+/*
+name: patients_search_by_name
+
+description: >
+    Search patients by name (case-insensitive substring match).
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string" },
+        "limit": { "type": "integer", "default": 20 }
+      },
+      "required": ["query"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT p.patient_id,
+       p.patient_name,
+       p.patient_email,
+       p.patient_cell,
+       p.medical_conditions,
+       p.doctor_name,
+       p.age,
+       p.gender
+FROM `Scripps`.`People`.`Patients` p
+WHERE LOWER(p.patient_name) LIKE "%" || LOWER($query) || "%"
+ORDER BY p.patient_name ASC
+LIMIT $limit;

@@ -1,0 +1,35 @@
+/*
+name: messages_public_recent
+
+description: >
+    Fetch recent public announcements, newest first.
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "limit": { "type": "integer", "default": 50 },
+        "unread_only": { "type": "boolean", "default": false }
+      }
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT m.id,
+       m.message_type,
+       m.from_id,
+       m.from_name,
+       m.to_name,
+       m.subject,
+       m.content,
+       m.timestamp,
+       m.read,
+       m.priority
+FROM `Scripps`.`Messages`.`Public` m
+WHERE ($unread_only IS MISSING OR $unread_only = FALSE OR m.read = FALSE)
+ORDER BY m.timestamp DESC
+LIMIT $limit;

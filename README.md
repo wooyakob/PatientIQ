@@ -8,9 +8,39 @@ PatientIQ centralizes patient data and minimizes a doctor's cognitive load by ma
 ## Abstract:
 Doctors today face countless daily micro decisions, many of which are administrative and pull focus away from life saving care. PatientIQ centralizes key patient information and uses AI agents to handle routine information retrieval, giving clinicians more time to focus on analysis and delivery of patient care. Using **Couchbase AI Services with vector search**, the application provides semantic search over medical research and clinical notes, enabling doctors to quickly find relevant information through natural language queries.
 
-## AI Agents
+## Agentc
+See: `/agents/AGENTS.md` for the agent inventory, workflows, and the Couchbase-backed tool architecture.
 
-See: `/agents/AGENTS.md`
+`agentc` is used in this repo to:
+- Index Python tools (e.g., `agents/medical-agents/medical_tools.py`) decorated with `@agentc.catalog.tool`
+- Index prompt files in `prompts/`
+- Publish a local Agent Catalog snapshot for use by agents
+
+### Setup
+- **Install deps**
+  - `uv sync --extra dev`
+- **Initialize agentc workspace (one-time)**
+  - `agentc init`
+  - If you don’t have `agentc` on PATH, use: `uv run agentc init`
+
+### Common commands
+- **Index tools and prompts (run after edits)**
+  - `agentc index agents/medical-agents prompts`
+- **List what’s indexed**
+  - `agentc ls tools`
+  - `agentc ls prompts`
+- **Search prompts/tools by name**
+  - `agentc ls prompts | grep wearable`
+- **Publish the catalog**
+  - `agentc publish`
+
+### Adding new catalog entries
+- **New tool**
+  - Add a function in `agents/medical-agents/medical_tools.py` with `@agentc.catalog.tool`, then re-run `agentc index agents/medical-agents`
+- **New prompt**
+  - Add a YAML prompt under `prompts/`, then re-run `agentc index prompts`
+
+Agent Tracer: https://docs.couchbase.com/ai/build/agent-tracer/add-spans-callbacks.html
 
 ## Technology Stack
 
@@ -59,6 +89,8 @@ Configured via environment variables:
 Research (bucket)
   Pubmed (scope)
     Pulmonary (collection)
+    questions (collection)
+    answers (collection)
 
 Scripps (bucket)
   Notes (scope)
@@ -73,11 +105,18 @@ Scripps (bucket)
     Patient_3 (collection)
     Patient_4 (collection)
     Patient_5 (collection)
+  Questionnaires (scope)
+    Patient_1 (collection)
+    Patient_2 (collection)
+    Patient_3 (collection)
+    Patient_4 (collection)
+    Patient_5 (collection)
   Messages (scope)
     Private (collection)
     Public (collection)
   Calendar
     Appointments (collection)
+  
 
  ## Cluster Cost Estimate
  **Window**

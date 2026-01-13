@@ -1,0 +1,60 @@
+/*
+name: docnotes_by_visitdate
+
+description: >
+    Fetch notes on a specific patient based on their visit date. Doctors can check recent notes before an appointment.
+
+# The inputs used to resolve the named parameters in the SQL++ query below.
+# Inputs are described using a JSON object that follows the JSON schema standard.
+# This field is mandatory.
+# See https://json-schema.org/learn/getting-started-step-by-step for more info.
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "patient_id": { "type": "string" },
+        "visit_date": { "type": "string", "description": "YYYY-MM-DD" },
+        "doctor_id": { "type": "string" },
+        "limit": { "type": "integer", "default": 25 }
+      },
+      "required": ["patient_id", "visit_date"]
+    }
+
+# The outputs used describe the structure of the SQL++ query result.
+# Outputs are described using a JSON object that follows the JSON schema standard.
+# This field is optional, and will be used to build a Pydantic model.
+# We recommend using the 'INFER' command to build a JSON schema from your query results.
+# See https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/infer.html.
+# In the future, this field will be optional (we will INFER the query automatically for you).
+# output: >
+#    <<< Replace me with your output type! >>>
+
+# As a supplement to the tool similarity search, users can optionally specify search annotations.
+# The values of these annotations MUST be strings (e.g., not 'true', but '"true"').
+# This field is optional, and does not have to be present.
+# annotations:
+#   gdpr_2016_compliant: "false"
+#   ccpa_2019_compliant: "true"
+
+# The "secrets" field defines search keys that will be used to query a "secrets" manager.
+# Note that these values are NOT the secrets themselves, rather they are used to lookup secrets.
+secrets:
+
+    # All Couchbase tools (e.g., semantic search, SQL++) must specify conn_string, username, and password.
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT n.visit_date,
+       n.doctor_id,
+       n.doctor_name,
+       n.patient_id,
+       n.patient_name,
+       n.visit_notes
+FROM `Scripps`.`Notes`.`Doctor` n
+WHERE (n.patient_id = $patient_id OR n.patient_id = TO_STRING($patient_id) OR n.patient_id = TO_STRING(TO_NUMBER($patient_id)))
+  AND n.visit_date = $visit_date
+  AND ($doctor_id IS MISSING OR n.doctor_id = $doctor_id OR n.doctor_id = TO_STRING($doctor_id))
+ORDER BY n.visit_date DESC
+LIMIT $limit;

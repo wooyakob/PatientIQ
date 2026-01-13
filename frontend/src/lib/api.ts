@@ -300,3 +300,59 @@ export async function deleteDoctorNote(noteId: string): Promise<{ message: strin
     method: "DELETE",
   });
 }
+
+
+// Research types
+export interface ResearchPaper {
+  title: string;
+  author: string;
+  article_citation: string;
+  pmc_link: string;
+}
+
+export interface ResearchResult {
+  patient_id: string;
+  patient_name: string;
+  condition: string;
+  question: string;
+  papers: ResearchPaper[];
+  answer: string;
+}
+
+// Medical Research Agent API
+export async function getPatientResearch(patientId: string, question?: string): Promise<ResearchResult> {
+  const params = question ? `?question=${encodeURIComponent(question)}` : '';
+  return apiFetch<ResearchResult>(`/api/patients/${patientId}/research${params}`);
+}
+
+export async function askResearchQuestion(patientId: string, question: string): Promise<ResearchResult> {
+  return apiFetch<ResearchResult>(`/api/patients/${patientId}/research/ask`, {
+    method: 'POST',
+    body: JSON.stringify({ question }),
+  });
+}
+
+export async function saveResearchAnswer(
+  question: string,
+  answer: string,
+  rating?: number
+): Promise<{ message: string; answer_id: string }> {
+  return apiFetch('/api/research/answers', {
+    method: 'POST',
+    body: JSON.stringify({
+      question_asked: question,
+      answer_provided: answer,
+      answer_rating: rating,
+    }),
+  });
+}
+
+export async function updateAnswerRating(
+  answerId: string,
+  rating: number
+): Promise<{ message: string; answer_id: string; rating: number }> {
+  return apiFetch(`/api/research/answers/${answerId}/rating`, {
+    method: 'PATCH',
+    body: JSON.stringify({ rating }),
+  });
+}

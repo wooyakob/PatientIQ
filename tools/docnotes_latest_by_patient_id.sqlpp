@@ -1,0 +1,31 @@
+/*
+name: docnotes_latest_by_patient_id
+
+description: >
+    Fetch the latest doctor note for a patient (by visit_date).
+
+input: >
+    {
+      "type": "object",
+      "properties": {
+        "patient_id": { "type": "string" }
+      },
+      "required": ["patient_id"]
+    }
+
+secrets:
+    - couchbase:
+        conn_string: CLUSTER_CONNECTION_STRING
+        username: CLUSTER_USERNAME
+        password: CLUSTER_PASS
+*/
+SELECT n.visit_date,
+       n.doctor_id,
+       n.doctor_name,
+       n.patient_id,
+       n.patient_name,
+       n.visit_notes
+FROM `Scripps`.`Notes`.`Doctor` n
+WHERE (n.patient_id = $patient_id OR n.patient_id = TO_STRING($patient_id))
+ORDER BY n.visit_date DESC
+LIMIT 1;
