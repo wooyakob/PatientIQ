@@ -40,17 +40,11 @@ def get_nvidia_embedding(text: str) -> dict:
     # Use OpenAI-compatible endpoint
     url = f"{endpoint}/v1/embeddings"
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-    payload = {
-        "input": text,
-        "model": model_name
-    }
+    payload = {"input": text, "model": model_name}
 
-    print(f"Sending query to NVIDIA embedding model")
+    print("Sending query to NVIDIA embedding model")
     print(f"Model: {model_name}")
     print(f"Endpoint: {url}")
     print(f"Text: '{text}'")
@@ -75,7 +69,7 @@ def get_nvidia_embedding(text: str) -> dict:
                 "embedding": embedding,
                 "timestamp": datetime.now().isoformat(),
                 "status": "success",
-                "api_format": "OpenAI-compatible /v1/embeddings"
+                "api_format": "OpenAI-compatible /v1/embeddings",
             }
         else:
             return {
@@ -84,7 +78,7 @@ def get_nvidia_embedding(text: str) -> dict:
                 "status": "error",
                 "message": "No embedding data in response",
                 "response": result,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
     except requests.exceptions.RequestException as e:
@@ -93,14 +87,14 @@ def get_nvidia_embedding(text: str) -> dict:
             "model": model_name,
             "status": "error",
             "message": f"API request failed: {str(e)}",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
 
 def main():
     """Main test function"""
     # Test query
-    #test_query = "What are the treatment options for pulmonary fibrosis?"
+    # test_query = "What are the treatment options for pulmonary fibrosis?"
     test_query = "What did I discuss with Emily regarding Enzymes on 2024-03-26?"
 
     print("=" * 80)
@@ -130,7 +124,7 @@ def main():
         if isinstance(embedding, list) and len(embedding) > 0:
             print(f"\nFirst 10 values: {embedding[:10]}")
             print(f"Last 10 values: {embedding[-10:]}")
-            print(f"\nEmbedding statistics:")
+            print("\nEmbedding statistics:")
             print(f"  Mean value: {np.mean(embedding):.6f}")
             print(f"  Std deviation: {np.std(embedding):.6f}")
             print(f"  Min value: {np.min(embedding):.6f}")

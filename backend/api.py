@@ -13,8 +13,7 @@ from backend.models import Patient, WearableData
 # Add agents path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "agents" / "medical-agents"))
 # Use catalog-integrated version with tracing
-from research_agent_catalog import run_medical_research
-
+from pulmonary_research_agent import run_pulmonary_research
 
 app = FastAPI(
     title="Healthcare API",
@@ -106,17 +105,27 @@ async def save_doctor_note(note: dict):
     """Save a doctor note"""
     try:
         # Validate required fields
-        required_fields = ["visit_date", "doctor_name", "doctor_id", "visit_notes", "patient_name", "patient_id"]
-        missing_fields = [field for field in required_fields if field not in note or not note[field]]
+        required_fields = [
+            "visit_date",
+            "doctor_name",
+            "doctor_id",
+            "visit_notes",
+            "patient_name",
+            "patient_id",
+        ]
+        missing_fields = [
+            field for field in required_fields if field not in note or not note[field]
+        ]
 
         if missing_fields:
             raise HTTPException(
-                status_code=400,
-                detail=f"Missing required fields: {', '.join(missing_fields)}"
+                status_code=400, detail=f"Missing required fields: {', '.join(missing_fields)}"
             )
 
         # Generate note ID using patient_id and timestamp
-        note_id = f"note_{note['patient_id']}_{note['visit_date']}_{int(datetime.now().timestamp())}"
+        note_id = (
+            f"note_{note['patient_id']}_{note['visit_date']}_{int(datetime.now().timestamp())}"
+        )
 
         success = db.save_doctor_note(note_id, note)
         if success:
@@ -175,7 +184,9 @@ async def send_private_message(payload: dict):
         content = str(payload.get("content") or "").strip()
 
         if not to_id or not to_name or not subject or not content:
-            raise HTTPException(status_code=400, detail="Missing required fields: to_id, to_name, subject, content")
+            raise HTTPException(
+                status_code=400, detail="Missing required fields: to_id, to_name, subject, content"
+            )
 
         # For now, enforce that private messages sent from the UI are from Tiffany Mitchell.
         message_id = f"msg_private_{int(datetime.now().timestamp())}"
@@ -274,9 +285,7 @@ async def mark_public_message_read(message_id: str):
 
 # Calendar/Appointments Endpoints
 @app.get("/api/appointments/doctor/{doctor_id}")
-async def get_doctor_appointments(
-    doctor_id: str, start_date: str = None, end_date: str = None
-):
+async def get_doctor_appointments(doctor_id: str, start_date: str = None, end_date: str = None):
     """Get appointments for a specific doctor, optionally filtered by date range"""
     try:
         appointments = db.get_appointments_for_doctor(doctor_id, start_date, end_date)
@@ -319,16 +328,20 @@ async def update_appointment_status(appointment_id: str, status: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error updating appointment status: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error updating appointment status: {str(e)}")
 
 
 @app.get("/api/questionnaires/pre-visit/{patient_id}")
 async def get_pre_visit_questionnaire(patient_id: str):
     try:
         root = Path(__file__).resolve().parent.parent
-        path = root / "data" / "questionnaires" / f"patient_{patient_id}" / "pre_visit_questionnaire.json"
+        path = (
+            root
+            / "data"
+            / "questionnaires"
+            / f"patient_{patient_id}"
+            / "pre_visit_questionnaire.json"
+        )
 
         if not path.exists():
             raise HTTPException(status_code=404, detail="Pre-visit questionnaire not found")
@@ -360,7 +373,13 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
         statuses = []
         for pid in patient_ids:
             patient_id = str(pid)
-            path = root / "data" / "questionnaires" / f"patient_{patient_id}" / "pre_visit_questionnaire.json"
+            path = (
+                root
+                / "data"
+                / "questionnaires"
+                / f"patient_{patient_id}"
+                / "pre_visit_questionnaire.json"
+            )
             if not path.exists():
                 statuses.append(
                     {
@@ -381,6 +400,7 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
                     date_completed = data.get("date_completed")
             except (json.JSONDecodeError, IOError) as e:
                 # Log the specific error e
+                _ = e
                 date_completed = None
 
             completed = bool(date_completed)
@@ -398,9 +418,9 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching questionnaire status: {str(e)}")
-
-
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching questionnaire status: {str(e)}"
+        )
 
 
 # Medical Research Agent Endpoints
@@ -408,11 +428,11 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
 async def get_patient_research(patient_id: str, question: Optional[str] = None):
     """
     Get medical research relevant to a patient's condition.
-    
+
     Args:
         patient_id: The patient's ID
         question: Optional specific question (if not provided, uses default question about treatment options)
-    
+
     Returns:
         Dictionary with patient info, condition, papers, and clinical summary
     """
@@ -420,15 +440,15 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
         # Default question if none provided
         if not question:
             question = "What are evidence-based treatment options and practical next steps for this patient's condition?"
-        
-        # Run the medical research agent
-        result = run_medical_research(patient_id, question)
-        
+
+        # Run the pulmonary research agent
+        result = run_pulmonary_research(patient_id, question)
+
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
-        
+
         return result
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -460,7 +480,7 @@ async def ask_research_question(patient_id: str, payload: dict = Body(...)):
             "question_id": question_id,
             "question_asked": question,
             "doctor_name": "Tiffany Mitchell",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         try:
@@ -469,8 +489,8 @@ async def ask_research_question(patient_id: str, payload: dict = Body(...)):
             # Log but don't fail if question save fails
             print(f"Warning: Failed to save question: {e}")
 
-        # Run the medical research agent with the specific question
-        result = run_medical_research(patient_id, question)
+        # Run the pulmonary research agent with the specific question
+        result = run_pulmonary_research(patient_id, question)
 
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
@@ -503,11 +523,15 @@ async def save_research_answer(payload: dict = Body(...)):
         answer_rating = payload.get("answer_rating")  # Optional, 1-5
 
         if not question_asked or not answer_provided:
-            raise HTTPException(status_code=400, detail="question_asked and answer_provided are required")
+            raise HTTPException(
+                status_code=400, detail="question_asked and answer_provided are required"
+            )
 
         if answer_rating is not None:
             if not isinstance(answer_rating, int) or answer_rating < 1 or answer_rating > 5:
-                raise HTTPException(status_code=400, detail="answer_rating must be an integer between 1 and 5")
+                raise HTTPException(
+                    status_code=400, detail="answer_rating must be an integer between 1 and 5"
+                )
 
         # Save answer to database
         answer_id = f"a_{int(datetime.now().timestamp() * 1000)}"
@@ -516,7 +540,7 @@ async def save_research_answer(payload: dict = Body(...)):
             "question_asked": question_asked,
             "answer_provided": answer_provided,
             "answer_rating": answer_rating,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         success = db.save_research_answer(answer_id, answer_doc)

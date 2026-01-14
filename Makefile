@@ -1,4 +1,4 @@
-.PHONY: help dev backend frontend stop
+.PHONY: help dev backend frontend stop fmt fmt-check lint lint-fix check install-hooks
 
 help:
 	@echo "Targets:"
@@ -29,3 +29,20 @@ dev:
 stop:
 	@-lsof -ti tcp:8000 | xargs -r kill >/dev/null 2>&1 || true
 	@-lsof -ti tcp:8080 | xargs -r kill >/dev/null 2>&1 || true
+
+fmt:
+	uv run ruff format .
+
+fmt-check:
+	uv run ruff format --check .
+
+lint:
+	uv run ruff check .
+
+lint-fix:
+	uv run ruff check --fix .
+
+check: fmt-check lint
+
+install-hooks:
+	sh scripts/install_git_hooks.sh

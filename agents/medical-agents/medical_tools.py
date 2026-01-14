@@ -22,7 +22,8 @@ try:
             authenticator=couchbase.auth.PasswordAuthenticator(
                 username=os.getenv("CLUSTER_USERNAME") or os.getenv("CB_USERNAME"),
                 password=os.getenv("CLUSTER_PASS") or os.getenv("CB_PASSWORD"),
-                certpath=os.getenv("AGENT_CATALOG_CONN_ROOT_CERTIFICATE") or os.getenv("CB_CERTIFICATE"),
+                certpath=os.getenv("AGENT_CATALOG_CONN_ROOT_CERTIFICATE")
+                or os.getenv("CB_CERTIFICATE"),
             )
         ),
     )
@@ -47,9 +48,7 @@ def get_patient_by_id(patient_id: str) -> dict:
             WHERE p.patient_id = $patient_id
             LIMIT 1
         """,
-        couchbase.options.QueryOptions(
-            named_parameters={"patient_id": patient_id}
-        ),
+        couchbase.options.QueryOptions(named_parameters={"patient_id": patient_id}),
     )
     results = list(query.rows())
     return results[0] if results else {}
@@ -66,9 +65,7 @@ def search_patients_by_name(patient_name: str) -> list[dict]:
             ORDER BY p.patient_name
             LIMIT 20
         """,
-        couchbase.options.QueryOptions(
-            named_parameters={"name_pattern": f"%{patient_name}%"}
-        ),
+        couchbase.options.QueryOptions(named_parameters={"name_pattern": f"%{patient_name}%"}),
     )
     return list(query.rows())
 
@@ -171,9 +168,7 @@ def get_recent_wearable_data(patient_id: str, days_back: int = 7) -> list[dict]:
             ORDER BY w.timestamp DESC
             LIMIT 500
         """,
-        couchbase.options.QueryOptions(
-            named_parameters={"cutoff_timestamp": cutoff_timestamp}
-        ),
+        couchbase.options.QueryOptions(named_parameters={"cutoff_timestamp": cutoff_timestamp}),
     )
     return list(query.rows())
 
@@ -199,7 +194,7 @@ def get_patient_appointments(patient_id: str, days_ahead: int = 30) -> list[dict
             named_parameters={
                 "patient_id": patient_id,
                 "start_date": start_date,
-                "end_date": end_date
+                "end_date": end_date,
             }
         ),
     )
@@ -223,7 +218,7 @@ def get_doctor_schedule(doctor_id: str, start_date: str, end_date: str) -> list[
             named_parameters={
                 "doctor_id": doctor_id,
                 "start_date": start_date,
-                "end_date": end_date
+                "end_date": end_date,
             }
         ),
     )
@@ -243,9 +238,7 @@ def get_todays_appointments(doctor_id: str) -> list[dict]:
             WHERE a.doctor_id = $doctor_id AND a.appointment_date = $today
             ORDER BY a.appointment_time
         """,
-        couchbase.options.QueryOptions(
-            named_parameters={"doctor_id": doctor_id, "today": today}
-        ),
+        couchbase.options.QueryOptions(named_parameters={"doctor_id": doctor_id, "today": today}),
     )
     return list(query.rows())
 
@@ -292,6 +285,16 @@ def vector_search_medical_research(query_vector: list[float], limit: int = 3) ->
 
 
 @agentc.catalog.tool
+def search_pulmonary_research(query_text: str, limit: int = 5) -> list[dict]:
+    return search_medical_research(query_text, limit=limit)
+
+
+@agentc.catalog.tool
+def vector_search_pulmonary_research(query_vector: list[float], limit: int = 3) -> list[dict]:
+    return vector_search_medical_research(query_vector, limit=limit)
+
+
+@agentc.catalog.tool
 def get_private_messages(doctor_id: str, limit: int = 20) -> list[dict]:
     """Get recent private messages for a doctor. Useful for checking unread communications."""
     query = cluster.query(
@@ -302,9 +305,7 @@ def get_private_messages(doctor_id: str, limit: int = 20) -> list[dict]:
             ORDER BY m.timestamp DESC
             LIMIT $limit
         """,
-        couchbase.options.QueryOptions(
-            named_parameters={"doctor_id": doctor_id, "limit": limit}
-        ),
+        couchbase.options.QueryOptions(named_parameters={"doctor_id": doctor_id, "limit": limit}),
     )
     return list(query.rows())
 
@@ -319,9 +320,7 @@ def get_unread_messages(doctor_id: str) -> list[dict]:
             WHERE m.to_id = $doctor_id AND m.read = false
             ORDER BY m.priority DESC, m.timestamp DESC
         """,
-        couchbase.options.QueryOptions(
-            named_parameters={"doctor_id": doctor_id}
-        ),
+        couchbase.options.QueryOptions(named_parameters={"doctor_id": doctor_id}),
     )
     return list(query.rows())
 
@@ -348,7 +347,7 @@ def get_patients_with_upcoming_appointments(doctor_id: str, days_ahead: int = 3)
             named_parameters={
                 "doctor_id": doctor_id,
                 "start_date": start_date,
-                "end_date": end_date
+                "end_date": end_date,
             }
         ),
     )
@@ -405,11 +404,7 @@ def get_patient_summary(patient_id: str) -> dict:
             LIMIT 5
         """,
         couchbase.options.QueryOptions(
-            named_parameters={
-                "patient_id": patient_id,
-                "today": today,
-                "future_date": future_date
-            }
+            named_parameters={"patient_id": patient_id, "today": today, "future_date": future_date}
         ),
     )
     upcoming_appointments = list(appointments_query.rows())
@@ -417,7 +412,7 @@ def get_patient_summary(patient_id: str) -> dict:
     return {
         "patient": patient_info[0],
         "recent_notes": recent_notes,
-        "upcoming_appointments": upcoming_appointments
+        "upcoming_appointments": upcoming_appointments,
     }
 
 
@@ -448,7 +443,7 @@ def get_nvidia_embedding(text: str) -> list[float]:
 @agentc.catalog.tool
 def find_patient_by_id(patient_id: str) -> dict:
     """Find a patient by ID and return their demographics and medical conditions.
-    Alias for get_patient_by_id for compatibility with medical_researcher prompt."""
+    Alias for get_patient_by_id for compatibility with pulmonary_research_agent prompt."""
     return get_patient_by_id(patient_id)
 
 
@@ -535,11 +530,6 @@ def doc_notes_search(query: str, patient_id: Optional[str] = None, top_k: int = 
         """
         params = {"query_vector": embedding, "top_k": top_k}
 
-    result_query = cluster.query(
-        query_str,
-        couchbase.options.QueryOptions(named_parameters=params)
-    )
+    result_query = cluster.query(query_str, couchbase.options.QueryOptions(named_parameters=params))
 
-    return {
-        "docnotes_search_results": list(result_query.rows())
-    }
+    return {"docnotes_search_results": list(result_query.rows())}
