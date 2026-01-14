@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Medical Research Agent
+Pulmonary Research Agent
 
 Uses Couchbase Agent Catalog for:
 - Tool retrieval and management
@@ -42,9 +42,9 @@ def _get_tool(tool_name: str):
     return _tools_cache[tool_name].func
 
 
-def run_medical_research(patient_id: str, question: str, enable_tracing: bool = True) -> dict:
+def run_pulmonary_research(patient_id: str, question: str, enable_tracing: bool = True) -> dict:
     """
-    Run medical research for a patient's condition using Agent Catalog
+    Run pulmonary research for a patient's condition using Agent Catalog
 
     Args:
         patient_id: The patient's ID
@@ -58,8 +58,8 @@ def run_medical_research(patient_id: str, question: str, enable_tracing: bool = 
 
     # Create root span for tracing
     if enable_tracing:
-        root_span = catalog.Span(name="medical_research_agent")
-        research_span = root_span.new(name=f"patient_{patient_id}_research")
+        root_span = catalog.Span(name="pulmonary_research_agent")
+        research_span = root_span.new(name=f"patient_{patient_id}_pulmonary_research")
     else:
         root_span = None
         research_span = None
@@ -69,11 +69,11 @@ def run_medical_research(patient_id: str, question: str, enable_tracing: bool = 
         if research_span:
             research_span.log(
                 agentc.span.SystemContent(
-                    value=f"Starting medical research for patient {patient_id}"
+                    value=f"Starting pulmonary research for patient {patient_id}"
                 )
             )
 
-        print(f" Starting medical research for patient {patient_id}...")
+        print(f" Starting pulmonary research for patient {patient_id}...")
 
         from medical_tools import find_patient_by_id, paper_search
 
@@ -234,7 +234,7 @@ def run_medical_research(patient_id: str, question: str, enable_tracing: bool = 
 def main():
     """Test the catalog-integrated research agent"""
     print("=" * 70)
-    print("Medical Research Agent - Catalog Integrated Version")
+    print("Pulmonary Research Agent - Catalog Integrated Version")
     print("=" * 70)
     print()
 
@@ -247,7 +247,7 @@ def main():
     print("=" * 70)
     print()
 
-    result = run_medical_research(patient_id, question, enable_tracing=True)
+    result = run_pulmonary_research(patient_id, question, enable_tracing=True)
 
     if "error" in result:
         print(f"\n✗ Error: {result['error']}")
@@ -283,6 +283,10 @@ def main():
     print("\n" + "=" * 70)
     print(" Research Complete with Tracing!")
     print("=" * 70)
+
+
+def run_medical_research(patient_id: str, question: str, enable_tracing: bool = True) -> dict:
+    return run_pulmonary_research(patient_id, question, enable_tracing=enable_tracing)
 
 
 if __name__ == "__main__":

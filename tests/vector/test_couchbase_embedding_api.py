@@ -27,17 +27,11 @@ def try_api_format_1(text: str) -> dict:
 
     url = f"{endpoint}/v1/functions/{model_id}/invoke"
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-    payload = {
-        "input": text,
-        "model": model_name
-    }
+    payload = {"input": text, "model": model_name}
 
-    print(f"Testing Format 1: /v1/functions/{{id}}/invoke")
+    print("Testing Format 1: /v1/functions/{id}/invoke")
     print(f"URL: {url}")
     print(f"Payload: {json.dumps(payload, indent=2)}")
 
@@ -49,7 +43,12 @@ def try_api_format_1(text: str) -> dict:
         if response.status_code == 200:
             return {"format": "format_1", "success": True, "data": response.json()}
         else:
-            return {"format": "format_1", "success": False, "status_code": response.status_code, "error": response.text}
+            return {
+                "format": "format_1",
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text,
+            }
     except Exception as e:
         return {"format": "format_1", "success": False, "error": str(e)}
 
@@ -62,17 +61,11 @@ def try_api_format_2(text: str) -> dict:
 
     url = f"{endpoint}/v1/embeddings"
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-    payload = {
-        "input": text,
-        "model": model_name
-    }
+    payload = {"input": text, "model": model_name}
 
-    print(f"\nTesting Format 2: /v1/embeddings")
+    print("\nTesting Format 2: /v1/embeddings")
     print(f"URL: {url}")
     print(f"Payload: {json.dumps(payload, indent=2)}")
 
@@ -84,7 +77,12 @@ def try_api_format_2(text: str) -> dict:
         if response.status_code == 200:
             return {"format": "format_2", "success": True, "data": response.json()}
         else:
-            return {"format": "format_2", "success": False, "status_code": response.status_code, "error": response.text}
+            return {
+                "format": "format_2",
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text,
+            }
     except Exception as e:
         return {"format": "format_2", "success": False, "error": str(e)}
 
@@ -97,17 +95,11 @@ def try_api_format_3(text: str) -> dict:
 
     url = f"{endpoint}/api/v1/embed"
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-    payload = {
-        "text": text,
-        "function_id": model_id
-    }
+    payload = {"text": text, "function_id": model_id}
 
-    print(f"\nTesting Format 3: /api/v1/embed")
+    print("\nTesting Format 3: /api/v1/embed")
     print(f"URL: {url}")
     print(f"Payload: {json.dumps(payload, indent=2)}")
 
@@ -119,7 +111,12 @@ def try_api_format_3(text: str) -> dict:
         if response.status_code == 200:
             return {"format": "format_3", "success": True, "data": response.json()}
         else:
-            return {"format": "format_3", "success": False, "status_code": response.status_code, "error": response.text}
+            return {
+                "format": "format_3",
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text,
+            }
     except Exception as e:
         return {"format": "format_3", "success": False, "error": str(e)}
 
@@ -136,15 +133,12 @@ def try_api_format_4(text: str) -> dict:
     headers = {
         "Authorization": f"Bearer {token}",
         "X-API-Key": key,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
-    payload = {
-        "input": [text],
-        "model": model_name
-    }
+    payload = {"input": [text], "model": model_name}
 
-    print(f"\nTesting Format 4: /v2/embeddings with X-API-Key")
+    print("\nTesting Format 4: /v2/embeddings with X-API-Key")
     print(f"URL: {url}")
     print(f"Payload: {json.dumps(payload, indent=2)}")
 
@@ -156,7 +150,12 @@ def try_api_format_4(text: str) -> dict:
         if response.status_code == 200:
             return {"format": "format_4", "success": True, "data": response.json()}
         else:
-            return {"format": "format_4", "success": False, "status_code": response.status_code, "error": response.text}
+            return {
+                "format": "format_4",
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text,
+            }
     except Exception as e:
         return {"format": "format_4", "success": False, "error": str(e)}
 
@@ -169,16 +168,11 @@ def try_api_format_5(text: str) -> dict:
 
     url = f"{endpoint}/invoke/{model_id}"
 
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
-    payload = {
-        "text": text
-    }
+    payload = {"text": text}
 
-    print(f"\nTesting Format 5: /invoke/{{id}}")
+    print("\nTesting Format 5: /invoke/{id}")
     print(f"URL: {url}")
     print(f"Payload: {json.dumps(payload, indent=2)}")
 
@@ -190,7 +184,12 @@ def try_api_format_5(text: str) -> dict:
         if response.status_code == 200:
             return {"format": "format_5", "success": True, "data": response.json()}
         else:
-            return {"format": "format_5", "success": False, "status_code": response.status_code, "error": response.text}
+            return {
+                "format": "format_5",
+                "success": False,
+                "status_code": response.status_code,
+                "error": response.text,
+            }
     except Exception as e:
         return {"format": "format_5", "success": False, "error": str(e)}
 
@@ -216,7 +215,7 @@ def main():
         try_api_format_2,
         try_api_format_3,
         try_api_format_4,
-        try_api_format_5
+        try_api_format_5,
     ]
 
     for format_func in formats:
@@ -230,11 +229,7 @@ def main():
                 print("🎉" * 40)
                 break
         except Exception as e:
-            results.append({
-                "format": format_func.__name__,
-                "success": False,
-                "error": str(e)
-            })
+            results.append({"format": format_func.__name__, "success": False, "error": str(e)})
 
     # Print summary
     print("\n" + "=" * 80)
@@ -258,7 +253,7 @@ def main():
         "endpoint": os.getenv("EMBEDDING_MODEL_ENDPOINT"),
         "model": os.getenv("EMBEDDING_MODEL_NAME"),
         "all_attempts": results,
-        "successful_format": successful
+        "successful_format": successful,
     }
 
     with open(output_file, "w") as f:

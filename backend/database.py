@@ -239,7 +239,9 @@ class CouchbaseDB:
         t = (text or "").lower()
         if any(w in t for w in ("terrible", "panic", "cannot", "can't", "worse", "urgent")):
             return "terrible"
-        if any(w in t for w in ("anxious", "drained", "fatig", "worried", "tight", "short of breath")):
+        if any(
+            w in t for w in ("anxious", "drained", "fatig", "worried", "tight", "short of breath")
+        ):
             return "poor"
         if any(w in t for w in ("motivated", "better", "helped", "coping", "steady", "improv")):
             return "good"
@@ -295,9 +297,7 @@ class CouchbaseDB:
         """
         try:
             rows = list(
-                self.cluster.query(
-                    query, QueryOptions(named_parameters={"patient_id": patient_id})
-                )
+                self.cluster.query(query, QueryOptions(named_parameters={"patient_id": patient_id}))
             )
         except Exception:
             return ""
@@ -385,7 +385,9 @@ class CouchbaseDB:
         wearable_data = self._get_wearable_summary(patient_id)
         private_notes = self._get_latest_patient_private_note(patient_id)
 
-        research_topic = f"Pulmonary research for {condition}" if condition else "Pulmonary research"
+        research_topic = (
+            f"Pulmonary research for {condition}" if condition else "Pulmonary research"
+        )
         research_content: List[str] = []
         try:
             existing = self.get_research_for_patient(patient_id)
@@ -399,7 +401,9 @@ class CouchbaseDB:
                 research_content = [str(s) for s in summaries if isinstance(s, str)]
 
         if not research_content:
-            research_content = self._get_research_snippets_for_condition(condition, limit=3, max_chars=700)
+            research_content = self._get_research_snippets_for_condition(
+                condition, limit=3, max_chars=700
+            )
 
         return {
             "id": patient_id,
@@ -428,9 +432,7 @@ class CouchbaseDB:
                 LIMIT 1
             """
             rows = list(
-                self.cluster.query(
-                    query, QueryOptions(named_parameters={"patient_id": patient_id})
-                )
+                self.cluster.query(query, QueryOptions(named_parameters={"patient_id": patient_id}))
             )
             if not rows:
                 return None
@@ -468,8 +470,12 @@ class CouchbaseDB:
             patient_data.pop("type", None)
             # Store with the same field names as the seeded dataset for compatibility.
             to_store = dict(patient_data)
-            to_store["patient_id"] = str(patient_data.get("patient_id") or patient_data.get("id") or patient_id)
-            to_store["patient_name"] = str(patient_data.get("patient_name") or patient_data.get("name") or "")
+            to_store["patient_id"] = str(
+                patient_data.get("patient_id") or patient_data.get("id") or patient_id
+            )
+            to_store["patient_name"] = str(
+                patient_data.get("patient_name") or patient_data.get("name") or ""
+            )
             if "medical_conditions" not in to_store and ("condition" in patient_data):
                 to_store["medical_conditions"] = patient_data.get("condition")
             self.patients_collection.upsert(str(patient_id), to_store)
@@ -718,9 +724,7 @@ class CouchbaseDB:
                 ORDER BY m.timestamp DESC
                 LIMIT $limit
             """
-            result = self.cluster.query(
-                query, QueryOptions(named_parameters={"limit": limit})
-            )
+            result = self.cluster.query(query, QueryOptions(named_parameters={"limit": limit}))
             return [row for row in result]
         except Exception as e:
             print(f"Error fetching public messages: {e}")
@@ -754,7 +758,9 @@ class CouchbaseDB:
         """Mark a message as read"""
         self._check_connection()
         try:
-            collection = self.private_messages_collection if is_private else self.public_messages_collection
+            collection = (
+                self.private_messages_collection if is_private else self.public_messages_collection
+            )
             message = collection.get(message_id)
             message_data = message.content_as[dict]
             message_data["read"] = True

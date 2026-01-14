@@ -13,9 +13,15 @@ class SentimentLevel(str, Enum):
 
 
 class WearableData(BaseModel):
-    timestamps: List[str] = Field(default_factory=list, description="Wearable entry timestamps (daily, last 30 days)")
-    heart_rate: List[int] = Field(default_factory=list, description="Daily heart rate readings (last 30 days)")
-    step_count: List[int] = Field(default_factory=list, description="Daily step count readings (last 30 days)")
+    timestamps: List[str] = Field(
+        default_factory=list, description="Wearable entry timestamps (daily, last 30 days)"
+    )
+    heart_rate: List[int] = Field(
+        default_factory=list, description="Daily heart rate readings (last 30 days)"
+    )
+    step_count: List[int] = Field(
+        default_factory=list, description="Daily step count readings (last 30 days)"
+    )
 
 
 class DoctorNote(BaseModel):
@@ -68,6 +74,7 @@ class MessageRoute(BaseModel):
     routed_to: List[str]  # List of doctor/staff IDs
     priority: str
     timestamp: datetime
+
 
 class Message(BaseModel):
     id: str
