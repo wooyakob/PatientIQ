@@ -10,6 +10,7 @@ Checks that:
 """
 
 import sys
+
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -61,10 +62,10 @@ def check_prompt(catalog):
     try:
         prompt = catalog.find("prompt", name="pulmonary_research_agent")
         if prompt:
-            print(f"   ✓ Found prompt: pulmonary_research_agent")
+            print("   ✓ Found prompt: pulmonary_research_agent")
             try:
                 # Try to access tools list if available
-                if hasattr(prompt, 'tools'):
+                if hasattr(prompt, "tools"):
                     print(f"   ✓ Prompt has {len(prompt.tools)} tools configured")
             except:
                 pass
@@ -97,6 +98,7 @@ def check_agent_init():
     except Exception as e:
         print(f"   ✗ Failed to run agent: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 

@@ -8,6 +8,7 @@ import typing
 
 class State(agentc_langgraph.agent.State):
     """State for the doc notes search agent"""
+
     patient_id: typing.Optional[str]
     patient_name: typing.Optional[str]
     question: typing.Optional[str]
@@ -28,17 +29,11 @@ class DocNotesSearchAgent(agentc_langgraph.agent.ReActAgent):
     def __init__(self, catalog: agentc.Catalog, span: agentc.Span):
         chat_model = langchain_openai.chat_models.ChatOpenAI(model="gpt-4o-mini", temperature=0)
         super().__init__(
-            chat_model=chat_model,
-            catalog=catalog,
-            span=span,
-            prompt_name="docnotes_search_agent"
+            chat_model=chat_model, catalog=catalog, span=span, prompt_name="docnotes_search_agent"
         )
 
     def _invoke(
-        self,
-        span: agentc.Span,
-        state: State,
-        config: langchain_core.runnables.RunnableConfig
+        self, span: agentc.Span, state: State, config: langchain_core.runnables.RunnableConfig
     ) -> State:
         """
         Execute the doc notes search workflow.
@@ -51,9 +46,11 @@ class DocNotesSearchAgent(agentc_langgraph.agent.ReActAgent):
         Returns:
             Updated state with search results
         """
-        span.log(agentc.span.SystemContent(
-            value=f"Searching notes for patient {state.get('patient_id')}"
-        ))
+        span.log(
+            agentc.span.SystemContent(
+                value=f"Searching notes for patient {state.get('patient_id')}"
+            )
+        )
 
         # Create the agent and invoke it
         agent = self.create_react_agent(span)
@@ -74,8 +71,8 @@ class DocNotesSearchAgent(agentc_langgraph.agent.ReActAgent):
         if response.get("messages"):
             state["messages"].append(response["messages"][-1])
 
-        span.log(agentc.span.SystemContent(
-            value=f"Search complete: {len(state['notes'])} notes found"
-        ))
+        span.log(
+            agentc.span.SystemContent(value=f"Search complete: {len(state['notes'])} notes found")
+        )
 
         return state

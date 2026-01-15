@@ -43,7 +43,7 @@ class PulmonaryResearcher(agentc_langgraph.graph.GraphRunnable):
             answer=None,
             is_complete=False,
             previous_node=None,
-            is_last_step=False
+            is_last_step=False,
         )
 
     def compile(self) -> langgraph.graph.StateGraph:

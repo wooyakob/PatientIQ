@@ -50,7 +50,7 @@ def doc_notes_search(query: str, patient_id: Optional[str] = None, top_k: int = 
     # Generate embedding for the query
     try:
         embedding = get_nvidia_embedding(query)
-    except Exception as e:
+    except Exception:
         # Fallback to keyword search if embedding fails
         return _fallback_keyword_search(query, patient_id, top_k)
 
@@ -76,10 +76,12 @@ def doc_notes_search(query: str, patient_id: Optional[str] = None, top_k: int = 
             """
             params = {"query_vector": embedding, "top_k": min(top_k, 10)}
 
-        result_query = cluster.query(query_str, couchbase.options.QueryOptions(named_parameters=params))
+        result_query = cluster.query(
+            query_str, couchbase.options.QueryOptions(named_parameters=params)
+        )
         return {"docnotes_search_results": list(result_query.rows())}
 
-    except Exception as e:
+    except Exception:
         # Fallback to keyword search if vector search fails
         return _fallback_keyword_search(query, patient_id, top_k)
 
@@ -109,7 +111,9 @@ def _fallback_keyword_search(query: str, patient_id: Optional[str], top_k: int) 
             """
             params = {"keyword_pattern": f"%{query}%", "top_k": top_k}
 
-        result_query = cluster.query(query_str, couchbase.options.QueryOptions(named_parameters=params))
+        result_query = cluster.query(
+            query_str, couchbase.options.QueryOptions(named_parameters=params)
+        )
         return {"docnotes_search_results": list(result_query.rows())}
 
     except Exception as e:

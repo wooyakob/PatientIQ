@@ -78,7 +78,7 @@ def paper_search(query: str, patient_id: Optional[str] = None, top_k: int = 3) -
     # Generate embedding for the query
     try:
         embedding = get_nvidia_embedding(enhanced_query)
-    except Exception as e:
+    except Exception:
         # Fallback to text search if embedding fails
         return _fallback_text_search(query, top_k)
 

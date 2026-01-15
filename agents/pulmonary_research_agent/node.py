@@ -8,6 +8,7 @@ import typing
 
 class State(agentc_langgraph.agent.State):
     """State for the pulmonary research agent"""
+
     patient_id: typing.Optional[str]
     patient_name: typing.Optional[str]
     condition: typing.Optional[str]
@@ -28,19 +29,9 @@ class PulmonaryResearchAgent(agentc_langgraph.agent.ReActAgent):
 
     def __init__(self, catalog: agentc.Catalog, span: agentc.Span):
         chat_model = langchain_openai.chat_models.ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        super().__init__(
-            chat_model=chat_model,
-            catalog=catalog,
-            span=span,
-            prompt_name="pulmonary_research_agent"
-        )
+        super().__init__(chat_model=chat_model, catalog=catalog, span=span, prompt_name="pulmonary_research_agent")
 
-    def _invoke(
-        self,
-        span: agentc.Span,
-        state: State,
-        config: langchain_core.runnables.RunnableConfig
-    ) -> State:
+    def _invoke(self, span: agentc.Span, state: State, config: langchain_core.runnables.RunnableConfig) -> State:
         """
         Execute the pulmonary research workflow.
 
@@ -52,9 +43,7 @@ class PulmonaryResearchAgent(agentc_langgraph.agent.ReActAgent):
         Returns:
             Updated state with research results
         """
-        span.log(agentc.span.SystemContent(
-            value=f"Starting pulmonary research for patient {state.get('patient_id')}"
-        ))
+        span.log(agentc.span.SystemContent(value=f"Starting pulmonary research for patient {state.get('patient_id')}"))
 
         # Create the agent and invoke it
         agent = self.create_react_agent(span)
@@ -76,8 +65,6 @@ class PulmonaryResearchAgent(agentc_langgraph.agent.ReActAgent):
         if response.get("messages"):
             state["messages"].append(response["messages"][-1])
 
-        span.log(agentc.span.SystemContent(
-            value=f"Research complete: {len(state['papers'])} papers found"
-        ))
+        span.log(agentc.span.SystemContent(value=f"Research complete: {len(state['papers'])} papers found"))
 
         return state

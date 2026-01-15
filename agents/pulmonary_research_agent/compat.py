@@ -8,6 +8,7 @@ All tools are now loaded from the Agent Catalog (/tools folder), not imported di
 """
 
 import sys
+
 from pathlib import Path
 
 # Add this directory to path for imports
@@ -15,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import agentc
 import langchain_core.messages
+
 from graph import PulmonaryResearcher
 
 # Initialize catalog once at module level
@@ -58,16 +60,11 @@ def run_pulmonary_research(patient_id: str, question: str, enable_tracing: bool 
         researcher = _get_researcher()
 
         # Build starting state
-        state = PulmonaryResearcher.build_starting_state(
-            patient_id=patient_id,
-            question=question
-        )
+        state = PulmonaryResearcher.build_starting_state(patient_id=patient_id, question=question)
 
         # Add the question as a human message in JSON format
         state["messages"].append(
-            langchain_core.messages.HumanMessage(
-                content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}'
-            )
+            langchain_core.messages.HumanMessage(content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}')
         )
 
         # Invoke the agent

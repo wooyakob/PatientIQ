@@ -7,17 +7,19 @@ Provides an interface for easy integration with existing backend code.
 import sys
 from pathlib import Path
 
+import agentc
+import langchain_core.messages
+
+# Import from this directory specifically
+import importlib.util
+
+
 # Add this directory to path for imports - insert at beginning to take precedence
 agent_dir = str(Path(__file__).parent)
 if agent_dir in sys.path:
     sys.path.remove(agent_dir)
 sys.path.insert(0, agent_dir)
 
-import agentc
-import langchain_core.messages
-
-# Import from this directory specifically
-import importlib.util
 graph_path = Path(__file__).parent / "graph.py"
 spec = importlib.util.spec_from_file_location("docnotes_graph", graph_path)
 docnotes_graph = importlib.util.module_from_spec(spec)
@@ -62,10 +64,7 @@ def search_doctor_notes(patient_id: str, question: str, enable_tracing: bool = T
         searcher = _get_searcher()
 
         # Build starting state
-        state = DocNotesSearcher.build_starting_state(
-            patient_id=patient_id,
-            question=question
-        )
+        state = DocNotesSearcher.build_starting_state(patient_id=patient_id, question=question)
 
         # Add the question as a human message in JSON format
         state["messages"].append(

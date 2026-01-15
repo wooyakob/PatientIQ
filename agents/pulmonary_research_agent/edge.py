@@ -3,9 +3,7 @@ import node
 import typing
 
 
-def out_research_agent_edge(
-    state: node.State
-) -> typing.Literal["__end__"]:
+def out_research_agent_edge(state: node.State) -> typing.Literal["__end__"]:
     """
     Routing logic after the pulmonary research agent completes.
 

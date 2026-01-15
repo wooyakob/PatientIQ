@@ -13,7 +13,6 @@ import dotenv
 import os
 import requests
 import warnings
-from datetime import datetime, timedelta
 
 dotenv.load_dotenv()
 warnings.filterwarnings("ignore", message="Unverified HTTPS request")

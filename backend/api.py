@@ -119,7 +119,10 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
 
         # Import and use the doc notes search agent using importlib to avoid module caching issues
         import importlib.util
-        compat_path = Path(__file__).parent.parent / "agents" / "docnotes_search_agent" / "compat.py"
+
+        compat_path = (
+            Path(__file__).parent.parent / "agents" / "docnotes_search_agent" / "compat.py"
+        )
         spec = importlib.util.spec_from_file_location("docnotes_compat", compat_path)
         docnotes_compat = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(docnotes_compat)

@@ -28,8 +28,10 @@ if __name__ == "__main__":
 
     # Get patient ID and question from user
     patient_id = input("Enter patient ID (default: 1): ").strip() or "1"
-    question = input("Enter clinical question (default: treatment options): ").strip() or \
-               "What are evidence-based treatment options for this patient's condition?"
+    question = (
+        input("Enter clinical question (default: treatment options): ").strip()
+        or "What are evidence-based treatment options for this patient's condition?"
+    )
 
     print()
     print("=" * 70)
@@ -38,16 +40,11 @@ if __name__ == "__main__":
     print()
 
     # Build starting state
-    state = graph.PulmonaryResearcher.build_starting_state(
-        patient_id=patient_id,
-        question=question
-    )
+    state = graph.PulmonaryResearcher.build_starting_state(patient_id=patient_id, question=question)
 
     # Add the question as a human message in JSON format (as expected by the prompt)
     state["messages"].append(
-        langchain_core.messages.HumanMessage(
-            content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}'
-        )
+        langchain_core.messages.HumanMessage(content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}')
     )
 
     # Run the agent

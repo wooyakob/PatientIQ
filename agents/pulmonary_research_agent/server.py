@@ -3,7 +3,6 @@ import agentc_langgraph.state
 import fastapi
 import langchain_core.messages
 import pydantic
-import starlette.responses
 
 from graph import PulmonaryResearcher
 
@@ -18,6 +17,7 @@ researcher = PulmonaryResearcher(catalog=catalog, span=span)
 
 class ResearchRequest(pydantic.BaseModel):
     """Request model for pulmonary research endpoint"""
+
     session_id: str
     patient_id: str
     question: str
@@ -26,6 +26,7 @@ class ResearchRequest(pydantic.BaseModel):
 
 class ResearchResponse(pydantic.BaseModel):
     """Response model for pulmonary research endpoint"""
+
     patient_id: str
     patient_name: str | None
     condition: str | None
@@ -48,10 +49,7 @@ async def research(req: ResearchRequest):
     """
     try:
         # Build starting state
-        input_state = PulmonaryResearcher.build_starting_state(
-            patient_id=req.patient_id,
-            question=req.question
-        )
+        input_state = PulmonaryResearcher.build_starting_state(patient_id=req.patient_id, question=req.question)
 
         # Add the question as a human message
         input_state["messages"].append(
@@ -74,7 +72,7 @@ async def research(req: ResearchRequest):
             question=result.get("question", req.question),
             papers=result.get("papers", []),
             answer=result.get("answer"),
-            error=None
+            error=None,
         )
 
     except Exception as e:
@@ -85,7 +83,7 @@ async def research(req: ResearchRequest):
             question=req.question,
             papers=[],
             answer=None,
-            error=str(e)
+            error=str(e),
         )
 
 
@@ -97,4 +95,5 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
