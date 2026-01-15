@@ -11,9 +11,9 @@ from backend.database import db
 from backend.models import Patient, WearableData
 
 # Add agents path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "agents" / "medical-agents"))
-# Use catalog-integrated version with tracing
-from pulmonary_research_agent import run_pulmonary_research
+sys.path.insert(0, str(Path(__file__).parent.parent / "agents" / "pulmonary_research_agent"))
+# Use new LangGraph-based agent with backward compatibility
+from compat import run_pulmonary_research
 
 app = FastAPI(
     title="Healthcare API",
@@ -98,6 +98,46 @@ async def get_patient_doctor_notes(patient_id: str):
         return {"patient_id": patient_id, "notes": notes, "count": len(notes)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching doctor notes: {str(e)}")
+
+
+@app.post("/api/patients/{patient_id}/doctor-notes/search")
+async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)):
+    """
+    Search doctor notes for a patient using semantic search.
+
+    Args:
+        patient_id: The patient's ID
+        payload: JSON with 'question' field
+
+    Returns:
+        Dictionary with patient info, relevant notes, and answer
+    """
+    try:
+        question = payload.get("question", "")
+        if not question:
+            raise HTTPException(status_code=400, detail="Question is required")
+
+        # Import and use the doc notes search agent using importlib to avoid module caching issues
+        import importlib.util
+
+        compat_path = (
+            Path(__file__).parent.parent / "agents" / "docnotes_search_agent" / "compat.py"
+        )
+        spec = importlib.util.spec_from_file_location("docnotes_compat", compat_path)
+        docnotes_compat = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(docnotes_compat)
+
+        result = docnotes_compat.search_doctor_notes(patient_id, question)
+
+        if "error" in result:
+            raise HTTPException(status_code=404, detail=result["error"])
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching notes: {str(e)}")
 
 
 @app.post("/api/doctor-notes")

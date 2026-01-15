@@ -1,6 +1,6 @@
 record_kind: semantic_search
 
-name: doc_notes_search
+name: doc_notes_search_semantic
 
 description: >
     Answer a doctor&#39;s questions about their own notes taken during and after patient visits. 

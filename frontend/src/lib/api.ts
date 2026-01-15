@@ -356,3 +356,35 @@ export async function updateAnswerRating(
     body: JSON.stringify({ rating }),
   });
 }
+
+// Doctor Notes Search types
+export interface DoctorNoteSearchResult {
+  visit_date: string;
+  visit_notes: string;
+  doctor_name: string;
+  patient_name: string;
+  patient_id: string;
+  similarity_score?: number;
+}
+
+export interface DoctorNotesSearchResponse {
+  patient_id: string;
+  patient_name: string;
+  question: string;
+  notes: DoctorNoteSearchResult[];
+  answer: string;
+}
+
+// Doctor Notes Search Agent API
+export async function searchDoctorNotes(
+  patientId: string,
+  question: string
+): Promise<DoctorNotesSearchResponse> {
+  return apiFetch<DoctorNotesSearchResponse>(
+    `/api/patients/${patientId}/doctor-notes/search`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ question }),
+    }
+  );
+}
