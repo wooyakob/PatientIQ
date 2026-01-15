@@ -61,12 +61,7 @@ def search_doctor_notes(patient_id: str, question: str, enable_tracing: bool = T
         Dictionary with patient_id, patient_name, question, notes, and answer
     """
     try:
-        catalog = _get_catalog()
-        if enable_tracing:
-            span = catalog.Span(name="DocNotesSearch")
-            searcher = DocNotesSearcher(catalog=catalog, span=span)
-        else:
-            searcher = _get_searcher()
+        searcher = _get_searcher()
 
         # Build starting state
         state = DocNotesSearcher.build_starting_state(patient_id=patient_id, question=question)
