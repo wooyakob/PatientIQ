@@ -107,18 +107,39 @@ def _fallback_text_search(query: str, limit: int) -> list[dict]:
         return [{"error": "Database connection not available"}]
 
     try:
-        result = cluster.query(
-            """
-            SELECT r.title, r.author, r.article_text, r.article_citation, r.pmc_link
-            FROM `Research`.Pubmed.Pulmonary r
-            WHERE LOWER(r.title) LIKE LOWER($search_pattern)
-               OR LOWER(r.article_text) LIKE LOWER($search_pattern)
-            LIMIT $limit
-            """,
-            couchbase.options.QueryOptions(
-                named_parameters={"search_pattern": f"%{query}%", "limit": limit}
-            ),
-        )
+        # Extract key medical terms from the query for better matching
+        # Split query into words and search for each significant term
+        query_lower = query.lower()
+        search_terms = [term for term in query_lower.split() if len(term) > 3]
+
+        # If we have specific terms, search for them individually
+        if search_terms:
+            # Build a query that searches for any of the key terms
+            result = cluster.query(
+                """
+                SELECT r.title, r.author, r.article_text, r.article_citation, r.pmc_link
+                FROM `Research`.Pubmed.Pulmonary r
+                WHERE LOWER(r.title) LIKE '%' || $term1 || '%'
+                   OR LOWER(r.article_text) LIKE '%' || $term1 || '%'
+                LIMIT $limit
+                """,
+                couchbase.options.QueryOptions(
+                    named_parameters={"term1": search_terms[0].lower(), "limit": limit}
+                ),
+            )
+        else:
+            # Fallback: just get the most recent papers
+            result = cluster.query(
+                """
+                SELECT r.title, r.author, r.article_text, r.article_citation, r.pmc_link
+                FROM `Research`.Pubmed.Pulmonary r
+                LIMIT $limit
+                """,
+                couchbase.options.QueryOptions(
+                    named_parameters={"limit": limit}
+                ),
+            )
+
         return list(result.rows())
     except Exception as e:
         return [{"error": f"Text search failed: {str(e)}"}]

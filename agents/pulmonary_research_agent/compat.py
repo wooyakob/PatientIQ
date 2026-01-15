@@ -21,7 +21,6 @@ from graph import PulmonaryResearcher
 
 # Initialize catalog once at module level
 _catalog = None
-_researcher = None
 
 
 def _get_catalog() -> agentc.Catalog:
@@ -30,15 +29,6 @@ def _get_catalog() -> agentc.Catalog:
     if _catalog is None:
         _catalog = agentc.Catalog()
     return _catalog
-
-
-def _get_researcher() -> PulmonaryResearcher:
-    """Get or create the researcher instance"""
-    global _researcher
-    if _researcher is None:
-        catalog = _get_catalog()
-        _researcher = PulmonaryResearcher(catalog=catalog)
-    return _researcher
 
 
 def run_pulmonary_research(patient_id: str, question: str, enable_tracing: bool = True) -> dict:  # noqa: ARG001
@@ -57,7 +47,12 @@ def run_pulmonary_research(patient_id: str, question: str, enable_tracing: bool 
         Dictionary with patient_id, condition, question, papers, and answer
     """
     try:
-        researcher = _get_researcher()
+        catalog = _get_catalog()
+        if enable_tracing:
+            span = catalog.Span(name="PulmonaryResearch")
+            researcher = PulmonaryResearcher(catalog=catalog, span=span)
+        else:
+            researcher = PulmonaryResearcher(catalog=catalog)
 
         # Build starting state
         state = PulmonaryResearcher.build_starting_state(patient_id=patient_id, question=question)

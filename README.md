@@ -44,6 +44,8 @@ Configured via environment variables:
 - **Notes** (scope)
   - `Doctor` (collection)
   - `Patient` (collection)
+  - `doctors_questions` (collection)
+  - `answers_doctors` (collection)
 - **People** (scope)
   - `Doctors` (collection)
   - `Patients` (collection)
