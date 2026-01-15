@@ -135,9 +135,7 @@ def _fallback_text_search(query: str, limit: int) -> list[dict]:
                 FROM `Research`.Pubmed.Pulmonary r
                 LIMIT $limit
                 """,
-                couchbase.options.QueryOptions(
-                    named_parameters={"limit": limit}
-                ),
+                couchbase.options.QueryOptions(named_parameters={"limit": limit}),
             )
 
         return list(result.rows())
