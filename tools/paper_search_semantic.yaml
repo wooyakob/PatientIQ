@@ -1,6 +1,6 @@
 record_kind: semantic_search
 
-name: paper_search
+name: paper_search_semantic
 
 description: >
     Find answers to questions from medical research papers that are focused on Pulmonary conditions.

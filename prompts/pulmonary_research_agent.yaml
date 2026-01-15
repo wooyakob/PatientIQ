@@ -30,6 +30,9 @@ output:
   properties:
     patient_id:
       type: string
+    patient_name:
+      type: string
+      description: "Full name of the patient"
     condition:
       type: string
     question:
@@ -57,6 +60,7 @@ output:
       description: "Concise answer in no more than three paragraphs."
   required:
     - patient_id
+    - patient_name
     - condition
     - question
     - papers
@@ -75,15 +79,18 @@ content: >
   - Retrieve relevant peer-reviewed papers.
   - Provide a concise, solution-oriented answer (no more than three paragraphs) grounded in the retrieved papers.
 
-  Process (use tools):
-  1) Use the tool find_conditions_by_patient_id with the provided patient_id to get the patient's medical_conditions.
-  2) Optionally use find_patient_by_id if you need extra context (e.g., age/sex) to make the search query more specific.
-  3) Use paper_search to retrieve the most relevant papers. Your search query should combine the patient's condition and the doctor's question.
-  4) Use the returned papers' article_text as the primary source of truth.
+  CRITICAL: You MUST use the tools to get accurate data. DO NOT make up patient names or conditions.
+
+  Process (use tools in this exact order):
+  1) FIRST: Call find_patient_by_id with the patient_id. Extract the patient_name from the result.
+  2) SECOND: Call find_conditions_by_patient_id with the patient_id. This gives you the condition string.
+  3) THIRD: Call paper_search with the condition and question. Pass patient_id parameter to enhance search.
+  4) Use ONLY the returned papers' article_text. Do not invent information.
 
   Output requirements:
-  - Return a JSON object matching the provided output schema.
-  - Include up to 3 papers in papers.
-  - The answer must be at most three paragraphs (use \n\n between paragraphs).
-  - Write plainly and concisely for a busy clinician.
-  - Avoid hallucinating citations; only cite what you can support from the provided article_text.
+  - patient_name: MUST come from find_patient_by_id tool result (e.g., "James Smith")
+  - condition: MUST come from find_conditions_by_patient_id tool result (e.g., "Asthma")
+  - papers: MUST be the exact papers returned by paper_search tool (up to 3)
+  - answer: Write THREE paragraphs based ONLY on the papers' article_text
+  - DO NOT make up patient names, conditions, or paper citations
+  - If a tool returns empty results, include that in your output

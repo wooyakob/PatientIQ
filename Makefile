@@ -1,19 +1,24 @@
-.PHONY: help dev backend frontend stop fmt fmt-check lint lint-fix check install-hooks
+.PHONY: help dev backend frontend stop fmt fmt-check lint lint-fix check install-hooks index-catalog
 
 help:
 	@echo "Targets:"
-	@echo "  make dev       - run backend + frontend in one command"
-	@echo "  make backend   - run FastAPI backend on :8000"
-	@echo "  make frontend  - run Vite frontend on :8080"
-	@echo "  make stop      - best-effort stop anything listening on :8000 and :8080"
+	@echo "  make dev          - run backend + frontend in one command"
+	@echo "  make backend      - run FastAPI backend on :8000"
+	@echo "  make frontend     - run Vite frontend on :8080"
+	@echo "  make stop         - best-effort stop anything listening on :8000 and :8080"
+	@echo "  make index-catalog - index agent catalog tools and prompts"
 
-backend:
+index-catalog:
+	@echo "Indexing agent catalog..."
+	@uv run agentc index tools prompts
+
+backend: index-catalog
 	uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000
 
 frontend:
 	npm --prefix frontend run dev
 
-dev:
+dev: index-catalog
 	@echo "Starting backend + frontend..."
 	@echo "Backend:  http://127.0.0.1:8000"
 	@echo "Frontend: http://localhost:8080"
