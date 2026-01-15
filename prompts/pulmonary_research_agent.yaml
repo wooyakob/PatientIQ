@@ -54,7 +54,6 @@ output:
             type: string
         required:
           - title
-          - article_text
     answer:
       type: string
       description: "Concise answer in no more than three paragraphs."
@@ -79,18 +78,22 @@ content: >
   - Retrieve relevant peer-reviewed papers.
   - Provide a concise, solution-oriented answer (no more than three paragraphs) grounded in the retrieved papers.
 
-  CRITICAL: You MUST use the tools to get accurate data. DO NOT make up patient names or conditions.
+  CRITICAL: You MUST use the tools to get accurate data. DO NOT make up patient names, conditions, or answers.
 
   Process (use tools in this exact order):
   1) FIRST: Call find_patient_by_id with the patient_id. Extract the patient_name from the result.
   2) SECOND: Call find_conditions_by_patient_id with the patient_id. This gives you the condition string.
-  3) THIRD: Call paper_search with the condition and question. Pass patient_id parameter to enhance search.
-  4) Use ONLY the returned papers' article_text. Do not invent information.
+  3) THIRD: Call paper_search tool with these parameters:
+     - query: Combine the condition and the question (e.g., "Asthma treatment options")
+     - patient_id: The patient ID you received
+     - top_k: 3
+  4) FOURTH: Use the returned papers' article_text as the primary source of truth. Write THREE paragraphs based ONLY on what the papers say.
 
   Output requirements:
-  - patient_name: MUST come from find_patient_by_id tool result (e.g., "James Smith")
-  - condition: MUST come from find_conditions_by_patient_id tool result (e.g., "Asthma")
-  - papers: MUST be the exact papers returned by paper_search tool (up to 3)
-  - answer: Write THREE paragraphs based ONLY on the papers' article_text
-  - DO NOT make up patient names, conditions, or paper citations
-  - If a tool returns empty results, include that in your output
+  - Return a JSON object matching the provided output schema.
+  - patient_name: MUST come from find_patient_by_id tool result
+  - condition: MUST come from find_conditions_by_patient_id tool result
+  - papers: Include all papers returned by paper_search (up to 3). Each paper should have title, author, article_citation, and pmc_link.
+  - answer: Write THREE paragraphs based ONLY on the papers' article_text. Use \n\n between paragraphs.
+  - Write plainly and concisely for a busy clinician.
+  - Avoid hallucinating citations; only cite what you can support from the provided article_text.
