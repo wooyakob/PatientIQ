@@ -41,6 +41,7 @@ def _append_json_list_record(path: Path, record: dict) -> None:
 def _now_utc_iso_z() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
+
 app = FastAPI(
     title="Healthcare API",
     description="FastAPI backend for healthcare dashboard",
@@ -81,6 +82,7 @@ async def log_requests(request: Request, call_next):
         duration_ms,
     )
     return response
+
 
 # CORS middleware for frontend communication
 app.add_middleware(
@@ -233,7 +235,9 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
         docnotes_compat = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(docnotes_compat)
 
-        result = docnotes_compat.search_doctor_notes(patient_id, question, patient_name=patient_name)
+        result = docnotes_compat.search_doctor_notes(
+            patient_id, question, patient_name=patient_name
+        )
 
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
