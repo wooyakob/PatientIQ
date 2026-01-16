@@ -1,8 +1,50 @@
 [
     {
         "question_asked": "What did I discuss with James Smith?",
+        "patient_name": "James Smith",
         "doctor_name": "Tiffany Mitchell",
         "timestamp": "2024-01-01T12:00:00Z",
-        "answer_provided": "You discussed trigger factors with James Smith."
+        "answer_provided": "You discussed trigger factors with James Smith.",
+        "referenced_visit_notes": ""
+    },
+    {
+        "question_asked": "any notes on trigger avoidance?",
+        "patient_name": "John Doe",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T21:14:00.257685Z",
+        "answer_provided": "During the visit on [date], [doctor_name] discussed the importance of trigger avoidance for patient [patient_name] and noted that it should be followed for symptom relief.",
+        "referenced_visit_notes": ""
+    },
+    {
+        "question_asked": "When did we discuss spacer techniques",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T22:50:17.146856Z",
+        "answer_provided": "There are no documented notes regarding the discussion of spacer techniques in your past visits.",
+        "referenced_visit_notes": []
+    },
+    {
+        "question_asked": "when did we discuss a rare wheeze?",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T23:01:15.818214Z",
+        "answer_provided": "You discussed a rare wheeze during your asthma visits on February 11, 2024, and on November 18 and November 2, 2023. Adjustments to your inhaled corticosteroids were made during these visits, along with reinforcement of your spacer technique and action plan.",
+        "referenced_visit_notes": [
+            {
+                "doctor_name": "Tiffany Mitchell",
+                "visit_date": "2024-02-11",
+                "visit_notes": "Asthma visit: rare wheeze; adjusted ICS (no change); reinforced spacer technique and written action plan."
+            },
+            {
+                "doctor_name": "Tiffany Mitchell",
+                "visit_date": "2023-11-18",
+                "visit_notes": "Asthma visit: rare wheeze; adjusted ICS (step-down trial); reinforced spacer technique and written action plan."
+            },
+            {
+                "doctor_name": "Tiffany Mitchell",
+                "visit_date": "2023-11-02",
+                "visit_notes": "Asthma visit: rare wheeze; adjusted ICS (step-down trial); reinforced spacer technique and written action plan."
+            }
+        ]
     }
 ]

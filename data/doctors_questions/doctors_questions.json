@@ -1,0 +1,32 @@
+[
+    {
+        "question_asked": "What did I discuss with James Smith?",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2024-01-01T12:00:00Z"
+    },
+    {
+        "question_asked": "any notes on trigger avoidance?",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T21:14:00.257685Z"
+    },
+    {
+        "question_asked": "When did we discuss ICS?",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T22:46:30.846389Z"
+    },
+    {
+        "question_asked": "When did we discuss spacer techniques",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T22:50:17.146856Z"
+    },
+    {
+        "question_asked": "when did we discuss a rare wheeze?",
+        "patient_name": "James Smith",
+        "doctor_name": "Tiffany Mitchell",
+        "timestamp": "2026-01-16T23:01:15.818214Z"
+    }
+]

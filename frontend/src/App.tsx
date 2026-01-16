@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import PatientDetail from "./pages/PatientDetail";
 import ResearchDetail from "./pages/ResearchDetail";
@@ -16,12 +17,25 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function RouteLogger() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log("[route]", location.pathname, { search: location.search });
+    }
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <RouteLogger />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/calendar" element={<Calendar />} />

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { ArrowLeft, FileText, Calendar, Clock, Plus, Edit2, X, Trash2, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDateOnlyForDisplay, getPatientWithNotes, saveDoctorNote, deleteDoctorNote, toLocalDateOnlyString, searchDoctorNotes, DoctorNotesSearchResponse } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +32,25 @@ const NotesDetail = () => {
   const [editNoteContent, setEditNoteContent] = useState('');
   const [searchQuestion, setSearchQuestion] = useState('');
   const [searchResults, setSearchResults] = useState<DoctorNotesSearchResponse[]>([]);
+  const [notesPage, setNotesPage] = useState(1);
+
+  const notesPerPage = 10;
+  const doctorNotes = patient?.doctorNotes ?? [];
+  const totalNotes = doctorNotes.length;
+  const totalPages = Math.max(1, Math.ceil(totalNotes / notesPerPage));
+  const safePage = Math.min(Math.max(notesPage, 1), totalPages);
+  const startIndex = (safePage - 1) * notesPerPage;
+  const pagedNotes = doctorNotes.slice(startIndex, startIndex + notesPerPage);
+
+  useEffect(() => {
+    if (notesPage !== safePage) {
+      setNotesPage(safePage);
+    }
+  }, [notesPage, safePage]);
+
+  useEffect(() => {
+    setNotesPage(1);
+  }, [patientId]);
 
   const saveMutation = useMutation({
     mutationFn: saveDoctorNote,
@@ -72,7 +91,7 @@ const NotesDetail = () => {
   });
 
   const searchMutation = useMutation({
-    mutationFn: (question: string) => searchDoctorNotes(patientId, question),
+    mutationFn: (question: string) => searchDoctorNotes(patientId, question, patient?.name),
     onSuccess: (data) => {
       setSearchQuestion('');
       setSearchResults((prev) => [data, ...prev]);
@@ -257,13 +276,136 @@ const NotesDetail = () => {
             </div>
           )}
 
-          <div className="space-y-4">
-            {patient.doctorNotes.map((note, index) => (
-              <div
-                key={note.id}
-                className="neo-card p-5 rounded-xl animate-slide-up"
-                style={{ animationDelay: `${index * 100}ms` }}
+          {/* Search Doctor Notes Section */}
+          <div className="mt-8 pt-6 border-t border-border relative z-10">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Search className="h-5 w-5 text-primary" />
+              Search Past Visit Notes
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ask questions about past visits for {patient.name}. For example, "What did I discuss with this patient about medication 2 weeks ago?"
+            </p>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="e.g., What did I discuss with this patient about asthma medication?"
+                value={searchQuestion}
+                onChange={(e) => setSearchQuestion(e.target.value)}
+                className="min-h-[100px] resize-none"
+                disabled={searchMutation.isPending}
+              />
+              <Button
+                onClick={handleSearchNotes}
+                disabled={!searchQuestion.trim() || searchMutation.isPending}
+                className="w-full sm:w-auto"
               >
+                {searchMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Searching notes...
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 mr-2" />
+                    Search Notes
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Search Results Section */}
+          {searchResults.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-border space-y-6 relative z-10">
+              <h3 className="text-lg font-semibold text-foreground">Search Results</h3>
+              {searchResults.map((result, idx) => (
+                <div
+                  key={idx}
+                  className="neo-card p-6 rounded-2xl space-y-4 animate-slide-up"
+                >
+                  {/* Question */}
+                  <div>
+                    <p className="text-sm font-medium text-primary mb-2">Question:</p>
+                    <p className="text-foreground">{result.question}</p>
+                  </div>
+
+                  {/* Answer */}
+                  <div>
+                    <p className="text-sm font-medium text-primary mb-2">Answer:</p>
+                    <div className="space-y-3">
+                      {result.answer.split('\n\n').map((paragraph, pIdx) => (
+                        <p key={pIdx} className="text-foreground leading-relaxed">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Referenced Notes */}
+                  {result.notes && result.notes.length > 0 && (
+                    <div className="pt-4 border-t border-border/50">
+                      <p className="text-sm font-medium text-muted-foreground mb-3">
+                        Referenced Visit Notes ({result.notes.length}):
+                      </p>
+                      <div className="space-y-3">
+                        {result.notes.map((note, nIdx) => (
+                          <div key={nIdx} className="neo-card p-4 rounded-xl">
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                              <span className="flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5" />
+                                {formatDateOnlyForDisplay(note.visit_date)}
+                              </span>
+                              {note.similarity_score && (
+                                <span className="text-primary font-medium">
+                                  Relevance: {(note.similarity_score * 100).toFixed(0)}%
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-foreground leading-relaxed line-clamp-3">
+                              {note.visit_notes}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-12 pt-8 border-t border-border relative z-0">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div className="text-sm text-muted-foreground">
+                Showing {totalNotes === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + notesPerPage, totalNotes)} of {totalNotes}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-muted-foreground">Page {safePage} of {totalPages}</div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setNotesPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage <= 1}
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setNotesPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage >= totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {pagedNotes.map((note, index) => (
+                <div
+                  key={note.id}
+                  className="neo-card p-5 rounded-xl animate-slide-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                 {editingNoteId === note.id ? (
                   <>
                     <div className="flex items-center gap-4 mb-3 text-sm text-muted-foreground">
@@ -330,112 +472,16 @@ const NotesDetail = () => {
                     <p className="text-foreground leading-relaxed">{note.content}</p>
                   </>
                 )}
-              </div>
-            ))}
-          </div>
-
-          {patient.doctorNotes.length === 0 && !showNewNote && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No clinical notes recorded yet.</p>
-            </div>
-          )}
-
-          {/* Search Doctor Notes Section */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Search className="h-5 w-5 text-primary" />
-              Search Past Visit Notes
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Ask questions about past visits for {patient.name}. For example, "What did I discuss with this patient about medication 2 weeks ago?"
-            </p>
-            <div className="space-y-4">
-              <Textarea
-                placeholder="e.g., What did I discuss with this patient about asthma medication?"
-                value={searchQuestion}
-                onChange={(e) => setSearchQuestion(e.target.value)}
-                className="min-h-[100px] resize-none"
-                disabled={searchMutation.isPending}
-              />
-              <Button
-                onClick={handleSearchNotes}
-                disabled={!searchQuestion.trim() || searchMutation.isPending}
-                className="w-full sm:w-auto"
-              >
-                {searchMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Searching notes...
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-4 w-4 mr-2" />
-                    Search Notes
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Search Results Section */}
-          {searchResults.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-border space-y-6">
-              <h3 className="text-lg font-semibold text-foreground">Search Results</h3>
-              {searchResults.map((result, idx) => (
-                <div
-                  key={idx}
-                  className="neo-card p-6 rounded-2xl space-y-4 animate-slide-up"
-                >
-                  {/* Question */}
-                  <div>
-                    <p className="text-sm font-medium text-primary mb-2">Question:</p>
-                    <p className="text-foreground">{result.question}</p>
-                  </div>
-
-                  {/* Answer */}
-                  <div>
-                    <p className="text-sm font-medium text-primary mb-2">Answer:</p>
-                    <div className="space-y-3">
-                      {result.answer.split('\n\n').map((paragraph, pIdx) => (
-                        <p key={pIdx} className="text-foreground leading-relaxed">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Referenced Notes */}
-                  {result.notes && result.notes.length > 0 && (
-                    <div className="pt-4 border-t border-border/50">
-                      <p className="text-sm font-medium text-muted-foreground mb-3">
-                        Referenced Visit Notes ({result.notes.length}):
-                      </p>
-                      <div className="space-y-3">
-                        {result.notes.map((note, nIdx) => (
-                          <div key={nIdx} className="neo-card p-4 rounded-xl">
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
-                              <span className="flex items-center gap-1.5">
-                                <Calendar className="h-3.5 w-3.5" />
-                                {formatDateOnlyForDisplay(note.visit_date)}
-                              </span>
-                              {note.similarity_score && (
-                                <span className="text-primary font-medium">
-                                  Relevance: {(note.similarity_score * 100).toFixed(0)}%
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-foreground leading-relaxed line-clamp-3">
-                              {note.visit_notes}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
-          )}
+
+            {patient.doctorNotes.length === 0 && !showNewNote && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No clinical notes recorded yet.</p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>

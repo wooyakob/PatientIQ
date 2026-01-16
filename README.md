@@ -56,16 +56,32 @@ Configured via environment variables:
   - `Patient_4` (collection)
   - `Patient_5` (collection)
 - **Questionnaires** (scope)
-  - `Patient_1` (collection)
-  - `Patient_2` (collection)
-  - `Patient_3` (collection)
-  - `Patient_4` (collection)
-  - `Patient_5` (collection)
+  - `patient_1` (collection)
+  - `patient_2` (collection)
+  - `patient_3` (collection)
+  - `patient_4` (collection)
+  - `patient_5` (collection)
 - **Messages** (scope)
   - `Private` (collection)
   - `Public` (collection)
 - **Calendar** (scope)
   - `Appointments` (collection)
+
+#### Agent Catalog (bucket)
+  - `agent_catalog
+     - metadata
+     - prompts
+     - tools
+  - `agent_activity
+     - logs
+
+default
+default
+system
+ mobile
+ query
+
+
 
 
  ## Cluster Cost Estimate

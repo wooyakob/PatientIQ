@@ -36,7 +36,6 @@ node_modules
 *.db
 *.csv
 *examples/
-*indexes/
 /man_api
 /data_api
 .claude

@@ -1,11 +1,15 @@
 import json
+import logging
 import sys
-from datetime import datetime
+import time
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
 
 from backend.database import db
 from backend.models import Patient, WearableData
@@ -15,11 +19,70 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "agents" / "pulmonary_rese
 # Use new LangGraph-based agent with backward compatibility
 from compat import run_pulmonary_research
 
+logger = logging.getLogger("cko")
+logger.setLevel(logging.INFO)
+
+
+def _append_json_list_record(path: Path, record: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    existing: list
+    if path.exists():
+        try:
+            parsed = json.loads(path.read_text(encoding="utf-8"))
+            existing = parsed if isinstance(parsed, list) else []
+        except Exception:
+            existing = []
+    else:
+        existing = []
+    existing.append(record)
+    path.write_text(json.dumps(existing, indent=4) + "\n", encoding="utf-8")
+
+
+def _now_utc_iso_z() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 app = FastAPI(
     title="Healthcare API",
     description="FastAPI backend for healthcare dashboard",
     version="1.0.0",
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    request_id = request.headers.get("x-request-id") or str(uuid.uuid4())
+    request.state.request_id = request_id
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        duration_ms = (time.perf_counter() - start) * 1000
+        logger.exception(
+            "Unhandled exception request_id=%s method=%s path=%s duration_ms=%.2f",
+            request_id,
+            request.method,
+            request.url.path,
+            duration_ms,
+        )
+        raise
+
+    try:
+        response.headers["X-Request-ID"] = request_id
+    except Exception:
+        pass
+
+    duration_ms = (time.perf_counter() - start) * 1000
+    logger.info(
+        "request request_id=%s method=%s path=%s status=%s duration_ms=%.2f",
+        request_id,
+        request.method,
+        request.url.path,
+        getattr(response, "status_code", "?"),
+        duration_ms,
+    )
+    return response
+
 
 # CORS middleware for frontend communication
 app.add_middleware(
@@ -46,9 +109,11 @@ def health():
 async def get_patients():
     """Get all patients"""
     try:
+        logger.info("get_patients")
         patients = db.get_all_patients()
         return patients
     except Exception as e:
+        logger.exception("Error fetching patients")
         raise HTTPException(status_code=500, detail=f"Error fetching patients: {str(e)}")
 
 
@@ -56,6 +121,7 @@ async def get_patients():
 async def get_patient(patient_id: str):
     """Get a specific patient by ID"""
     try:
+        logger.info("get_patient patient_id=%s", patient_id)
         patient = db.get_patient(patient_id)
         if not patient:
             raise HTTPException(status_code=404, detail=f"Patient {patient_id} not found")
@@ -63,6 +129,7 @@ async def get_patient(patient_id: str):
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("Error fetching patient patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error fetching patient: {str(e)}")
 
 
@@ -70,8 +137,10 @@ async def get_patient(patient_id: str):
 async def get_patient_wearables(patient_id: str, days: int = 30):
     """Get wearable data (daily entries) for a patient"""
     try:
+        logger.info("get_patient_wearables patient_id=%s days=%s", patient_id, days)
         return db.get_wearables_for_patient(patient_id, days=days)
     except Exception as e:
+        logger.exception("Error fetching wearable data patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error fetching wearable data: {str(e)}")
 
 
@@ -117,6 +186,45 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
         if not question:
             raise HTTPException(status_code=400, detail="Question is required")
 
+        doctor_name = str(payload.get("doctor_name") or "Tiffany Mitchell")
+        patient_name = str(payload.get("patient_name") or "").strip()
+        if not patient_name:
+            try:
+                patient = db.get_patient(patient_id)
+                patient_name = str((patient or {}).get("name") or "").strip()
+            except Exception:
+                patient_name = ""
+
+        timestamp = _now_utc_iso_z()
+        question_id = f"dq_{int(datetime.now().timestamp() * 1000)}"
+        question_doc = {
+            "question_asked": question,
+            "patient_name": patient_name,
+            "doctor_name": doctor_name,
+            "timestamp": timestamp,
+        }
+        try:
+            db.save_doctors_question(question_id, question_doc)
+        except Exception as e:
+            logger.warning("Warning: Failed to save doctors question: %s", e)
+
+        try:
+            _append_json_list_record(
+                Path(__file__).parent.parent
+                / "data"
+                / "doctors_questions"
+                / "doctors_questions.json",
+                question_doc,
+            )
+        except Exception as e:
+            logger.warning("Warning: Failed to append doctors_questions.json: %s", e)
+
+        logger.info(
+            "search_patient_doctor_notes patient_id=%s question_len=%s",
+            patient_id,
+            len(question),
+        )
+
         # Import and use the doc notes search agent using importlib to avoid module caching issues
         import importlib.util
 
@@ -127,16 +235,58 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
         docnotes_compat = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(docnotes_compat)
 
-        result = docnotes_compat.search_doctor_notes(patient_id, question)
+        result = docnotes_compat.search_doctor_notes(
+            patient_id, question, patient_name=patient_name
+        )
 
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
+
+        authoritative_patient_name = (patient_name or str(result.get("patient_name") or "")).strip()
+        if authoritative_patient_name:
+            result["patient_name"] = authoritative_patient_name
+
+        answer_text = str(result.get("answer") or "")
+        if answer_text:
+            if authoritative_patient_name:
+                answer_text = answer_text.replace("[patient_name]", authoritative_patient_name)
+                if authoritative_patient_name.lower() != "john doe":
+                    answer_text = answer_text.replace("John Doe", authoritative_patient_name)
+            if doctor_name:
+                answer_text = answer_text.replace("[doctor_name]", doctor_name)
+            result["answer"] = answer_text
+
+        answer_id = f"ad_{int(datetime.now().timestamp() * 1000)}"
+        referenced_visit_notes = result.get("notes", [])
+        answer_doc = {
+            "question_asked": question,
+            "patient_name": str(result.get("patient_name") or ""),
+            "doctor_name": doctor_name,
+            "timestamp": timestamp,
+            "answer_provided": str(result.get("answer") or ""),
+            "referenced_visit_notes": referenced_visit_notes,
+        }
+        try:
+            db.save_answers_doctors(answer_id, answer_doc)
+        except Exception as e:
+            logger.warning("Warning: Failed to save answers_doctors: %s", e)
+
+        try:
+            _append_json_list_record(
+                Path(__file__).parent.parent / "data" / "answers_doctors" / "answers_doctors.json",
+                answer_doc,
+            )
+        except Exception as e:
+            logger.warning("Warning: Failed to append answers_doctors.json: %s", e)
+
+        result["referenced_visit_notes"] = referenced_visit_notes
 
         return result
 
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("Error searching notes patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error searching notes: {str(e)}")
 
 
@@ -481,6 +631,12 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
         if not question:
             question = "What are evidence-based treatment options and practical next steps for this patient's condition?"
 
+        logger.info(
+            "get_patient_research patient_id=%s question_len=%s",
+            patient_id,
+            len(question),
+        )
+
         # Run the pulmonary research agent
         result = run_pulmonary_research(patient_id, question)
 
@@ -492,6 +648,7 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("Error fetching research patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error fetching research: {str(e)}")
 
 
@@ -543,6 +700,7 @@ async def ask_research_question(patient_id: str, payload: dict = Body(...)):
     except HTTPException:
         raise
     except Exception as e:
+        logger.exception("Error processing research question patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
 
 

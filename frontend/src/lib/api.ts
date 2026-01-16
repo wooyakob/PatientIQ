@@ -233,20 +233,55 @@ const toPatient = (api: ApiPatient, doctorNotes: DoctorNote[] = []): Patient => 
 };
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-  });
+  const requestId =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const start = performance.now();
+  const method = (init?.method ?? "GET").toUpperCase();
+
+  if (import.meta.env.DEV) {
+    console.groupCollapsed(`[api] ${method} ${path} (${requestId})`);
+    console.log("request", { path, method, requestId, init });
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Request-ID": requestId,
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.error("network error", err);
+      console.groupEnd();
+    }
+    throw err;
+  }
+
+  const durationMs = performance.now() - start;
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(text || `Request failed: ${res.status}`);
+    if (import.meta.env.DEV) {
+      console.error("response error", { status: res.status, durationMs, text });
+      console.groupEnd();
+    }
+    throw new Error(text || `Request failed: ${res.status} (request_id=${requestId})`);
   }
 
-  return (await res.json()) as T;
+  const data = (await res.json()) as T;
+  if (import.meta.env.DEV) {
+    console.log("response", { status: res.status, durationMs, data });
+    console.groupEnd();
+  }
+
+  return data;
 }
 
 export async function getPatients(): Promise<Patient[]> {
@@ -371,20 +406,22 @@ export interface DoctorNotesSearchResponse {
   patient_id: string;
   patient_name: string;
   question: string;
-  notes: DoctorNoteSearchResult[];
+  notes: any[];
   answer: string;
+  referenced_visit_notes?: any[];
 }
 
 // Doctor Notes Search Agent API
 export async function searchDoctorNotes(
   patientId: string,
-  question: string
+  question: string,
+  patientName?: string
 ): Promise<DoctorNotesSearchResponse> {
   return apiFetch<DoctorNotesSearchResponse>(
     `/api/patients/${patientId}/doctor-notes/search`,
     {
       method: 'POST',
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, patient_name: patientName }),
     }
   );
 }
