@@ -1,0 +1,1 @@
+CREATE VECTOR INDEX `hyperscale_pubmed_vectorized_article_vectorized` ON `Research`.`Pubmed`.`Pulmonary`(`article_vectorized` VECTOR) WITH { "nodes":[ "svc-qise-node-004.jsj8zoukjhiil00.cloud.couchbase.com:18091","svc-qise-node-005.jsj8zoukjhiil00.cloud.couchbase.com:18091" ], "num_replica":1, "dimension":2048, "similarity":"L2", "description":"IVF,SQ8" }

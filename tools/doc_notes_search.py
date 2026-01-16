@@ -59,19 +59,19 @@ def doc_notes_search(query: str, patient_id: Optional[str] = None, top_k: int = 
         if patient_id:
             query_str = """
                 SELECT n.visit_date, n.visit_notes, n.doctor_name, n.patient_name, n.patient_id,
-                       APPROX_VECTOR_DISTANCE(n.visit_notes_vectorized, $query_vector, "COSINE") AS similarity_score
+                       APPROX_VECTOR_DISTANCE(n.all_notes_vectorized, $query_vector, "L2") AS similarity_score
                 FROM `Scripps`.Notes.Doctor n
                 WHERE n.patient_id = $patient_id
-                ORDER BY APPROX_VECTOR_DISTANCE(n.visit_notes_vectorized, $query_vector, "COSINE")
+                ORDER BY APPROX_VECTOR_DISTANCE(n.all_notes_vectorized, $query_vector, "L2")
                 LIMIT $top_k
             """
             params = {"query_vector": embedding, "patient_id": patient_id, "top_k": min(top_k, 10)}
         else:
             query_str = """
                 SELECT n.visit_date, n.visit_notes, n.doctor_name, n.patient_name, n.patient_id,
-                       APPROX_VECTOR_DISTANCE(n.visit_notes_vectorized, $query_vector, "COSINE") AS similarity_score
+                       APPROX_VECTOR_DISTANCE(n.all_notes_vectorized, $query_vector, "L2") AS similarity_score
                 FROM `Scripps`.Notes.Doctor n
-                ORDER BY APPROX_VECTOR_DISTANCE(n.visit_notes_vectorized, $query_vector, "COSINE")
+                ORDER BY APPROX_VECTOR_DISTANCE(n.all_notes_vectorized, $query_vector, "L2")
                 LIMIT $top_k
             """
             params = {"query_vector": embedding, "top_k": min(top_k, 10)}

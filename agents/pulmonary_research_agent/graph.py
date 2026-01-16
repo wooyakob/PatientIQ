@@ -6,7 +6,6 @@ from edge import out_research_agent_edge
 from node import PulmonaryResearchAgent
 from node import State
 
-# Make sure you populate your .env file with the correct credentials!
 dotenv.load_dotenv()
 
 

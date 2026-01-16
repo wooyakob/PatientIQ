@@ -7,6 +7,8 @@ Provides an interface for easy integration with existing backend code.
 import sys
 from pathlib import Path
 
+from typing import Optional
+
 import agentc
 import langchain_core.messages
 
@@ -48,7 +50,12 @@ def _get_searcher() -> DocNotesSearcher:
     return _searcher
 
 
-def search_doctor_notes(patient_id: str, question: str, enable_tracing: bool = True) -> dict:  # noqa: ARG001
+def search_doctor_notes(
+    patient_id: str,
+    question: str,
+    patient_name: Optional[str] = None,
+    enable_tracing: bool = True,
+) -> dict:  # noqa: ARG001
     """
     Search doctor notes for a patient using semantic search.
 
@@ -65,11 +72,13 @@ def search_doctor_notes(patient_id: str, question: str, enable_tracing: bool = T
 
         # Build starting state
         state = DocNotesSearcher.build_starting_state(patient_id=patient_id, question=question)
+        if patient_name:
+            state["patient_name"] = patient_name
 
         # Add the question as a human message in JSON format
         state["messages"].append(
             langchain_core.messages.HumanMessage(
-                content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}'
+                content=f'{{"patient_id": "{patient_id}", "patient_name": "{patient_name or ""}", "question": "{question}"}}'
             )
         )
 

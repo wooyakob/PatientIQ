@@ -19,8 +19,9 @@ This Agent will review a Patient's previsit Questionnaire answers and allow a Do
 ### Agentc 
 agentc init
 agentc status
-agentc index tools prompts
+agentc index tools prompts (optional logs, if there are issues with tracing)
 agentc publish --bucket agent-catalog
+agentc clean (can clean logs locally, and in Capella)
 
 #### Vector Search Tools
 - **Couchbase AI Services**: Embedding model with 2048-dimensional vectors
@@ -55,3 +56,5 @@ https://github.com/couchbaselabs/agent-catalog/tree/master/examples/with_langgra
 https://github.com/couchbaselabs/agent-catalog/tree/master/examples/with_fastapi
 https://docs.couchbase.com/ai/build/agent-tracer/add-spans-callbacks.html
 https://docs.couchbase.com/ai/build/agent-tracer/add-spans-callbacks.html#tool-results
+https://docs.couchbase.com/ai/api-guide/api-use.html
+https://docs.couchbase.com/ai/model-service-api-reference/rest-api.html 

@@ -866,6 +866,17 @@ class CouchbaseDB:
             print(f"Error saving research question: {e}")
             return False
 
+    def save_doctors_question(self, question_id: str, question_data: dict) -> bool:
+        """Save a doctor-notes question to Notes.doctors_questions collection"""
+        self._check_connection()
+        try:
+            doctors_questions_collection = self.notes_scope.collection("doctors_questions")
+            doctors_questions_collection.upsert(question_id, question_data)
+            return True
+        except Exception as e:
+            print(f"Error saving doctors question: {e}")
+            return False
+
     def save_research_answer(self, answer_id: str, answer_data: dict) -> bool:
         """Save a research answer to Research.Pubmed.answers collection"""
         self._check_connection()
@@ -876,6 +887,17 @@ class CouchbaseDB:
             return True
         except Exception as e:
             print(f"Error saving research answer: {e}")
+            return False
+
+    def save_answers_doctors(self, answer_id: str, answer_data: dict) -> bool:
+        """Save a doctor-notes answer to Notes.answers_doctors collection"""
+        self._check_connection()
+        try:
+            answers_doctors_collection = self.notes_scope.collection("answers_doctors")
+            answers_doctors_collection.upsert(answer_id, answer_data)
+            return True
+        except Exception as e:
+            print(f"Error saving answers_doctors: {e}")
             return False
 
     def update_answer_rating(self, answer_id: str, rating: int) -> bool:

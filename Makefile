@@ -12,13 +12,13 @@ index-catalog:
 	@echo "Indexing agent catalog..."
 	@uv run agentc index tools prompts
 
-backend: index-catalog
+backend:
 	uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000
 
 frontend:
 	npm --prefix frontend run dev
 
-dev: index-catalog
+dev:
 	@echo "Starting backend + frontend..."
 	@echo "Backend:  http://127.0.0.1:8000"
 	@echo "Frontend: http://localhost:8080"

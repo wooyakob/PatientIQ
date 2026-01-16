@@ -87,9 +87,9 @@ def paper_search(query: str, patient_id: Optional[str] = None, top_k: int = 3) -
         result = cluster.query(
             """
             SELECT r.title, r.author, r.article_text, r.article_citation, r.pmc_link,
-                   APPROX_VECTOR_DISTANCE(r.article_vectorized, $query_vector, "COSINE") AS distance
+                   APPROX_VECTOR_DISTANCE(r.article_vectorized, $query_vector, "L2") AS distance
             FROM `Research`.Pubmed.Pulmonary r
-            ORDER BY APPROX_VECTOR_DISTANCE(r.article_vectorized, $query_vector, "COSINE")
+            ORDER BY APPROX_VECTOR_DISTANCE(r.article_vectorized, $query_vector, "L2")
             LIMIT $limit
             """,
             couchbase.options.QueryOptions(
