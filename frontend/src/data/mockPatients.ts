@@ -11,7 +11,7 @@ export interface Patient {
     heartRate: number[];
     stepCount: number[];
   };
-  sentiment: 'amazing' | 'good' | 'neutral' | 'poor' | 'terrible';
+  sentiment: 'positive' | 'neutral' | 'mixed' | 'negative';
   privateNotes: string;
   researchTopic: string;
   researchContent: string[];
@@ -37,7 +37,7 @@ export const patients: Patient[] = [
       heartRate: [72, 75, 68, 71, 74, 69, 73],
       stepCount: [4500, 5200, 3800, 4100, 4800, 5500, 4200],
     },
-    sentiment: 'good',
+    sentiment: 'positive',
     privateNotes: "Feeling more optimistic after last treatment. Energy levels improving. Family support has been incredible.",
     researchTopic: 'Breast Cancer Treatment Advances',
     researchContent: [
@@ -88,7 +88,7 @@ export const patients: Patient[] = [
       heartRate: [85, 92, 78, 88, 82, 90, 86],
       stepCount: [6200, 7500, 5800, 8100, 6900, 7200, 6500],
     },
-    sentiment: 'poor',
+    sentiment: 'negative',
     privateNotes: "Work stress overwhelming. Sleep has been terrible. Panic attacks returning. Feel like I'm failing at everything.",
     researchTopic: 'Anxiety Treatment Approaches',
     researchContent: [
@@ -114,7 +114,7 @@ export const patients: Patient[] = [
       heartRate: [68, 70, 66, 72, 69, 71, 67],
       stepCount: [8500, 9200, 7800, 8900, 9500, 8100, 8700],
     },
-    sentiment: 'amazing',
+    sentiment: 'positive',
     privateNotes: "Feeling the best I have in years! Walking every day, blood pressure under control. Life is good!",
     researchTopic: 'Hypertension Control Strategies',
     researchContent: [

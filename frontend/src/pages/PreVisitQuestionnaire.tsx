@@ -1,7 +1,7 @@
 import { Header } from '@/components/Header';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
-import { getPreVisitQuestionnaire } from '@/lib/api';
+import { getPreVisitQuestionnaire, getPreVisitQuestionnaireSummary } from '@/lib/api';
 
 function formatKey(k: string): string {
   const s = String(k ?? '').trim();
@@ -71,6 +71,17 @@ export default function PreVisitQuestionnaire() {
     enabled: Boolean(patientId),
   });
 
+  const {
+    data: questionnaireSummary,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+  } = useQuery({
+    queryKey: ['questionnaires', 'pre-visit', patientId, 'summary'],
+    queryFn: () => getPreVisitQuestionnaireSummary(patientId),
+    enabled: Boolean(patientId),
+    staleTime: 1000 * 60 * 60,
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -126,6 +137,17 @@ export default function PreVisitQuestionnaire() {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="glass-card neo-shadow rounded-2xl p-6 mb-6">
+          <p className="text-xs text-muted-foreground mb-2">Summary</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {isSummaryLoading
+              ? 'Generating summary…'
+              : isSummaryError
+                ? 'Unable to generate summary right now.'
+                : (questionnaireSummary?.summary ?? '')}
+          </p>
         </div>
 
         <div className="space-y-6">

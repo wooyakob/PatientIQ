@@ -5,11 +5,10 @@ from pydantic import BaseModel, Field
 
 
 class SentimentLevel(str, Enum):
-    amazing = "amazing"
-    good = "good"
+    positive = "positive"
     neutral = "neutral"
-    poor = "poor"
-    terrible = "terrible"
+    mixed = "mixed"
+    negative = "negative"
 
 
 class WearableData(BaseModel):
@@ -22,6 +21,17 @@ class WearableData(BaseModel):
     step_count: List[int] = Field(
         default_factory=list, description="Daily step count readings (last 30 days)"
     )
+
+
+class WearablesSummary(BaseModel):
+    patient_id: str
+    days: int
+    summary: str
+
+
+class QuestionnaireSummary(BaseModel):
+    patient_id: str
+    summary: str
 
 
 class DoctorNote(BaseModel):
@@ -42,6 +52,7 @@ class Patient(BaseModel):
     next_appointment: str
     wearable_data: WearableData
     sentiment: SentimentLevel
+    sentiment_rating: str = ""
     private_notes: str
     research_topic: str
     research_content: List[str]

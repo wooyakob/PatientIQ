@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { ArrowLeft, BookOpen, ExternalLink, Send, Loader2, Star } from 'lucide-react';
+import { ArrowLeft, BookOpen, ExternalLink, Send, Loader2, Star, Search, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
@@ -9,7 +9,10 @@ import {
   askResearchQuestion,
   saveResearchAnswer,
   updateAnswerRating,
-  ResearchResult
+  searchTavilyResearch,
+  addResearchPaper,
+  ResearchResult,
+  ResearchPaper
 } from '@/lib/api';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -27,6 +30,10 @@ const ResearchDetail = () => {
   const patientId = id ?? '';
   const [question, setQuestion] = useState('');
   const [answers, setAnswers] = useState<ResearchAnswer[]>([]);
+  const [tavilyQuery, setTavilyQuery] = useState('');
+  const [tavilyResults, setTavilyResults] = useState<ResearchPaper[]>([]);
+  const [selectedPaper, setSelectedPaper] = useState<ResearchPaper | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Fetch initial research summary
   const {
@@ -86,6 +93,28 @@ const ResearchDetail = () => {
           a.answerId === variables.answerId ? { ...a, rating: variables.rating } : a
         )
       );
+    },
+  });
+
+  // Mutation for Tavily search
+  const tavilySearchMutation = useMutation({
+    mutationFn: (query: string) => searchTavilyResearch(query),
+    onSuccess: (data) => {
+      setTavilyResults(data.results || []);
+      setTavilyQuery('');
+    },
+  });
+
+  // Mutation for adding papers to database
+  const addPaperMutation = useMutation({
+    mutationFn: (paper: ResearchPaper) => addResearchPaper(paper),
+    onSuccess: () => {
+      setShowAddModal(false);
+      setSelectedPaper(null);
+      alert('Paper added to database successfully!');
+    },
+    onError: (error: any) => {
+      alert(error.message || 'Failed to add paper');
     },
   });
 
@@ -267,6 +296,69 @@ const ResearchDetail = () => {
             </div>
           </div>
 
+          {/* Search Latest Research (Web) */}
+          <div className="pt-6 border-t border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <Search className="h-5 w-5" />
+              <h3 className="text-xl font-semibold">Search Latest Research (Web)</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Search the web for the latest research on {initialResearch.condition}
+            </p>
+
+            <div className="space-y-4">
+              <Textarea
+                placeholder={`e.g., "Latest clinical trials for ${initialResearch.condition} 2025"`}
+                value={tavilyQuery}
+                onChange={(e) => setTavilyQuery(e.target.value)}
+                rows={2}
+              />
+              <Button
+                onClick={() => tavilySearchMutation.mutate(tavilyQuery)}
+                disabled={!tavilyQuery.trim() || tavilySearchMutation.isPending}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                {tavilySearchMutation.isPending ? 'Searching...' : 'Search Web'}
+              </Button>
+            </div>
+
+            {/* Tavily Results */}
+            {tavilyResults.length > 0 && (
+              <div className="mt-6 space-y-4">
+                <h4 className="text-lg font-medium">Web Results ({tavilyResults.length})</h4>
+                {tavilyResults.map((paper, idx) => (
+                  <div key={idx} className="neo-card p-4 space-y-3">
+                    <h5 className="font-semibold text-base">{paper.title}</h5>
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      {paper.article_text}
+                    </p>
+                    <div className="flex items-center gap-3 text-sm">
+                      <a
+                        href={paper.pmc_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        View Source →
+                      </a>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedPaper(paper);
+                          setShowAddModal(true);
+                        }}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add to Database
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Previous Answers Section */}
           {answers.length > 0 && (
             <div className="mt-8 pt-6 border-t border-border space-y-6">
@@ -364,6 +456,39 @@ const ResearchDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* Add Paper Confirmation Modal */}
+      {showAddModal && selectedPaper && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-3">Add Paper to Database</h3>
+            <p className="text-sm text-muted-foreground mb-2">
+              <strong>{selectedPaper.title}</strong>
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              This will add the paper to the medical research database and vectorize
+              it for future semantic searches.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddModal(false);
+                  setSelectedPaper(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => addPaperMutation.mutate(selectedPaper)}
+                disabled={addPaperMutation.isPending}
+              >
+                {addPaperMutation.isPending ? 'Adding...' : 'Add Paper'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

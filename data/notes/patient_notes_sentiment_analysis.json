@@ -1,0 +1,1202 @@
+[
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-12-28",
+    "visit_notes": "Energy is low today. Cough is about the same.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-06-04",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2024-03-23",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-05-18",
+    "visit_notes": "I felt congested this morning and tired, but improved after clearing my chest.",
+    "visit_sentiment": [
+      {
+        "response": "positive (improved)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-02-08",
+    "visit_notes": "Im a bit drained, but breathing feels clearer after treatments.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2024-01-08",
+    "visit_notes": "Breathing feels a bit heavier on exertion, but Im managing day to day.",
+    "visit_sentiment": [
+      {
+        "response": "Positive (implying that despite some challenges, the individual is managing and maintaining a positive outlook)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-04-16",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-06-27",
+    "visit_notes": "I felt wheezy after exercise, but the rescue inhaler helped quickly.",
+    "visit_sentiment": [
+      {
+        "response": "positive (focusing on the relief provided by the rescue inhaler)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-07-04",
+    "visit_notes": "I felt congested this morning and tired, but improved after clearing my chest.",
+    "visit_sentiment": [
+      {
+        "response": "positive (improved)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-12-20",
+    "visit_notes": "My allergies are flaring and its making my chest feel a bit tight.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2024-01-10",
+    "visit_notes": "My allergies are flaring and its making my chest feel a bit tight.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2024-02-21",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-09-13",
+    "visit_notes": "Im feeling okay today still coughing, but less than last week.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-09-16",
+    "visit_notes": "Cough is a little worse today; Im staying on top of airway clearance.",
+    "visit_sentiment": [
+      {
+        "response": "negative (due to the mention of a worsening cough, even though the person is taking measures to manage it)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-10-04",
+    "visit_notes": "I slept better this week and my breathing has been steady.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2024-01-10",
+    "visit_notes": "My appetite is better this week and I feel a bit stronger.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2024-04-14",
+    "visit_notes": "Cough is a little worse today; Im staying on top of airway clearance.",
+    "visit_sentiment": [
+      {
+        "response": "negative (due to the mention of a worsening cough, even though the person is taking measures to manage it)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-06-10",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-01-14",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2024-03-16",
+    "visit_notes": "Im worried about progression, but having a clear plan helps my anxiety.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-01-15",
+    "visit_notes": "Im watching for flare signs and trying to stay hydrated.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-12-21",
+    "visit_notes": "Im watching for flare signs and trying to stay hydrated.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2024-01-19",
+    "visit_notes": "Breathing is stable, just the usual morning cough.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2024-01-29",
+    "visit_notes": "Im worried about progression, but having a clear plan helps my anxiety.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-10-15",
+    "visit_notes": "Energy is low today. Cough is about the same.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-05-16",
+    "visit_notes": "Im feeling motivated exercise has been helping my mood.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2024-03-19",
+    "visit_notes": "Treatments take time, but Im feeling fairly steady overall.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-09-16",
+    "visit_notes": "short of breath walking up stairs, but I recovered after resting.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2024-04-19",
+    "visit_notes": "Im a bit drained, but breathing feels clearer after treatments.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2024-02-29",
+    "visit_notes": "I slept better this week and my breathing has been steady.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-11-03",
+    "visit_notes": "Im watching for flare signs and trying to stay hydrated.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-09-10",
+    "visit_notes": "Im feeling confident about my action plan and what to do if symptoms worsen.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-03-04",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-11-27",
+    "visit_notes": "Im feeling okay today still coughing, but less than last week.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-07-25",
+    "visit_notes": "Cough is dry and annoying, though overall Im coping.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-06-12",
+    "visit_notes": "I felt congested this morning and tired, but improved after clearing my chest.",
+    "visit_sentiment": [
+      {
+        "response": "positive (improved)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-05-17",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-12-11",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-08-21",
+    "visit_notes": "Im a bit drained, but breathing feels clearer after treatments.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2024-04-14",
+    "visit_notes": "Im feeling confident about my action plan and what to do if symptoms worsen.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-07-21",
+    "visit_notes": "Im feeling confident about my action plan and what to do if symptoms worsen.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-03-07",
+    "visit_notes": "Im watching for flare signs and trying to stay hydrated.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-03-26",
+    "visit_notes": "short of breath walking up stairs, but I recovered after resting.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-04-24",
+    "visit_notes": "I get tired faster than I used to, but pacing myself helps.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2024-03-05",
+    "visit_notes": "Coughing up mucus is frustrating, but airway clearance makes me feel better.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-11-02",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-05-11",
+    "visit_notes": "Im feeling confident about my action plan and what to do if symptoms worsen.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-04-24",
+    "visit_notes": "Energy is low today. Cough is about the same.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2024-02-26",
+    "visit_notes": "Treatments take time, but Im feeling fairly steady overall.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-03-31",
+    "visit_notes": "Im feeling okay today still coughing, but less than last week.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-07-29",
+    "visit_notes": "Coughing up mucus is frustrating, but airway clearance makes me feel better.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-04-22",
+    "visit_notes": "Im feeling motivated exercise has been helping my mood.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-08-17",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-08-23",
+    "visit_notes": "My appetite is better this week and I feel a bit stronger.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-11-13",
+    "visit_notes": "short of breath walking up stairs, but I recovered after resting.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-07-01",
+    "visit_notes": "Breathing feels a bit heavier on exertion, but Im managing day to day.",
+    "visit_sentiment": [
+      {
+        "response": "Positive (implying that despite some challenges, the individual is managing and maintaining a positive outlook)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-07-28",
+    "visit_notes": "Ive been keeping up with my inhalers and feel a little more in control.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-04-24",
+    "visit_notes": "Im feeling okay today still coughing, but less than last week.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-07-01",
+    "visit_notes": "Treatments take time, but Im feeling fairly steady overall.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2024-04-11",
+    "visit_notes": "Cough is dry and annoying, though overall Im coping.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-11-16",
+    "visit_notes": "I get tired faster than I used to, but pacing myself helps.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2024-01-17",
+    "visit_notes": "Im feeling okay today still coughing, but less than last week.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2023-10-10",
+    "visit_notes": "Im a bit drained, but breathing feels clearer after treatments.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-02-07",
+    "visit_notes": "Cough is dry and annoying, though overall Im coping.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-07-01",
+    "visit_notes": "Ive been keeping up with my inhalers and feel a little more in control.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-12-19",
+    "visit_notes": "Im feeling motivated exercise has been helping my mood.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-06-07",
+    "visit_notes": "short of breath walking up stairs, but I recovered after resting.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-01-13",
+    "visit_notes": "A bit anxious when I get winded, but the breathing techniques are helping.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-12-04",
+    "visit_notes": "Ive been keeping up with my inhalers and feel a little more in control.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-08-20",
+    "visit_notes": "Im a bit anxious when I get winded, but the breathing techniques are helping.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-02-09",
+    "visit_notes": "Ive been more fatigued, but my breathing feels close to baseline.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2024-02-02",
+    "visit_notes": "Im feeling motivated exercise has been helping my mood.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-05-15",
+    "visit_notes": "Ive been keeping up with my inhalers and feel a little more in control.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-03-04",
+    "visit_notes": "Cough is a little worse today; Im staying on top of airway clearance.",
+    "visit_sentiment": [
+      {
+        "response": "negative (due to the mention of a worsening cough, even though the person is taking measures to manage it)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2024-04-02",
+    "visit_notes": "Ive been keeping up with my inhalers and feel a little more in control.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-10-10",
+    "visit_notes": "Cough is a little worse today; Im staying on top of airway clearance.",
+    "visit_sentiment": [
+      {
+        "response": "negative (due to the mention of a worsening cough, even though the person is taking measures to manage it)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-03-30",
+    "visit_notes": "Ive been more fatigued, but my breathing feels close to baseline.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-03-03",
+    "visit_notes": "Ive been keeping up with my inhalers and feel a little more in control.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-11-26",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-06-09",
+    "visit_notes": "Treatments take time, but Im feeling fairly steady overall.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-09-05",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-11-28",
+    "visit_notes": "My appetite is better this week and I feel a bit stronger.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2024-02-12",
+    "visit_notes": "Im a bit drained, but breathing feels clearer after treatments.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2024-03-09",
+    "visit_notes": "Energy is low today. Cough is about the same.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2023-02-09",
+    "visit_notes": "short of breath walking up stairs, but I recovered after resting.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "4",
+    "visit_date": "2024-03-28",
+    "visit_notes": "Coughing up mucus is frustrating, but airway clearance makes me feel better.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-09-28",
+    "visit_notes": "I get tired faster than I used to, but pacing myself helps.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-01-17",
+    "visit_notes": "Im feeling motivated exercise has been helping my mood.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-11-04",
+    "visit_notes": "Cough is a little worse today; Im staying on top of airway clearance.",
+    "visit_sentiment": [
+      {
+        "response": "negative (due to the mention of a worsening cough, even though the person is taking measures to manage it)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-03-30",
+    "visit_notes": "Breathing feels a bit heavier on exertion, but Im managing day to day.",
+    "visit_sentiment": [
+      {
+        "response": "Positive (implying that despite some challenges, the individual is managing and maintaining a positive outlook)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2024-02-02",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-10-26",
+    "visit_notes": "I felt stable this week and was able to do light activity without overdoing it.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-01-12",
+    "visit_notes": "I felt wheezy after exercise, but the rescue inhaler helped quickly.",
+    "visit_sentiment": [
+      {
+        "response": "positive (focusing on the relief provided by the rescue inhaler)"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-02-27",
+    "visit_notes": "My allergies are flaring and its making my chest feel a bit tight.",
+    "visit_sentiment": [
+      {
+        "response": "negative"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-02-04",
+    "visit_notes": "I slept better this week and my breathing has been steady.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2024-02-13",
+    "visit_notes": "Im a bit anxious when I get winded, but the breathing techniques are helping.",
+    "visit_sentiment": [
+      {
+        "response": "positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "1",
+    "visit_date": "2023-03-20",
+    "visit_notes": "Breathing felt mostly OK today. A little tightness but manageable.",
+    "visit_sentiment": [
+      {
+        "response": "neutral"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "5",
+    "visit_date": "2023-07-25",
+    "visit_notes": "My appetite is better this week and I feel a bit stronger.",
+    "visit_sentiment": [
+      {
+        "response": "Positive"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "3",
+    "visit_date": "2023-08-15",
+    "visit_notes": "I get tired faster than I used to, but pacing myself helps.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  },
+  {
+    "doctor_id": "1",
+    "doctor_name": "Tiffany Mitchell",
+    "patient_id": "2",
+    "visit_date": "2024-04-26",
+    "visit_notes": "short of breath walking up stairs, but I recovered after resting.",
+    "visit_sentiment": [
+      {
+        "response": "mixed"
+      }
+    ]
+  }
+]

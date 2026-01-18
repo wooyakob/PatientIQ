@@ -3,6 +3,9 @@ import logging
 import sys
 import time
 import uuid
+import os
+import hashlib
+import requests
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -12,11 +15,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from backend.database import db
-from backend.models import Patient, WearableData
+from backend.models import Patient, WearableData, WearablesSummary, QuestionnaireSummary
 
 import agentc
 import importlib.util
 import langchain_core.messages
+
+from backend.utils.llm_client import chat_completion_text
+from backend.utils.embedding_client import embedding_vector
+from tools._shared import get_nvidia_embedding
 
 
 def _load_agent_module(agent_name: str, module_file: str = "graph.py"):
@@ -36,34 +43,42 @@ def _load_agent_module(agent_name: str, module_file: str = "graph.py"):
     # Use unique module name to avoid conflicts
     unique_module_name = f"{agent_name}_{module_file.replace('.py', '')}"
 
-    # Clear any cached modules that might conflict (graph, node, edge)
-    modules_to_clear = ["graph", "node", "edge"]
-    original_modules = {}
-    for mod_name in modules_to_clear:
-        if mod_name in sys.modules:
-            original_modules[mod_name] = sys.modules[mod_name]
-            del sys.modules[mod_name]
+    spec = importlib.util.spec_from_file_location(unique_module_name, str(module_path))
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load agent module spec from {module_path}")
 
-    # Temporarily add agent directory to path
-    sys.path.insert(0, agent_dir)
-
+    module = importlib.util.module_from_spec(spec)
+    prior = sys.modules.get(unique_module_name)
+    sys.modules[unique_module_name] = module
+    original_sys_path = list(sys.path)
+    if agent_dir not in sys.path:
+        sys.path.insert(0, agent_dir)
     try:
-        spec = importlib.util.spec_from_file_location(unique_module_name, module_path)
-        module = importlib.util.module_from_spec(spec)
-
-        # Register in sys.modules before exec to handle internal imports
-        sys.modules[unique_module_name] = module
         spec.loader.exec_module(module)
-
-        return module
     finally:
-        # Clean up sys.path
-        if agent_dir in sys.path:
-            sys.path.remove(agent_dir)
+        sys.path = original_sys_path
+        if prior is None:
+            sys.modules.pop(unique_module_name, None)
+        else:
+            sys.modules[unique_module_name] = prior
 
-        # Restore original modules
-        for mod_name, mod_obj in original_modules.items():
-            sys.modules[mod_name] = mod_obj
+    return module
+
+
+def _trim_to_last_sentence(text: str) -> str:
+    text = (text or "").strip()
+    if not text:
+        return ""
+
+    last_dot = text.rfind(".")
+    last_bang = text.rfind("!")
+    last_q = text.rfind("?")
+    last_end = max(last_dot, last_bang, last_q)
+
+    if last_end == -1:
+        return text
+
+    return text[: last_end + 1].strip()
 
 
 # Import PulmonaryResearcher from pulmonary_research_agent/graph.py
@@ -178,6 +193,69 @@ async def get_patient(patient_id: str):
         raise HTTPException(status_code=500, detail=f"Error fetching patient: {str(e)}")
 
 
+@app.post("/api/patients/{patient_id}/summary")
+async def summarize_patient(patient_id: str):
+    """Summarize a patient's raw demographic/profile fields in a single paragraph."""
+    try:
+        logger.info("summarize_patient patient_id=%s", patient_id)
+        patient = db.get_patient_raw(patient_id)
+        if not patient:
+            raise HTTPException(status_code=404, detail=f"Patient {patient_id} not found")
+
+        prompt = (
+            "Summarize the following patient information in a single paragraph. "
+            "Be factual, concise, and avoid speculation.\n\n"
+            f"Patient JSON:\n{json.dumps(patient, ensure_ascii=False)}"
+        )
+
+        text, _raw = await chat_completion_text(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=220,
+            temperature=0.2,
+        )
+
+        summary = (text or "").strip()
+        return {"patient_id": str(patient_id), "patient": patient, "summary": summary}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error summarizing patient patient_id=%s", patient_id)
+        raise HTTPException(status_code=500, detail=f"Error summarizing patient: {str(e)}")
+
+
+@app.post("/api/conditions/summary")
+async def summarize_condition(payload: dict = Body(...)):
+    """Summarize a medical condition in a single paragraph (no agents)."""
+    try:
+        condition = str(payload.get("condition") or "").strip()
+        if not condition:
+            raise HTTPException(status_code=400, detail="condition is required")
+
+        logger.info("summarize_condition condition=%s", condition)
+
+        prompt = (
+            "Write a single-paragraph clinical overview of the condition below for a busy clinician. "
+            "Include typical presentation and high-level management considerations. "
+            "Keep it concise (under ~90 words) and end with a period. "
+            "Do not mention that you are an AI.\n\n"
+            f"Condition: {condition}"
+        )
+
+        text, _raw = await chat_completion_text(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=260,
+            temperature=0.2,
+        )
+
+        summary = _trim_to_last_sentence(text)
+        return {"condition": condition, "summary": summary}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error summarizing condition")
+        raise HTTPException(status_code=500, detail=f"Error summarizing condition: {str(e)}")
+
+
 @app.get("/api/patients/{patient_id}/wearables", response_model=WearableData)
 async def get_patient_wearables(patient_id: str, days: int = 30):
     """Get wearable data (daily entries) for a patient"""
@@ -187,6 +265,69 @@ async def get_patient_wearables(patient_id: str, days: int = 30):
     except Exception as e:
         logger.exception("Error fetching wearable data patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error fetching wearable data: {str(e)}")
+
+
+@app.get("/api/patients/{patient_id}/wearables/summary", response_model=WearablesSummary)
+async def get_patient_wearables_summary(patient_id: str, days: int = 30):
+    """Generate a one-paragraph summary of the last N days of wearable data."""
+    try:
+        logger.info("get_patient_wearables_summary patient_id=%s days=%s", patient_id, days)
+
+        try:
+            days_i = int(days)
+        except Exception:
+            days_i = 30
+        if days_i <= 0:
+            days_i = 30
+        if days_i > 60:
+            days_i = 60
+
+        wearable_data = db.get_wearables_for_patient(patient_id, days=days_i)
+        patient = None
+        try:
+            patient = db.get_patient(patient_id)
+        except Exception:
+            patient = None
+
+        heart_rate = list((wearable_data or {}).get("heart_rate") or [])
+        step_count = list((wearable_data or {}).get("step_count") or [])
+        timestamps = list((wearable_data or {}).get("timestamps") or [])
+        num_points = min(len(heart_rate), len(step_count), len(timestamps))
+
+        series = []
+        for i in range(num_points):
+            series.append(
+                {
+                    "date": str(timestamps[i]),
+                    "heart_rate": int(heart_rate[i] or 0),
+                    "steps": int(step_count[i] or 0),
+                }
+            )
+
+        patient_name = str((patient or {}).get("name") or "")
+        prompt = (
+            "You are a clinical assistant. Summarize the patient's last "
+            f"{days_i} days of wearable data (heart rate and steps) in ONE paragraph. "
+            "Identify meaningful patterns and trends with concrete examples (e.g., early period vs late period, "
+            "increasing steps over last 5 days, sustained elevation in heart rate). "
+            "Be factual and concise. Do not mention that you are an AI. End with a period.\n\n"
+            f"Patient: {patient_name or patient_id}\n"
+            f"Data points: {num_points}\n"
+            f"Time series JSON (chronological): {json.dumps(series, ensure_ascii=False)}"
+        )
+
+        text, _raw = await chat_completion_text(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=220,
+            temperature=0.2,
+        )
+        summary = _trim_to_last_sentence(text)
+        return {"patient_id": str(patient_id), "days": int(days_i), "summary": summary}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error generating wearables summary patient_id=%s", patient_id)
+        raise HTTPException(status_code=500, detail=f"Error generating wearables summary: {str(e)}")
 
 
 @app.post("/api/patients")
@@ -362,6 +503,18 @@ async def save_doctor_note(note: dict):
 
         success = db.save_doctor_note(note_id, note)
         if success:
+            try:
+                vec = await embedding_vector(str(note.get("visit_notes") or ""))
+                if vec:
+                    db.upsert_doctor_note_embedding(note_id, vec)
+            except Exception as e:
+                logger.warning(
+                    "Warning: Failed to vectorize doctor note note_id=%s patient_id=%s: %s",
+                    note_id,
+                    str(note.get("patient_id") or ""),
+                    e,
+                )
+
             return {"message": "Doctor note saved successfully", "note_id": note_id}
         else:
             raise HTTPException(status_code=500, detail="Failed to save doctor note")
@@ -593,6 +746,44 @@ async def get_pre_visit_questionnaire(patient_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching questionnaire: {str(e)}")
+
+
+@app.get("/api/questionnaires/pre-visit/{patient_id}/summary", response_model=QuestionnaireSummary)
+async def get_pre_visit_questionnaire_summary(patient_id: str):
+    try:
+        questionnaire = await get_pre_visit_questionnaire(patient_id)
+        if not isinstance(questionnaire, dict):
+            raise HTTPException(status_code=500, detail="Invalid questionnaire format")
+
+        patient_name = str(questionnaire.get("patient_name") or "").strip()
+        date_completed = str(questionnaire.get("date_completed") or "").strip()
+
+        prompt = (
+            "You are a clinical assistant. Write ONE paragraph summarizing the patient's pre-visit questionnaire. "
+            "Capture the key symptoms, severity, functional impact, relevant exposures, and any red flags or follow-up needs. "
+            "Be factual and concise. Do not mention that you are an AI. End with a period.\n\n"
+            f"Patient: {patient_name or patient_id}\n"
+            f"Date completed: {date_completed or 'unknown'}\n"
+            f"Questionnaire JSON: {json.dumps(questionnaire, ensure_ascii=False)}"
+        )
+
+        text, _raw = await chat_completion_text(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=240,
+            temperature=0.2,
+        )
+
+        summary = _trim_to_last_sentence(text)
+        return {"patient_id": str(patient_id), "summary": summary}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Error generating pre-visit questionnaire summary patient_id=%s", patient_id
+        )
+        raise HTTPException(
+            status_code=500, detail=f"Error generating questionnaire summary: {str(e)}"
+        )
 
 
 @app.post("/api/questionnaires/pre-visit/status")
@@ -882,3 +1073,130 @@ async def update_answer_rating(answer_id: str, payload: dict = Body(...)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating rating: {str(e)}")
+
+
+@app.post("/api/research/tavily/search")
+async def search_tavily_research(payload: dict = Body(...)):
+    """Search latest medical research using Tavily web search API."""
+    try:
+        query = payload.get("query", "").strip()
+        max_results = payload.get("max_results", 3)
+
+        if not query:
+            raise HTTPException(status_code=400, detail="Query is required")
+
+        tavily_api_key = os.getenv("TAVILY_API_KEY")
+        if not tavily_api_key:
+            raise HTTPException(status_code=503, detail="Tavily API not configured")
+
+        # Call Tavily API
+        url = "https://api.tavily.com/search"
+        headers = {"Authorization": f"Bearer {tavily_api_key}", "Content-Type": "application/json"}
+        payload_data = {
+            "query": query,
+            "search_depth": "advanced",
+            "max_results": max_results,
+            "include_raw_content": True,
+        }
+
+        response = requests.post(url, headers=headers, json=payload_data, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+
+        # Transform results to paper schema
+        papers = []
+        for result in data.get("results", []):
+            # Extract domain from URL for author field
+            domain = result.get("url", "").split("//")[-1].split("/")[0]
+
+            paper = {
+                "title": result.get("title", "Untitled"),
+                "author": domain,
+                "article_text": result.get("raw_content", result.get("content", ""))[:5000],
+                "article_citation": result.get("url", ""),
+                "pmc_link": result.get("url", ""),
+                "source_type": "tavily",
+                "score": result.get("score", 0),
+            }
+            papers.append(paper)
+
+        logger.info(f"Tavily search returned {len(papers)} results for query: {query}")
+        return {"results": papers}
+
+    except HTTPException:
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.exception("Tavily API error")
+        raise HTTPException(status_code=502, detail=f"Tavily API error: {str(e)}")
+    except Exception as e:
+        logger.exception("Error searching Tavily")
+        raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
+
+
+@app.post("/api/research/papers/add")
+async def add_research_paper(payload: dict = Body(...)):
+    """Add a research paper to database with automatic vectorization."""
+    try:
+        # Validate required fields
+        title = payload.get("title", "").strip()
+        article_text = payload.get("article_text", "").strip()
+        article_citation = payload.get("article_citation", "").strip()
+
+        if not all([title, article_text, article_citation]):
+            raise HTTPException(
+                status_code=400,
+                detail="Missing required fields: title, article_text, article_citation",
+            )
+
+        # Check for duplicate by URL
+        existing = db.check_paper_exists(article_citation)
+        if existing:
+            raise HTTPException(status_code=409, detail="Paper already exists in database")
+
+        # Generate unique paper ID
+        timestamp = int(datetime.now().timestamp())
+        url_hash = hashlib.md5(article_citation.encode()).hexdigest()[:8]
+        paper_id = f"tavily_{timestamp}_{url_hash}"
+
+        # Build paper document
+        paper_doc = {
+            "paper_id": paper_id,
+            "title": title,
+            "author": payload.get("author", "Unknown"),
+            "article_text": article_text,
+            "article_citation": article_citation,
+            "pmc_link": payload.get("pmc_link", article_citation),
+            "source_type": payload.get("source_type", "tavily"),
+            "added_at": datetime.now().isoformat(),
+            "added_by": "Tiffany Mitchell",
+        }
+
+        # Vectorize article_text
+        vectorized = False
+        try:
+            logger.info(f"Vectorizing paper: {paper_id}")
+            embedding = get_nvidia_embedding(article_text)
+            paper_doc["article_vectorized"] = embedding
+            vectorized = True
+            logger.info(f"Successfully vectorized paper: {paper_id}")
+        except Exception as e:
+            logger.warning(f"Vectorization failed for {paper_id}: {e}")
+            # Continue without vector - paper still searchable via text
+
+        # Save to database
+        success = db.save_research_paper(paper_id, paper_doc)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to save paper to database")
+
+        logger.info(f"Added paper {paper_id} (vectorized={vectorized})")
+        return {
+            "message": "Paper added successfully",
+            "paper_id": paper_id,
+            "vectorized": vectorized,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error adding paper")
+        raise HTTPException(status_code=500, detail=f"Error adding paper: {str(e)}")
