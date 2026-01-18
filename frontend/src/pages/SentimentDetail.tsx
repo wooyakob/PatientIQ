@@ -6,11 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getPatient } from '@/lib/api';
 
 const sentimentConfig = {
-  amazing: { color: 'bg-emerald-500', textColor: 'text-emerald-500', value: 5, label: 'Amazing', description: 'Patient is expressing very positive emotions and outlook' },
-  good: { color: 'bg-green-400', textColor: 'text-green-500', value: 4, label: 'Good', description: 'Patient is expressing positive emotions with minor concerns' },
+  positive: { color: 'bg-emerald-500', textColor: 'text-emerald-500', value: 4, label: 'Positive', description: 'Patient is expressing positive emotions or improvement' },
   neutral: { color: 'bg-yellow-400', textColor: 'text-yellow-500', value: 3, label: 'Neutral', description: 'Patient is expressing balanced emotions without strong positivity or negativity' },
-  poor: { color: 'bg-orange-400', textColor: 'text-orange-500', value: 2, label: 'Poor', description: 'Patient is expressing concerning emotions that may need attention' },
-  terrible: { color: 'bg-red-500', textColor: 'text-red-500', value: 1, label: 'Terrible', description: 'Patient is expressing significant distress requiring immediate attention' },
+  mixed: { color: 'bg-orange-400', textColor: 'text-orange-500', value: 2, label: 'Mixed', description: 'Patient is expressing both positive and negative emotions' },
+  negative: { color: 'bg-red-500', textColor: 'text-red-500', value: 1, label: 'Negative', description: 'Patient is expressing distress or worsening symptoms' },
 };
 
 const SentimentDetail = () => {
@@ -63,7 +62,8 @@ const SentimentDetail = () => {
   }
 
   const config = sentimentConfig[patient.sentiment];
-  const sentimentLevels = ['terrible', 'poor', 'neutral', 'good', 'amazing'] as const;
+  const sentimentLabel = config.label;
+  const sentimentLevels = ['negative', 'mixed', 'neutral', 'positive'] as const;
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +93,7 @@ const SentimentDetail = () => {
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-muted-foreground">Current Sentiment Score</span>
               <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${config.color} text-card`}>
-                {config.label}
+                {sentimentLabel}
               </span>
             </div>
             

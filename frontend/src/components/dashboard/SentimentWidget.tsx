@@ -7,11 +7,10 @@ interface SentimentWidgetProps {
 }
 
 const sentimentConfig = {
-  amazing: { color: 'bg-emerald-500', position: '90%', label: 'Amazing' },
-  good: { color: 'bg-green-400', position: '70%', label: 'Good' },
-  neutral: { color: 'bg-yellow-400', position: '50%', label: 'Neutral' },
-  poor: { color: 'bg-orange-400', position: '30%', label: 'Poor' },
-  terrible: { color: 'bg-red-500', position: '10%', label: 'Terrible' },
+  positive: { color: 'bg-emerald-500', position: '90%', label: 'Positive' },
+  neutral: { color: 'bg-yellow-400', position: '65%', label: 'Neutral' },
+  mixed: { color: 'bg-orange-400', position: '40%', label: 'Mixed' },
+  negative: { color: 'bg-red-500', position: '10%', label: 'Negative' },
 };
 
 export function SentimentWidget({ patient }: SentimentWidgetProps) {
@@ -34,8 +33,8 @@ export function SentimentWidget({ patient }: SentimentWidgetProps) {
 
       <div className="mb-4">
         <div className="flex justify-between text-xs text-muted-foreground mb-2">
-          <span>Terrible</span>
-          <span>Amazing</span>
+          <span>Negative</span>
+          <span>Positive</span>
         </div>
         <div className="neo-inset h-3 rounded-full relative overflow-hidden">
           <div 

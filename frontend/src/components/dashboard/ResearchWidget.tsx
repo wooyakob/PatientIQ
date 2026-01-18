@@ -1,16 +1,37 @@
 import { Patient } from '@/lib/api';
 import { BookOpen, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { getConditionSummary } from '@/lib/api';
 
 interface ResearchWidgetProps {
   patient: Patient;
 }
 
 export function ResearchWidget({ patient }: ResearchWidgetProps) {
+  const condition = (patient.condition ?? '').trim();
+  const {
+    data: conditionSummary,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['condition-summary', condition],
+    queryFn: () => getConditionSummary(condition),
+    enabled: Boolean(condition),
+    staleTime: 1000 * 60 * 60,
+  });
+
+  const fillerText =
+    isLoading
+      ? 'Generating a condition summary…'
+      : isError
+        ? (patient.researchContent?.[0] ?? '')
+        : (conditionSummary?.summary ?? patient.researchContent?.[0] ?? '');
+
   return (
     <Link
       to={`/patient/${patient.id}/research`}
-      className="glass-card p-6 block transition-all duration-300 hover:scale-[1.01] hover:shadow-xl group"
+      className="glass-card overflow-visible p-6 block transition-all duration-300 hover:scale-[1.01] hover:shadow-xl group"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -22,8 +43,8 @@ export function ResearchWidget({ patient }: ResearchWidgetProps) {
         <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <p className="text-sm font-medium text-primary mb-3">{patient.researchTopic}</p>
-      <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-        {patient.researchContent[0]}
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        {fillerText}
       </p>
     </Link>
   );

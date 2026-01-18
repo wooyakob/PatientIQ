@@ -1,4 +1,4 @@
-export type SentimentLevel = "amazing" | "good" | "neutral" | "poor" | "terrible";
+export type SentimentLevel = "positive" | "neutral" | "mixed" | "negative";
 
 export interface ApiWearableData {
   timestamps?: string[];
@@ -17,6 +17,7 @@ export interface ApiPatient {
   next_appointment: string;
   wearable_data: ApiWearableData;
   sentiment: SentimentLevel;
+  sentiment_rating?: string;
   private_notes: string;
   research_topic: string;
   research_content: string[];
@@ -44,6 +45,7 @@ export interface Patient {
     stepCount: number[];
   };
   sentiment: SentimentLevel;
+  sentimentRating: string;
   privateNotes: string;
   researchTopic: string;
   researchContent: string[];
@@ -106,6 +108,19 @@ export async function getPreVisitQuestionnaireStatus(
 export async function getPreVisitQuestionnaire(patientId: string): Promise<any> {
   return apiFetch<any>(
     `/api/questionnaires/pre-visit/${encodeURIComponent(String(patientId))}`
+  );
+}
+
+export interface PreVisitQuestionnaireSummaryResponse {
+  patient_id: string;
+  summary: string;
+}
+
+export async function getPreVisitQuestionnaireSummary(
+  patientId: string
+): Promise<PreVisitQuestionnaireSummaryResponse> {
+  return apiFetch<PreVisitQuestionnaireSummaryResponse>(
+    `/api/questionnaires/pre-visit/${encodeURIComponent(String(patientId))}/summary`
   );
 }
 
@@ -178,6 +193,21 @@ export async function getPatientWearables(
   };
 }
 
+export interface WearablesSummaryResponse {
+  patient_id: string;
+  days: number;
+  summary: string;
+}
+
+export async function getPatientWearablesSummary(
+  patientId: string,
+  days: number = 30
+): Promise<WearablesSummaryResponse> {
+  return apiFetch<WearablesSummaryResponse>(
+    `/api/patients/${encodeURIComponent(patientId)}/wearables/summary?days=${encodeURIComponent(String(days))}`
+  );
+}
+
 export function toLocalDateOnlyString(d: Date): string {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -225,6 +255,7 @@ const toPatient = (api: ApiPatient, doctorNotes: DoctorNote[] = []): Patient => 
       stepCount: api.wearable_data?.step_count ?? [],
     },
     sentiment: api.sentiment,
+    sentimentRating: String(api.sentiment_rating ?? ""),
     privateNotes: api.private_notes,
     researchTopic: api.research_topic ?? "",
     researchContent: api.research_content ?? [],
@@ -294,6 +325,31 @@ export async function getPatient(patientId: string): Promise<Patient> {
   return toPatient(apiPatient);
 }
 
+export interface PatientSummaryResponse {
+  patient_id: string;
+  patient: any;
+  summary: string;
+}
+
+export async function getPatientSummary(patientId: string): Promise<PatientSummaryResponse> {
+  return apiFetch<PatientSummaryResponse>(
+    `/api/patients/${encodeURIComponent(patientId)}/summary`,
+    { method: "POST" }
+  );
+}
+
+export interface ConditionSummaryResponse {
+  condition: string;
+  summary: string;
+}
+
+export async function getConditionSummary(condition: string): Promise<ConditionSummaryResponse> {
+  return apiFetch<ConditionSummaryResponse>("/api/conditions/summary", {
+    method: "POST",
+    body: JSON.stringify({ condition }),
+  });
+}
+
 export async function getDoctorNotes(patientId: string): Promise<DoctorNote[]> {
   const result = await apiFetch<{ patient_id: string; notes: any[] }>(
     `/api/patients/${encodeURIComponent(patientId)}/doctor-notes`
@@ -343,6 +399,9 @@ export interface ResearchPaper {
   author: string;
   article_citation: string;
   pmc_link: string;
+  article_text?: string;
+  source_type?: string;
+  score?: number;
 }
 
 export interface ResearchResult {
@@ -389,6 +448,25 @@ export async function updateAnswerRating(
   return apiFetch(`/api/research/answers/${answerId}/rating`, {
     method: 'PATCH',
     body: JSON.stringify({ rating }),
+  });
+}
+
+export async function searchTavilyResearch(
+  query: string,
+  maxResults: number = 3
+): Promise<{ results: ResearchPaper[] }> {
+  return apiFetch('/api/research/tavily/search', {
+    method: 'POST',
+    body: JSON.stringify({ query, max_results: maxResults }),
+  });
+}
+
+export async function addResearchPaper(
+  paper: ResearchPaper
+): Promise<{ message: string; paper_id: string; vectorized: boolean }> {
+  return apiFetch('/api/research/papers/add', {
+    method: 'POST',
+    body: JSON.stringify(paper),
   });
 }
 

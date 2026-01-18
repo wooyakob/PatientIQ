@@ -19,7 +19,7 @@ Doctors today face countless daily micro decisions, many of which are administra
 ## Agentc
 See: `/agents/AGENTS.md`
 
- ### Cluster Configuration
+### Cluster Configuration
  Cluster used for testing (high level):
  - AWS US East
  - Couchbase Server `8.0`
@@ -46,6 +46,8 @@ Configured via environment variables:
   - `Patient` (collection)
   - `doctors_questions` (collection)
   - `answers_doctors` (collection)
+  - `patient_notes_sentiment_analysis` (collection)
+  - `patient_masked` (collection)
 - **People** (scope)
   - `Doctors` (collection)
   - `Patients` (collection)
@@ -68,23 +70,14 @@ Configured via environment variables:
   - `Appointments` (collection)
 
 #### Agent Catalog (bucket)
-  - `agent_catalog
-     - metadata
-     - prompts
-     - tools
-  - `agent_activity
-     - logs
+- `agent_catalog`
+  - `metadata`
+  - `prompts`
+  - `tools`
+- `agent_activity`
+  - `logs`
 
-default
-default
-system
- mobile
- query
-
-
-
-
- ## Cluster Cost Estimate
+## Cluster Cost Estimate
  **Window**
 
  - **Feb 8–12**

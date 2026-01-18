@@ -19,7 +19,7 @@ Direct database queries for simple data retrieval:
 Vector search configurations for AI-powered search:
 
 - `paper_search_semantic.yaml` - Base semantic search for medical papers
-- `doc_notes_search.yaml` - Semantic search for doctor notes
+- `doc_notes_search_semantic.yaml` - Semantic search for doctor notes
 
 ### 3. Python Function Tools (*.py)
 

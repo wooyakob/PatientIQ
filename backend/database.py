@@ -238,14 +238,106 @@ class CouchbaseDB:
     def _sentiment_from_text(self, text: str) -> str:
         t = (text or "").lower()
         if any(w in t for w in ("terrible", "panic", "cannot", "can't", "worse", "urgent")):
-            return "terrible"
+            return "negative"
         if any(
             w in t for w in ("anxious", "drained", "fatig", "worried", "tight", "short of breath")
         ):
-            return "poor"
+            return "negative"
         if any(w in t for w in ("motivated", "better", "helped", "coping", "steady", "improv")):
-            return "good"
+            return "positive"
         return "neutral"
+
+    def _extract_sentiment_rating(self, doc: dict) -> str:
+        if not isinstance(doc, dict):
+            return ""
+
+        for key in ("sentiment_rating", "sentiment", "rating", "label"):
+            value = doc.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+
+        visit_sentiment = doc.get("visit_sentiment")
+        if isinstance(visit_sentiment, list) and visit_sentiment:
+            first = visit_sentiment[0]
+            if isinstance(first, dict):
+                resp = first.get("response")
+                if isinstance(resp, str) and resp.strip():
+                    return resp.strip()
+            if isinstance(first, str) and first.strip():
+                return first.strip()
+
+        return ""
+
+    def _normalize_sentiment_rating(self, rating: str) -> str:
+        s = str(rating or "").strip()
+        if not s:
+            return ""
+        lower = s.lower()
+        if lower.startswith("positive"):
+            return "Positive"
+        if lower.startswith("negative"):
+            return "Negative"
+        if lower.startswith("neutral"):
+            return "Neutral"
+        if lower.startswith("mixed"):
+            return "Mixed"
+        return s[:1].upper() + s[1:]
+
+    def _sentiment_level_from_rating(self, rating: str) -> str:
+        lower = str(rating or "").strip().lower()
+        if lower.startswith("positive"):
+            return "positive"
+        if lower.startswith("negative"):
+            return "negative"
+        if lower.startswith("neutral"):
+            return "neutral"
+        if lower.startswith("mixed"):
+            return "mixed"
+        return "neutral"
+
+    def _get_latest_sentiment_analysis(self, patient_id: str) -> dict:
+        keyspaces = (
+            f"`{self.bucket_name}`.`Notes`.`sentiment_analysis`",
+            f"`{self.bucket_name}`.`Notes`.`patient_notes_sentiment_analysis`",
+        )
+
+        query_template = """
+            SELECT s.*
+            FROM {keyspace} s
+            WHERE TOSTRING(s.patient_id) = $patient_id
+            ORDER BY s.visit_date DESC
+            LIMIT 1
+        """
+
+        for keyspace in keyspaces:
+            query = query_template.format(keyspace=keyspace)
+            try:
+                rows = list(
+                    self.cluster.query(
+                        query, QueryOptions(named_parameters={"patient_id": str(patient_id)})
+                    )
+                )
+            except Exception:
+                continue
+            if rows and isinstance(rows[0], dict):
+                return rows[0]
+        return {}
+
+    def _get_latest_sentiment_rating(self, patient_id: str) -> str:
+        try:
+            doc = self._get_latest_sentiment_analysis(patient_id)
+        except Exception:
+            doc = {}
+        rating = self._extract_sentiment_rating(doc)
+        return self._normalize_sentiment_rating(rating)
+
+    def _get_latest_sentiment_level(self, patient_id: str) -> str:
+        try:
+            doc = self._get_latest_sentiment_analysis(patient_id)
+        except Exception:
+            doc = {}
+        rating = self._extract_sentiment_rating(doc)
+        return self._sentiment_level_from_rating(rating)
 
     def _wearables_keyspace_for_patient_id(self, patient_id: str) -> Optional[str]:
         if not re.fullmatch(r"\d+", str(patient_id or "")):
@@ -385,6 +477,11 @@ class CouchbaseDB:
         wearable_data = self._get_wearable_summary(patient_id)
         private_notes = self._get_latest_patient_private_note(patient_id)
 
+        sentiment_level = self._get_latest_sentiment_level(patient_id)
+        sentiment_rating = self._get_latest_sentiment_rating(patient_id)
+        if not sentiment_level:
+            sentiment_level = self._sentiment_from_text(private_notes)
+
         research_topic = (
             f"Pulmonary research for {condition}" if condition else "Pulmonary research"
         )
@@ -415,7 +512,8 @@ class CouchbaseDB:
             "last_visit": last_visit,
             "next_appointment": next_appointment,
             "wearable_data": wearable_data,
-            "sentiment": self._sentiment_from_text(private_notes),
+            "sentiment": sentiment_level,
+            "sentiment_rating": sentiment_rating,
             "private_notes": private_notes,
             "research_topic": research_topic,
             "research_content": research_content,
@@ -437,6 +535,29 @@ class CouchbaseDB:
             if not rows:
                 return None
             return self._patient_doc_to_api(rows[0])
+        except DocumentNotFoundException:
+            return None
+        except Exception:
+            return None
+
+    def get_patient_raw(self, patient_id: str) -> Optional[dict]:
+        """Retrieve the raw patient document by ID from People.Patients collection."""
+        self._check_connection()
+        try:
+            query = f"""
+                SELECT p.*
+                FROM `{self.bucket_name}`.`People`.`Patients` p
+                WHERE p.patient_id = $patient_id
+                LIMIT 1
+            """
+            rows = list(
+                self.cluster.query(query, QueryOptions(named_parameters={"patient_id": patient_id}))
+            )
+            if not rows:
+                return None
+            if len(rows) == 1 and isinstance(rows[0], dict):
+                return rows[0]
+            return None
         except DocumentNotFoundException:
             return None
         except Exception:
@@ -611,6 +732,21 @@ class CouchbaseDB:
             return True
         except Exception as e:
             print(f"Error saving doctor note: {e}")
+            return False
+
+    def upsert_doctor_note_embedding(self, note_id: str, embedding: list[float]) -> bool:
+        """Upsert an embedding vector to a doctor note document (field: all_notes_vectorized)."""
+        self._check_connection()
+        try:
+            existing = self.doctor_notes_collection.get(note_id)
+            doc = existing.content_as[dict]
+            doc["all_notes_vectorized"] = embedding
+            self.doctor_notes_collection.upsert(note_id, doc)
+            return True
+        except DocumentNotFoundException:
+            return False
+        except Exception as e:
+            print(f"Error upserting doctor note embedding: {e}")
             return False
 
     def delete_doctor_note(self, note_id: str) -> bool:
@@ -913,6 +1049,38 @@ class CouchbaseDB:
             return True
         except Exception as e:
             print(f"Error updating answer rating: {e}")
+            return False
+
+    def save_research_paper(self, paper_id: str, paper_data: dict) -> bool:
+        """Save a research paper to Research.Pubmed.Pulmonary collection."""
+        self._check_connection()
+        try:
+            research_bucket = self.cluster.bucket(self.research_bucket_name)
+            pulmonary_collection = research_bucket.scope("Pubmed").collection("Pulmonary")
+            pulmonary_collection.upsert(paper_id, paper_data)
+            logger.info(f"Saved research paper: {paper_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Error saving research paper {paper_id}: {e}")
+            return False
+
+    def check_paper_exists(self, article_citation: str) -> bool:
+        """Check if a paper with the given citation URL already exists."""
+        self._check_connection()
+        try:
+            query = """
+                SELECT META().id
+                FROM `Research`.Pubmed.Pulmonary
+                WHERE article_citation = $url
+                LIMIT 1
+            """
+            result = self.cluster.query(
+                query,
+                QueryOptions(named_parameters={"url": article_citation})
+            )
+            return len(list(result)) > 0
+        except Exception as e:
+            logger.error(f"Error checking paper existence: {e}")
             return False
 
 
