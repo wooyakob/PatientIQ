@@ -778,7 +778,9 @@ async def get_pre_visit_questionnaire_summary(patient_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception("Error generating pre-visit questionnaire summary patient_id=%s", patient_id)
+        logger.exception(
+            "Error generating pre-visit questionnaire summary patient_id=%s", patient_id
+        )
         raise HTTPException(
             status_code=500, detail=f"Error generating questionnaire summary: {str(e)}"
         )
@@ -1089,15 +1091,12 @@ async def search_tavily_research(payload: dict = Body(...)):
 
         # Call Tavily API
         url = "https://api.tavily.com/search"
-        headers = {
-            "Authorization": f"Bearer {tavily_api_key}",
-            "Content-Type": "application/json"
-        }
+        headers = {"Authorization": f"Bearer {tavily_api_key}", "Content-Type": "application/json"}
         payload_data = {
             "query": query,
             "search_depth": "advanced",
             "max_results": max_results,
-            "include_raw_content": True
+            "include_raw_content": True,
         }
 
         response = requests.post(url, headers=headers, json=payload_data, timeout=30)
@@ -1117,7 +1116,7 @@ async def search_tavily_research(payload: dict = Body(...)):
                 "article_citation": result.get("url", ""),
                 "pmc_link": result.get("url", ""),
                 "source_type": "tavily",
-                "score": result.get("score", 0)
+                "score": result.get("score", 0),
             }
             papers.append(paper)
 
@@ -1146,16 +1145,13 @@ async def add_research_paper(payload: dict = Body(...)):
         if not all([title, article_text, article_citation]):
             raise HTTPException(
                 status_code=400,
-                detail="Missing required fields: title, article_text, article_citation"
+                detail="Missing required fields: title, article_text, article_citation",
             )
 
         # Check for duplicate by URL
         existing = db.check_paper_exists(article_citation)
         if existing:
-            raise HTTPException(
-                status_code=409,
-                detail="Paper already exists in database"
-            )
+            raise HTTPException(status_code=409, detail="Paper already exists in database")
 
         # Generate unique paper ID
         timestamp = int(datetime.now().timestamp())
@@ -1172,7 +1168,7 @@ async def add_research_paper(payload: dict = Body(...)):
             "pmc_link": payload.get("pmc_link", article_citation),
             "source_type": payload.get("source_type", "tavily"),
             "added_at": datetime.now().isoformat(),
-            "added_by": "Tiffany Mitchell"
+            "added_by": "Tiffany Mitchell",
         }
 
         # Vectorize article_text
@@ -1190,16 +1186,13 @@ async def add_research_paper(payload: dict = Body(...)):
         # Save to database
         success = db.save_research_paper(paper_id, paper_doc)
         if not success:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to save paper to database"
-            )
+            raise HTTPException(status_code=500, detail="Failed to save paper to database")
 
         logger.info(f"Added paper {paper_id} (vectorized={vectorized})")
         return {
             "message": "Paper added successfully",
             "paper_id": paper_id,
-            "vectorized": vectorized
+            "vectorized": vectorized,
         }
 
     except HTTPException:

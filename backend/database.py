@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import threading
@@ -16,6 +17,9 @@ try:
     load_dotenv()
 except Exception:
     pass
+
+
+logger = logging.getLogger("cko")
 
 
 class CouchbaseDB:
@@ -1075,8 +1079,7 @@ class CouchbaseDB:
                 LIMIT 1
             """
             result = self.cluster.query(
-                query,
-                QueryOptions(named_parameters={"url": article_citation})
+                query, QueryOptions(named_parameters={"url": article_citation})
             )
             return len(list(result)) > 0
         except Exception as e:
