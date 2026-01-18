@@ -14,28 +14,73 @@ from starlette.requests import Request
 from backend.database import db
 from backend.models import Patient, WearableData
 
-# Add agents path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "agents" / "pulmonary_research_agent"))
-# Use new LangGraph-based agent with backward compatibility
-from compat import run_pulmonary_research
+import agentc
+import importlib.util
+import langchain_core.messages
+
+
+def _load_agent_module(agent_name: str, module_file: str = "graph.py"):
+    """
+    Load an agent module with proper isolation to avoid naming conflicts.
+
+    Args:
+        agent_name: Name of the agent directory (e.g., 'pulmonary_research_agent')
+        module_file: Name of the module file to load (default: 'graph.py')
+
+    Returns:
+        Loaded module
+    """
+    agent_dir = str(Path(__file__).parent.parent / "agents" / agent_name)
+    module_path = Path(agent_dir) / module_file
+
+    # Use unique module name to avoid conflicts
+    unique_module_name = f"{agent_name}_{module_file.replace('.py', '')}"
+
+    # Clear any cached modules that might conflict (graph, node, edge)
+    modules_to_clear = ["graph", "node", "edge"]
+    original_modules = {}
+    for mod_name in modules_to_clear:
+        if mod_name in sys.modules:
+            original_modules[mod_name] = sys.modules[mod_name]
+            del sys.modules[mod_name]
+
+    # Temporarily add agent directory to path
+    sys.path.insert(0, agent_dir)
+
+    try:
+        spec = importlib.util.spec_from_file_location(unique_module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+
+        # Register in sys.modules before exec to handle internal imports
+        sys.modules[unique_module_name] = module
+        spec.loader.exec_module(module)
+
+        return module
+    finally:
+        # Clean up sys.path
+        if agent_dir in sys.path:
+            sys.path.remove(agent_dir)
+
+        # Restore original modules
+        for mod_name, mod_obj in original_modules.items():
+            sys.modules[mod_name] = mod_obj
+
+
+# Import PulmonaryResearcher from pulmonary_research_agent/graph.py
+pulmonary_graph = _load_agent_module("pulmonary_research_agent", "graph.py")
+PulmonaryResearcher = pulmonary_graph.PulmonaryResearcher
+
+# Import DocNotesSearcher from docnotes_search_agent/graph.py
+docnotes_graph = _load_agent_module("docnotes_search_agent", "graph.py")
+DocNotesSearcher = docnotes_graph.DocNotesSearcher
+
+# Initialize catalog and agents at module level
+_catalog = agentc.Catalog()
+_pulmonary_researcher = PulmonaryResearcher(catalog=_catalog)
+_docnotes_searcher = DocNotesSearcher(catalog=_catalog)
 
 logger = logging.getLogger("cko")
 logger.setLevel(logging.INFO)
-
-
-def _append_json_list_record(path: Path, record: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    existing: list
-    if path.exists():
-        try:
-            parsed = json.loads(path.read_text(encoding="utf-8"))
-            existing = parsed if isinstance(parsed, list) else []
-        except Exception:
-            existing = []
-    else:
-        existing = []
-    existing.append(record)
-    path.write_text(json.dumps(existing, indent=4) + "\n", encoding="utf-8")
 
 
 def _now_utc_iso_z() -> str:
@@ -208,35 +253,41 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
         except Exception as e:
             logger.warning("Warning: Failed to save doctors question: %s", e)
 
-        try:
-            _append_json_list_record(
-                Path(__file__).parent.parent
-                / "data"
-                / "doctors_questions"
-                / "doctors_questions.json",
-                question_doc,
-            )
-        except Exception as e:
-            logger.warning("Warning: Failed to append doctors_questions.json: %s", e)
-
         logger.info(
-            "search_patient_doctor_notes patient_id=%s question_len=%s",
+            "search_patient_doctor_notes patient_id=%s question_len=%s patient_name=%s",
             patient_id,
             len(question),
+            patient_name,
         )
 
-        # Import and use the doc notes search agent using importlib to avoid module caching issues
-        import importlib.util
+        # Use the doc notes search agent directly
+        state = DocNotesSearcher.build_starting_state(patient_id=patient_id, question=question)
+        if patient_name:
+            state["patient_name"] = patient_name
 
-        compat_path = (
-            Path(__file__).parent.parent / "agents" / "docnotes_search_agent" / "compat.py"
+        # Add the question as a human message in JSON format
+        state["messages"].append(
+            langchain_core.messages.HumanMessage(
+                content=f'{{"patient_id": "{patient_id}", "patient_name": "{patient_name or ""}", "question": "{question}"}}'
+            )
         )
-        spec = importlib.util.spec_from_file_location("docnotes_compat", compat_path)
-        docnotes_compat = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(docnotes_compat)
 
-        result = docnotes_compat.search_doctor_notes(
-            patient_id, question, patient_name=patient_name
+        # Invoke the agent
+        logger.info("Invoking DocNotesSearcher agent for patient_id=%s", patient_id)
+        agent_result = _docnotes_searcher.invoke(input=state)
+
+        # Format response
+        result = {
+            "patient_id": agent_result.get("patient_id", patient_id),
+            "patient_name": agent_result.get("patient_name"),
+            "question": agent_result.get("question", question),
+            "notes": agent_result.get("notes", []),
+            "answer": agent_result.get("answer", ""),
+        }
+        logger.info(
+            "DocNotesSearcher completed - found %s notes, answer_len=%s",
+            len(result.get("notes", [])),
+            len(result.get("answer", "")),
         )
 
         if "error" in result:
@@ -270,14 +321,6 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
             db.save_answers_doctors(answer_id, answer_doc)
         except Exception as e:
             logger.warning("Warning: Failed to save answers_doctors: %s", e)
-
-        try:
-            _append_json_list_record(
-                Path(__file__).parent.parent / "data" / "answers_doctors" / "answers_doctors.json",
-                answer_doc,
-            )
-        except Exception as e:
-            logger.warning("Warning: Failed to append answers_doctors.json: %s", e)
 
         result["referenced_visit_notes"] = referenced_visit_notes
 
@@ -637,8 +680,34 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
             len(question),
         )
 
-        # Run the pulmonary research agent
-        result = run_pulmonary_research(patient_id, question)
+        # Use the pulmonary research agent directly
+        state = PulmonaryResearcher.build_starting_state(patient_id=patient_id, question=question)
+
+        # Add the question as a human message in JSON format
+        state["messages"].append(
+            langchain_core.messages.HumanMessage(
+                content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}'
+            )
+        )
+
+        # Invoke the agent
+        logger.info("Invoking PulmonaryResearcher agent for patient_id=%s", patient_id)
+        agent_result = _pulmonary_researcher.invoke(input=state)
+
+        # Format response
+        result = {
+            "patient_id": agent_result.get("patient_id", patient_id),
+            "patient_name": agent_result.get("patient_name"),
+            "condition": agent_result.get("condition", ""),
+            "question": agent_result.get("question", question),
+            "papers": agent_result.get("papers", []),
+            "answer": agent_result.get("answer", ""),
+        }
+        logger.info(
+            "PulmonaryResearcher completed - found %s papers, answer_len=%s",
+            len(result.get("papers", [])),
+            len(result.get("answer", "")),
+        )
 
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
@@ -684,10 +753,40 @@ async def ask_research_question(patient_id: str, payload: dict = Body(...)):
             db.save_research_question(question_id, question_doc)
         except Exception as e:
             # Log but don't fail if question save fails
-            print(f"Warning: Failed to save question: {e}")
+            logger.warning("Warning: Failed to save question: %s", e)
 
-        # Run the pulmonary research agent with the specific question
-        result = run_pulmonary_research(patient_id, question)
+        # Use the pulmonary research agent directly with the specific question
+        state = PulmonaryResearcher.build_starting_state(patient_id=patient_id, question=question)
+
+        # Add the question as a human message in JSON format
+        state["messages"].append(
+            langchain_core.messages.HumanMessage(
+                content=f'{{"patient_id": "{patient_id}", "question": "{question}"}}'
+            )
+        )
+
+        # Invoke the agent
+        logger.info(
+            "Invoking PulmonaryResearcher agent for patient_id=%s question_id=%s",
+            patient_id,
+            question_id,
+        )
+        agent_result = _pulmonary_researcher.invoke(input=state)
+
+        # Format response
+        result = {
+            "patient_id": agent_result.get("patient_id", patient_id),
+            "patient_name": agent_result.get("patient_name"),
+            "condition": agent_result.get("condition", ""),
+            "question": agent_result.get("question", question),
+            "papers": agent_result.get("papers", []),
+            "answer": agent_result.get("answer", ""),
+        }
+        logger.info(
+            "PulmonaryResearcher completed - found %s papers, answer_len=%s",
+            len(result.get("papers", [])),
+            len(result.get("answer", "")),
+        )
 
         if "error" in result:
             raise HTTPException(status_code=404, detail=result["error"])
