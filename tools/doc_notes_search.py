@@ -7,8 +7,11 @@ Uses NVIDIA embeddings and Couchbase vector search with keyword fallback.
 
 import agentc
 import couchbase.options
+import logging
 from typing import Optional
 from _shared import cluster, get_nvidia_embedding
+
+logger = logging.getLogger(__name__)
 
 
 @agentc.catalog.tool
@@ -49,9 +52,13 @@ def doc_notes_search(query: str, patient_id: Optional[str] = None, top_k: int = 
 
     # Generate embedding for the query
     try:
+        logger.info(f"Generating embedding for query: {query[:100]}...")
         embedding = get_nvidia_embedding(query)
-    except Exception:
+        logger.info(f"✓ Embedding generated successfully ({len(embedding)} dimensions)")
+    except Exception as e:
         # Fallback to keyword search if embedding fails
+        logger.warning(f"⚠️ Embedding generation failed: {str(e)}")
+        logger.warning("Falling back to keyword search...")
         return _fallback_keyword_search(query, patient_id, top_k)
 
     # Build vector search query
@@ -76,19 +83,27 @@ def doc_notes_search(query: str, patient_id: Optional[str] = None, top_k: int = 
             """
             params = {"query_vector": embedding, "top_k": min(top_k, 10)}
 
+        logger.info(f"Executing vector search for patient_id={patient_id}, top_k={top_k}")
         result_query = cluster.query(
             query_str, couchbase.options.QueryOptions(named_parameters=params)
         )
-        return {"docnotes_search_results": list(result_query.rows())}
+        results = list(result_query.rows())
+        logger.info(f"✓ Vector search completed: found {len(results)} notes")
+        return {"docnotes_search_results": results}
 
-    except Exception:
+    except Exception as e:
         # Fallback to keyword search if vector search fails
+        logger.warning(f"⚠️ Vector search failed: {str(e)}")
+        logger.warning("Falling back to keyword search...")
         return _fallback_keyword_search(query, patient_id, top_k)
 
 
 def _fallback_keyword_search(query: str, patient_id: Optional[str], top_k: int) -> dict:
     """Fallback to keyword-based search if vector search fails"""
+    logger.info(f"Using keyword fallback search for query: {query[:100]}...")
+
     if not cluster:
+        logger.error("Database cluster not available")
         return {"docnotes_search_results": [], "error": "Database connection not available"}
 
     try:
@@ -111,10 +126,16 @@ def _fallback_keyword_search(query: str, patient_id: Optional[str], top_k: int) 
             """
             params = {"keyword_pattern": f"%{query}%", "top_k": top_k}
 
+        logger.info(
+            f"Executing keyword search with pattern: {params.get('keyword_pattern', 'N/A')[:100]}"
+        )
         result_query = cluster.query(
             query_str, couchbase.options.QueryOptions(named_parameters=params)
         )
-        return {"docnotes_search_results": list(result_query.rows())}
+        results = list(result_query.rows())
+        logger.info(f"Keyword search completed: found {len(results)} notes")
+        return {"docnotes_search_results": results}
 
     except Exception as e:
+        logger.error(f"Keyword search failed: {str(e)}")
         return {"docnotes_search_results": [], "error": f"Search failed: {str(e)}"}

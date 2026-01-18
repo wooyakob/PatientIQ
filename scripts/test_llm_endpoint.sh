@@ -62,7 +62,7 @@ curl -sS -X POST "${LLM_ENDPOINT%/}/v1/chat/completions" \
     "messages": [
       {
         "role": "user",
-        "content": "What is Couchbase all about? Write a N1QL query to get top 250 documents in a sorted list of scope, inventory and collection, airlines"
+        "content": ""
       }
     ],
     "stream": false,
