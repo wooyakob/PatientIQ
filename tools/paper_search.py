@@ -87,16 +87,24 @@ def paper_search(query: str, patient_id: Optional[str] = None, top_k: int = 3) -
         result = cluster.query(
             """
             SELECT r.title, r.author, r.article_text, r.article_citation, r.pmc_link,
-                   APPROX_VECTOR_DISTANCE(r.article_vectorized, $query_vector, "L2") AS distance
+                   APPROX_VECTOR_DISTANCE(r.article_text_vectorized, $query_vector, "L2") AS distance
             FROM `Research`.Pubmed.Pulmonary r
-            ORDER BY APPROX_VECTOR_DISTANCE(r.article_vectorized, $query_vector, "L2")
+            ORDER BY APPROX_VECTOR_DISTANCE(r.article_text_vectorized, $query_vector, "L2")
             LIMIT $limit
             """,
             couchbase.options.QueryOptions(
                 named_parameters={"query_vector": embedding, "limit": min(top_k, 10)}
             ),
         )
-        return list(result.rows())
+        papers = list(result.rows())
+
+        # Filter out papers with distance > 1.3 (too dissimilar)
+        # Lower distance = more similar. Threshold balances relevance vs availability.
+        # Typical good matches: 0.9-1.2, borderline: 1.2-1.3, irrelevant: >1.3
+        relevant_papers = [p for p in papers if p.get("distance", 999) < 1.3]
+
+        # If no relevant papers found, return empty list instead of irrelevant ones
+        return relevant_papers
     except Exception as e:
         return [{"error": f"Vector search failed: {str(e)}"}]
 

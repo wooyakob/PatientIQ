@@ -1086,6 +1086,52 @@ class CouchbaseDB:
             logger.error(f"Error checking paper existence: {e}")
             return False
 
+    def get_research_paper_pmc_link(
+        self, *, article_citation: Optional[str] = None, title: Optional[str] = None
+    ) -> Optional[str]:
+        """Resolve a paper's pmc_link from the Research.Pubmed.Pulmonary collection."""
+        self._check_connection()
+
+        citation = str(article_citation or "").strip()
+        t = str(title or "").strip()
+
+        if not citation and not t:
+            return None
+
+        try:
+            if citation:
+                query = """
+                    SELECT r.pmc_link AS pmc_link
+                    FROM `Research`.Pubmed.Pulmonary r
+                    WHERE r.article_citation = $citation
+                    LIMIT 1
+                """
+                rows = list(
+                    self.cluster.query(query, QueryOptions(named_parameters={"citation": citation}))
+                )
+                if rows and isinstance(rows[0], dict):
+                    pmc_link = rows[0].get("pmc_link")
+                    if isinstance(pmc_link, str) and pmc_link.strip():
+                        return pmc_link.strip()
+
+            if t:
+                query = """
+                    SELECT r.pmc_link AS pmc_link
+                    FROM `Research`.Pubmed.Pulmonary r
+                    WHERE r.title = $title
+                    LIMIT 1
+                """
+                rows = list(self.cluster.query(query, QueryOptions(named_parameters={"title": t})))
+                if rows and isinstance(rows[0], dict):
+                    pmc_link = rows[0].get("pmc_link")
+                    if isinstance(pmc_link, str) and pmc_link.strip():
+                        return pmc_link.strip()
+
+            return None
+        except Exception as e:
+            logger.warning(f"Error resolving paper pmc_link: {e}")
+            return None
+
 
 # Global database instance
 _db_instance = None

@@ -34,6 +34,17 @@ const NotesDetail = () => {
   const [searchResults, setSearchResults] = useState<DoctorNotesSearchResponse[]>([]);
   const [notesPage, setNotesPage] = useState(1);
 
+  const searchLoadingSteps = [
+    'Searching notes…',
+    'Finding Patient Name',
+    'Collecting Visit Notes',
+    'Searching Relevant Notes',
+    'Summarizing Answer',
+  ];
+
+  const [searchLoadingStep, setSearchLoadingStep] = useState(searchLoadingSteps[0]);
+  const searchStepIndex = Math.max(0, searchLoadingSteps.indexOf(searchLoadingStep));
+
   const notesPerPage = 10;
   const doctorNotes = patient?.doctorNotes ?? [];
   const totalNotes = doctorNotes.length;
@@ -92,6 +103,9 @@ const NotesDetail = () => {
 
   const searchMutation = useMutation({
     mutationFn: (question: string) => searchDoctorNotes(patientId, question, patient?.name),
+    onMutate: () => {
+      setSearchLoadingStep(searchLoadingSteps[0]);
+    },
     onSuccess: (data) => {
       setSearchQuestion('');
       setSearchResults((prev) => [data, ...prev]);
@@ -104,6 +118,25 @@ const NotesDetail = () => {
       });
     },
   });
+
+  useEffect(() => {
+    if (!searchMutation.isPending) {
+      setSearchLoadingStep(searchLoadingSteps[0]);
+      return;
+    }
+
+    let step = 0;
+    setSearchLoadingStep(searchLoadingSteps[step]);
+
+    const interval = window.setInterval(() => {
+      step = Math.min(step + 1, searchLoadingSteps.length - 1);
+      setSearchLoadingStep(searchLoadingSteps[step]);
+    }, 1200);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [searchMutation.isPending, patientId]);
 
   if (isLoading) {
     return (
@@ -301,7 +334,7 @@ const NotesDetail = () => {
                 {searchMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Searching notes...
+                    {searchLoadingStep}
                   </>
                 ) : (
                   <>
@@ -310,6 +343,28 @@ const NotesDetail = () => {
                   </>
                 )}
               </Button>
+              {searchMutation.isPending && (
+                <div className="neo-card p-4 rounded-xl text-left space-y-2">
+                  {searchLoadingSteps.map((step, idx) => {
+                    const isCurrent = idx === searchStepIndex;
+                    const isDone = idx < searchStepIndex;
+                    return (
+                      <div
+                        key={step}
+                        className={
+                          isCurrent
+                            ? 'text-primary font-medium'
+                            : isDone
+                              ? 'text-foreground/70'
+                              : 'text-muted-foreground'
+                        }
+                      >
+                        {step}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
