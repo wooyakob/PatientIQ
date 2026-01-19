@@ -43,9 +43,23 @@ A single span could be:
 * A Large Language Model (LLM) call
 * A document retrieval
 
-When defining spans in your app, you start with a root span, that contains the entire application. The name of your root span also sets the name of your application in Agent Tracer
+When defining spans in your app, you start with a root span, that contains the entire application. The name of your root span also sets the name of your application in Agent Tracer.
 
-Define child spans from your root span to change what information gets logged at each step of your app
+Define child spans from your root span to change what information gets logged at each step of your app.
+
+There are too many traces generated that are impacting the current Agent Tracer UI based on available memory quota. 
+
+I can set a log ttl to limit the life of generated traces to 24 hours.
+
+https://couchbaselabs.github.io/agent-catalog/config.html#agentc_core.config.config.RemoteCatalogConfig.log_ttl 
+Can limit them:
+log_ttl = 86400  # 24 hours * 60 minutes * 60 seconds
+
+
+
+
+https://couchbaselabs.github.io/agent-catalog/config.html#agentc_core.config.config.RemoteCatalogConfig.log_ttl
+
 
 ### Links:
 - [https://docs.couchbase.com/ai/build/integrate-agent-with-catalog.html](https://docs.couchbase.com/ai/build/integrate-agent-with-catalog.html)

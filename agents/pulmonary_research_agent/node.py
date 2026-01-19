@@ -97,8 +97,6 @@ class PulmonaryResearchAgent(agentc_langgraph.agent.ReActAgent):
         Returns:
             Updated state with research results
         """
-        span.log(agentc.span.SystemContent(value=f"Starting pulmonary research for patient {state.get('patient_id')}"))
-
         # Create the agent and invoke it
         agent = self.create_react_agent(span)
         response = agent.invoke(input=state, config=config)
@@ -123,7 +121,5 @@ class PulmonaryResearchAgent(agentc_langgraph.agent.ReActAgent):
         # Append the AI response to messages
         if response.get("messages"):
             state["messages"].append(response["messages"][-1])
-
-        span.log(agentc.span.SystemContent(value=f"Research complete: {len(state['papers'])} papers found"))
 
         return state
