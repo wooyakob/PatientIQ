@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { ArrowLeft, BookOpen, ExternalLink, Send, Loader2, Star, Search, Plus } from 'lucide-react';
@@ -35,6 +35,28 @@ const ResearchDetail = () => {
   const [selectedPaper, setSelectedPaper] = useState<ResearchPaper | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
+  const researchLoadingSteps = [
+    'Loading research…',
+    'Finding Patient Name',
+    'Checking Medical Condition',
+    'Searching Medical Literature',
+    'Summarizing Findings',
+  ];
+
+  const askLoadingSteps = [
+    'Searching research…',
+    'Finding Patient Name',
+    'Checking Medical Condition',
+    'Searching Medical Literature',
+    'Generating Answer',
+  ];
+
+  const [researchLoadingStep, setResearchLoadingStep] = useState(researchLoadingSteps[0]);
+  const [askLoadingStep, setAskLoadingStep] = useState(askLoadingSteps[0]);
+
+  const researchStepIndex = Math.max(0, researchLoadingSteps.indexOf(researchLoadingStep));
+  const askStepIndex = Math.max(0, askLoadingSteps.indexOf(askLoadingStep));
+
   // Fetch initial research summary
   const {
     data: initialResearch,
@@ -47,9 +69,31 @@ const ResearchDetail = () => {
     enabled: Boolean(patientId),
   });
 
+  useEffect(() => {
+    if (!isLoading) {
+      setResearchLoadingStep(researchLoadingSteps[0]);
+      return;
+    }
+
+    let step = 0;
+    setResearchLoadingStep(researchLoadingSteps[step]);
+
+    const interval = window.setInterval(() => {
+      step = Math.min(step + 1, researchLoadingSteps.length - 1);
+      setResearchLoadingStep(researchLoadingSteps[step]);
+    }, 1200);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [isLoading, patientId]);
+
   // Mutation for asking custom questions
   const askMutation = useMutation({
     mutationFn: (q: string) => askResearchQuestion(patientId, q),
+    onMutate: () => {
+      setAskLoadingStep(askLoadingSteps[0]);
+    },
     onSuccess: (data) => {
       // Add answer to the list instead of replacing
       const newAnswer: ResearchAnswer = {
@@ -81,6 +125,25 @@ const ResearchDetail = () => {
         });
     },
   });
+
+  useEffect(() => {
+    if (!askMutation.isPending) {
+      setAskLoadingStep(askLoadingSteps[0]);
+      return;
+    }
+
+    let step = 0;
+    setAskLoadingStep(askLoadingSteps[step]);
+
+    const interval = window.setInterval(() => {
+      step = Math.min(step + 1, askLoadingSteps.length - 1);
+      setAskLoadingStep(askLoadingSteps[step]);
+    }, 1200);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [askMutation.isPending]);
 
   // Mutation for rating answers
   const ratingMutation = useMutation({
@@ -132,9 +195,29 @@ const ResearchDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-sm w-full px-6">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading research…</p>
+          <p className="text-muted-foreground mb-4">{researchLoadingStep}</p>
+          <div className="neo-card p-4 rounded-xl text-left space-y-2">
+            {researchLoadingSteps.map((step, idx) => {
+              const isCurrent = idx === researchStepIndex;
+              const isDone = idx < researchStepIndex;
+              return (
+                <div
+                  key={step}
+                  className={
+                    isCurrent
+                      ? 'text-primary font-medium'
+                      : isDone
+                        ? 'text-foreground/70'
+                        : 'text-muted-foreground'
+                  }
+                >
+                  {step}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -279,7 +362,7 @@ const ResearchDetail = () => {
                 {askMutation.isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Searching research...
+                    {askLoadingStep}
                   </>
                 ) : (
                   <>
@@ -288,6 +371,28 @@ const ResearchDetail = () => {
                   </>
                 )}
               </Button>
+              {askMutation.isPending && (
+                <div className="neo-card p-4 rounded-xl text-left space-y-2">
+                  {askLoadingSteps.map((step, idx) => {
+                    const isCurrent = idx === askStepIndex;
+                    const isDone = idx < askStepIndex;
+                    return (
+                      <div
+                        key={step}
+                        className={
+                          isCurrent
+                            ? 'text-primary font-medium'
+                            : isDone
+                              ? 'text-foreground/70'
+                              : 'text-muted-foreground'
+                        }
+                      >
+                        {step}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               {askMutation.isError && (
                 <p className="text-sm text-destructive">
                   Error: {(askMutation.error as Error).message}

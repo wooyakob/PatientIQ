@@ -81,6 +81,33 @@ def _trim_to_last_sentence(text: str) -> str:
     return text[: last_end + 1].strip()
 
 
+def _normalize_research_papers(papers: Any) -> List[Dict[str, Any]]:
+    if not isinstance(papers, list):
+        return []
+
+    normalized: List[Dict[str, Any]] = []
+    for p in papers:
+        if not isinstance(p, dict):
+            continue
+
+        paper = dict(p)
+        citation = paper.get("article_citation")
+        title = paper.get("title")
+
+        resolved = None
+        try:
+            resolved = db.get_research_paper_pmc_link(article_citation=citation, title=title)
+        except Exception:
+            resolved = None
+
+        if isinstance(resolved, str) and resolved.strip():
+            paper["pmc_link"] = resolved.strip()
+
+        normalized.append(paper)
+
+    return normalized
+
+
 # Import PulmonaryResearcher from pulmonary_research_agent/graph.py
 pulmonary_graph = _load_agent_module("pulmonary_research_agent", "graph.py")
 PulmonaryResearcher = pulmonary_graph.PulmonaryResearcher
@@ -885,13 +912,15 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
         logger.info("Invoking PulmonaryResearcher agent for patient_id=%s", patient_id)
         agent_result = _pulmonary_researcher.invoke(input=state)
 
+        papers = _normalize_research_papers(agent_result.get("papers", []))
+
         # Format response
         result = {
             "patient_id": agent_result.get("patient_id", patient_id),
             "patient_name": agent_result.get("patient_name"),
             "condition": agent_result.get("condition", ""),
             "question": agent_result.get("question", question),
-            "papers": agent_result.get("papers", []),
+            "papers": papers,
             "answer": agent_result.get("answer", ""),
         }
         logger.info(
@@ -964,13 +993,15 @@ async def ask_research_question(patient_id: str, payload: dict = Body(...)):
         )
         agent_result = _pulmonary_researcher.invoke(input=state)
 
+        papers = _normalize_research_papers(agent_result.get("papers", []))
+
         # Format response
         result = {
             "patient_id": agent_result.get("patient_id", patient_id),
             "patient_name": agent_result.get("patient_name"),
             "condition": agent_result.get("condition", ""),
             "question": agent_result.get("question", question),
-            "papers": agent_result.get("papers", []),
+            "papers": papers,
             "answer": agent_result.get("answer", ""),
         }
         logger.info(
