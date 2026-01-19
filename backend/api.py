@@ -118,6 +118,7 @@ DocNotesSearcher = docnotes_graph.DocNotesSearcher
 
 # Initialize catalog and agents at module level
 _catalog = agentc.Catalog()
+_root_span = _catalog.Span(name="CKO-Backend")
 _pulmonary_researcher = PulmonaryResearcher(catalog=_catalog)
 _docnotes_searcher = DocNotesSearcher(catalog=_catalog)
 
@@ -383,7 +384,7 @@ async def get_patient_doctor_notes(patient_id: str):
 
 
 @app.post("/api/patients/{patient_id}/doctor-notes/search")
-async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)):
+async def search_patient_doctor_notes(request: Request, patient_id: str, payload: dict = Body(...)):
     """
     Search doctor notes for a patient using semantic search.
 
@@ -442,7 +443,15 @@ async def search_patient_doctor_notes(patient_id: str, payload: dict = Body(...)
 
         # Invoke the agent
         logger.info("Invoking DocNotesSearcher agent for patient_id=%s", patient_id)
-        agent_result = _docnotes_searcher.invoke(input=state)
+        request_id = getattr(getattr(request, "state", None), "request_id", None)
+        search_span = _root_span.new(
+            name="DocNotesSearcher.invoke",
+            agent="docnotes_search_agent",
+            endpoint="POST /api/patients/{patient_id}/doctor-notes/search",
+            patient_id=str(patient_id),
+            request_id=str(request_id or ""),
+        )
+        agent_result = DocNotesSearcher(catalog=_catalog, span=search_span).invoke(input=state)
 
         # Format response
         result = {
@@ -876,7 +885,7 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
 
 # Medical Research Agent Endpoints
 @app.get("/api/patients/{patient_id}/research")
-async def get_patient_research(patient_id: str, question: Optional[str] = None):
+async def get_patient_research(request: Request, patient_id: str, question: Optional[str] = None):
     """
     Get medical research relevant to a patient's condition.
 
@@ -910,7 +919,15 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
 
         # Invoke the agent
         logger.info("Invoking PulmonaryResearcher agent for patient_id=%s", patient_id)
-        agent_result = _pulmonary_researcher.invoke(input=state)
+        request_id = getattr(getattr(request, "state", None), "request_id", None)
+        research_span = _root_span.new(
+            name="PulmonaryResearcher.invoke",
+            agent="pulmonary_research_agent",
+            endpoint="GET /api/patients/{patient_id}/research",
+            patient_id=str(patient_id),
+            request_id=str(request_id or ""),
+        )
+        agent_result = PulmonaryResearcher(catalog=_catalog, span=research_span).invoke(input=state)
 
         papers = _normalize_research_papers(agent_result.get("papers", []))
 
@@ -942,7 +959,7 @@ async def get_patient_research(patient_id: str, question: Optional[str] = None):
 
 
 @app.post("/api/patients/{patient_id}/research/ask")
-async def ask_research_question(patient_id: str, payload: dict = Body(...)):
+async def ask_research_question(request: Request, patient_id: str, payload: dict = Body(...)):
     """
     Ask a specific question about a patient's condition and get research-based answers.
     Also saves the question to Research.Pubmed.questions collection.
@@ -991,7 +1008,16 @@ async def ask_research_question(patient_id: str, payload: dict = Body(...)):
             patient_id,
             question_id,
         )
-        agent_result = _pulmonary_researcher.invoke(input=state)
+        request_id = getattr(getattr(request, "state", None), "request_id", None)
+        research_span = _root_span.new(
+            name="PulmonaryResearcher.ask.invoke",
+            agent="pulmonary_research_agent",
+            endpoint="POST /api/patients/{patient_id}/research/ask",
+            patient_id=str(patient_id),
+            question_id=str(question_id),
+            request_id=str(request_id or ""),
+        )
+        agent_result = PulmonaryResearcher(catalog=_catalog, span=research_span).invoke(input=state)
 
         papers = _normalize_research_papers(agent_result.get("papers", []))
 

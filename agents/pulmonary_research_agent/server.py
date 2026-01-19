@@ -48,6 +48,14 @@ async def research(req: ResearchRequest):
         Research results with papers and clinical summary
     """
     try:
+        request_span = span.new(
+            name="PulmonaryResearcher.invoke",
+            agent="pulmonary_research_agent",
+            endpoint="POST /research",
+            patient_id=str(req.patient_id),
+            session_id=str(req.session_id),
+        )
+
         # Build starting state
         input_state = PulmonaryResearcher.build_starting_state(patient_id=req.patient_id, question=req.question)
 
@@ -62,7 +70,7 @@ async def research(req: ResearchRequest):
         config = {"configurable": {"thread_id": f"{req.patient_id}/{req.session_id}"}}
 
         # Invoke the agent
-        result = researcher.invoke(input=input_state, config=config)
+        result = PulmonaryResearcher(catalog=catalog, span=request_span).invoke(input=input_state, config=config)
 
         # Build response
         return ResearchResponse(

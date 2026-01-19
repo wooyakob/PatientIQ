@@ -46,12 +46,6 @@ class DocNotesSearchAgent(agentc_langgraph.agent.ReActAgent):
         Returns:
             Updated state with search results
         """
-        span.log(
-            agentc.span.SystemContent(
-                value=f"Searching notes for patient {state.get('patient_id')}"
-            )
-        )
-
         # Create the agent and invoke it
         agent = self.create_react_agent(span)
         response = agent.invoke(input=state, config=config)
@@ -70,9 +64,5 @@ class DocNotesSearchAgent(agentc_langgraph.agent.ReActAgent):
         # Append the AI response to messages
         if response.get("messages"):
             state["messages"].append(response["messages"][-1])
-
-        span.log(
-            agentc.span.SystemContent(value=f"Search complete: {len(state['notes'])} notes found")
-        )
 
         return state
