@@ -1001,6 +1001,180 @@ class CouchbaseDB:
             print(f"Error updating appointment status: {e}")
             return False
 
+    # Wearable Analytics Methods
+
+    def get_wearable_analytics_summary(self, patient_id: str, days: int = 30) -> Optional[dict]:
+        """
+        Get comprehensive wearable analytics for a patient.
+        
+        This is the main method for the wearable analytics agent endpoint.
+        Returns analysis results including alerts, trends, cohort comparison, and research.
+        
+        Args:
+            patient_id: Patient ID to analyze
+            days: Number of days of data to analyze (default: 30)
+            
+        Returns:
+            Dictionary containing complete analytics or None if error
+        """
+        self._check_connection()
+        try:
+            # This will be called by the API after the agent completes
+            # For now, return a placeholder structure
+            return {
+                "patient_id": patient_id,
+                "analysis_period_days": days,
+                "timestamp": datetime.now().isoformat(),
+                "status": "analysis_requested"
+            }
+        except Exception as e:
+            print(f"Error getting wearable analytics: {e}")
+            return None
+
+    def get_patient_wearable_data(self, patient_id: str, days: int = 30, limit: Optional[int] = None) -> List[dict]:
+        """
+        Get wearable device data for a specific patient.
+        
+        Args:
+            patient_id: Patient ID
+            days: Number of days to look back
+            limit: Optional limit on number of records
+            
+        Returns:
+            List of wearable data records
+        """
+        self._check_connection()
+        try:
+            collection_name = f"Patient_{patient_id}"
+            
+            query = f"""
+            SELECT w.*
+            FROM `{self.bucket_name}`.Wearables.`{collection_name}` w
+            WHERE DATE_DIFF_STR(NOW_STR(), w.timestamp, 'day') <= $days
+            ORDER BY w.timestamp DESC
+            {f'LIMIT {limit}' if limit else ''}
+            """
+            
+            result = self.cluster.query(
+                query,
+                QueryOptions(named_parameters={"days": days}),
+            )
+            
+            return list(result)
+            
+        except Exception as e:
+            print(f"Error fetching wearable data for patient {patient_id}: {e}")
+            return []
+
+    def find_similar_patients(
+        self, 
+        patient_id: str, 
+        age_range: int = 5,
+        same_condition: bool = True,
+        same_gender: bool = True,
+        limit: int = 10
+    ) -> List[dict]:
+        """
+        Find patients with similar demographics for cohort analysis.
+        
+        Args:
+            patient_id: Reference patient ID
+            age_range: Age tolerance (±years)
+            same_condition: Match medical condition
+            same_gender: Match gender
+            limit: Max results
+            
+        Returns:
+            List of similar patients
+        """
+        self._check_connection()
+        try:
+            # First get reference patient
+            ref_query = f"""
+            SELECT p.patient_id, p.age, p.gender, p.medical_conditions
+            FROM `{self.bucket_name}`.People.Patients p
+            WHERE p.patient_id = $patient_id
+            LIMIT 1
+            """
+            
+            ref_result = self.cluster.query(
+                ref_query,
+                QueryOptions(named_parameters={"patient_id": patient_id}),
+            )
+            
+            ref_rows = list(ref_result)
+            if not ref_rows:
+                return []
+            
+            ref_patient = ref_rows[0]
+            ref_age = int(ref_patient.get("age", 0))
+            ref_gender = ref_patient.get("gender", "")
+            ref_condition = ref_patient.get("medical_conditions", "")
+            
+            # Build query conditions
+            conditions = [
+                f"p.patient_id != '{patient_id}'",
+                f"ABS(TO_NUMBER(p.age) - {ref_age}) <= {age_range}"
+            ]
+            
+            if same_gender and ref_gender:
+                conditions.append(f"LOWER(p.gender) = '{ref_gender.lower()}'")
+            
+            if same_condition and ref_condition:
+                conditions.append(
+                    f"(LOWER(p.medical_conditions) = '{ref_condition.lower()}' OR "
+                    f"ANY c IN p.medical_conditions SATISFIES LOWER(c) = '{ref_condition.lower()}' END)"
+                )
+            
+            where_clause = " AND ".join(conditions)
+            
+            query = f"""
+            SELECT 
+                p.patient_id,
+                p.patient_name,
+                p.age,
+                p.gender,
+                p.medical_conditions,
+                ABS(TO_NUMBER(p.age) - {ref_age}) AS age_difference
+            FROM `{self.bucket_name}`.People.Patients p
+            WHERE {where_clause}
+            ORDER BY age_difference ASC
+            LIMIT $limit
+            """
+            
+            result = self.cluster.query(
+                query,
+                QueryOptions(named_parameters={"limit": limit}),
+            )
+            
+            return list(result)
+            
+        except Exception as e:
+            print(f"Error finding similar patients: {e}")
+            return []
+
+    def save_wearable_analytics_result(self, result_id: str, result_data: dict) -> bool:
+        """
+        Save wearable analytics results for future reference.
+        
+        Args:
+            result_id: Unique ID for the analysis result
+            result_data: Complete analysis results
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        self._check_connection()
+        try:
+            # Save to a new collection for analytics results
+            # You may want to create this collection in your schema
+            analytics_collection = self.bucket.scope("Wearables").collection("Analytics_Results")
+            analytics_collection.upsert(result_id, result_data)
+            return True
+        except Exception as e:
+            print(f"Error saving wearable analytics result: {e}")
+            return False
+
     def save_research_question(self, question_id: str, question_data: dict) -> bool:
         """Save a research question to Research.Pubmed.questions collection"""
         self._check_connection()
