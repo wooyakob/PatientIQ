@@ -12,10 +12,8 @@ import couchbase.options
 import dotenv
 import os
 import requests
-import warnings
 
 dotenv.load_dotenv()
-warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 
 # Shared Couchbase cluster connection
 # Agent Catalog imports tool files, so this connection is reused across tools
@@ -64,7 +62,9 @@ def get_nvidia_embedding(text: str) -> list[float]:
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     payload = {"input": text, "model": model_name}
 
-    res = requests.post(url, headers=headers, json=payload, timeout=30, verify=False)
+    ssl_verify_raw = (os.getenv("EMBEDDING_SSL_VERIFY") or "").strip().lower()
+    ssl_verify = ssl_verify_raw not in ("0", "false", "no")
+    res = requests.post(url, headers=headers, json=payload, timeout=30, verify=ssl_verify)
     res.raise_for_status()
     data = res.json()
 

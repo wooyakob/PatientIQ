@@ -84,7 +84,12 @@ class CouchbaseDB:
 
         try:
             connstr = self._build_connection_string(self.endpoint)
-            print(f"Connecting to Couchbase at {connstr}...")
+            try:
+                parts = urlsplit(connstr)
+                safe_connstr = urlunsplit((parts.scheme, parts.netloc, parts.path or "/", "", ""))
+            except Exception:
+                safe_connstr = ""
+            print(f"Connecting to Couchbase at {safe_connstr or '[redacted]'}...")
             auth = PasswordAuthenticator(self.username, self.password)
             options = ClusterOptions(auth)
             options.apply_profile("wan_development")
@@ -715,12 +720,14 @@ class CouchbaseDB:
             query = f"""
                 SELECT n.*
                 FROM `{self.bucket_name}`.`Notes`.`Doctor` n
-                WHERE n.patient_id = '{patient_id}'
+                WHERE n.patient_id = $patient_id
                 AND n.document_type = 'questionnaire_summary'
                 ORDER BY n.generated_at DESC
                 LIMIT 1
             """
-            result = self.cluster.query(query)
+            result = self.cluster.query(
+                query, QueryOptions(named_parameters={"patient_id": patient_id})
+            )
             rows = list(result)
             return rows[0] if rows else None
         except Exception as e:
