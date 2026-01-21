@@ -5,7 +5,11 @@ import time
 import uuid
 import os
 import hashlib
+import asyncio
 import requests
+import re
+import urllib.parse
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -13,6 +17,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from backend.database import db
 from backend.models import Patient, WearableData, WearablesSummary, QuestionnaireSummary
@@ -79,6 +84,51 @@ def _trim_to_last_sentence(text: str) -> str:
         return text
 
     return text[: last_end + 1].strip()
+
+
+def _redact_pii(value: Any) -> Any:
+    keys_to_drop = {
+        "patient_email",
+        "patient_cell",
+        "email",
+        "phone",
+        "insurance_number",
+        "emergency_contacts",
+    }
+
+    if isinstance(value, dict):
+        out: Dict[str, Any] = {}
+        for k, v in value.items():
+            if str(k) in keys_to_drop:
+                continue
+            out[str(k)] = _redact_pii(v)
+        return out
+
+    if isinstance(value, list):
+        return [_redact_pii(v) for v in value]
+
+    if isinstance(value, str):
+        s = value
+        s = re.sub(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", "[REDACTED]", s, flags=re.I)
+        s = re.sub(r"\b\d{3}[- .]?\d{3}[- .]?\d{4}\b", "[REDACTED]", s)
+        return s
+
+    return value
+
+
+def _strip_html_to_text(html: str) -> str:
+    h = str(html or "")
+    if not h.strip():
+        return ""
+    h = re.sub(r"(?is)<script.*?>.*?</script>", " ", h)
+    h = re.sub(r"(?is)<style.*?>.*?</style>", " ", h)
+    paras = re.findall(r"(?is)<p[^>]*>(.*?)</p>", h)
+    if paras:
+        text = "\n\n".join([re.sub(r"(?is)<.*?>", " ", p) for p in paras])
+    else:
+        text = re.sub(r"(?is)<.*?>", " ", h)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 
 def _normalize_research_papers(papers: Any) -> List[Dict[str, Any]]:
@@ -172,15 +222,31 @@ async def log_requests(request: Request, call_next):
     return response
 
 
+@app.middleware("http")
+async def require_api_key(request: Request, call_next):
+    expected = (os.getenv("API_KEY") or "").strip()
+    if not expected:
+        return await call_next(request)
+    if request.url.path == "/health":
+        return await call_next(request)
+    provided = (request.headers.get("x-api-key") or "").strip()
+    if provided != expected:
+        return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+    return await call_next(request)
+
+
 # CORS middleware for frontend communication
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:8080",
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],  # Vite default ports
-    allow_credentials=True,
+        o
+        for o in (
+            (os.getenv("CORS_ALLOW_ORIGINS") or "")
+            or "http://localhost:8080,http://localhost:5173,http://localhost:3000"
+        ).split(",")
+        if o.strip()
+    ],
+    allow_credentials=("*" not in (os.getenv("CORS_ALLOW_ORIGINS") or "")),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -230,10 +296,23 @@ async def summarize_patient(patient_id: str):
         if not patient:
             raise HTTPException(status_code=404, detail=f"Patient {patient_id} not found")
 
+        questionnaire = None
+        try:
+            questionnaire = await get_pre_visit_questionnaire(patient_id)
+        except Exception:
+            questionnaire = None
+
+        patient_redacted = _redact_pii(patient)
+        questionnaire_redacted = _redact_pii(questionnaire) if questionnaire else None
+
         prompt = (
-            "Summarize the following patient information in a single paragraph. "
-            "Be factual, concise, and avoid speculation.\n\n"
-            f"Patient JSON:\n{json.dumps(patient, ensure_ascii=False)}"
+            "You are a clinical assistant. Write ONE paragraph summarizing the patient's profile and, if available, "
+            "their pre-visit questionnaire. Capture key conditions, symptoms, functional impact, exposures, and follow-up needs. "
+            "Be factual, concise, and avoid speculation. Do not mention that you are an AI. "
+            "Do NOT include any email addresses, phone numbers, insurance numbers, emergency contacts, or other personal contact information. "
+            "End with a period.\n\n"
+            f"Patient JSON:\n{json.dumps(patient_redacted, ensure_ascii=False)}\n\n"
+            f"Pre-visit questionnaire JSON (if present):\n{json.dumps(questionnaire_redacted, ensure_ascii=False)}"
         )
 
         text, _raw = await chat_completion_text(
@@ -242,8 +321,8 @@ async def summarize_patient(patient_id: str):
             temperature=0.2,
         )
 
-        summary = (text or "").strip()
-        return {"patient_id": str(patient_id), "patient": patient, "summary": summary}
+        summary = _trim_to_last_sentence(text)
+        return {"patient_id": str(patient_id), "patient": patient_redacted, "summary": summary}
     except HTTPException:
         raise
     except Exception as e:
@@ -794,13 +873,17 @@ async def get_pre_visit_questionnaire_summary(patient_id: str):
         patient_name = str(questionnaire.get("patient_name") or "").strip()
         date_completed = str(questionnaire.get("date_completed") or "").strip()
 
+        questionnaire_redacted = _redact_pii(questionnaire)
+
         prompt = (
             "You are a clinical assistant. Write ONE paragraph summarizing the patient's pre-visit questionnaire. "
             "Capture the key symptoms, severity, functional impact, relevant exposures, and any red flags or follow-up needs. "
-            "Be factual and concise. Do not mention that you are an AI. End with a period.\n\n"
+            "Be factual and concise. Do not mention that you are an AI. "
+            "Do NOT include any email addresses, phone numbers, insurance numbers, emergency contacts, or other personal contact information. "
+            "End with a period.\n\n"
             f"Patient: {patient_name or patient_id}\n"
             f"Date completed: {date_completed or 'unknown'}\n"
-            f"Questionnaire JSON: {json.dumps(questionnaire, ensure_ascii=False)}"
+            f"Questionnaire JSON: {json.dumps(questionnaire_redacted, ensure_ascii=False)}"
         )
 
         text, _raw = await chat_completion_text(
@@ -840,6 +923,7 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
                 / f"patient_{patient_id}"
                 / "pre_visit_questionnaire.json"
             )
+
             if not path.exists():
                 statuses.append(
                     {
@@ -1141,6 +1225,10 @@ async def search_tavily_research(payload: dict = Body(...)):
 
         if not query:
             raise HTTPException(status_code=400, detail="Query is required")
+        if max_results <= 0:
+            max_results = 3
+        if max_results > 10:
+            max_results = 10
 
         tavily_api_key = os.getenv("TAVILY_API_KEY")
         if not tavily_api_key:
@@ -1156,7 +1244,9 @@ async def search_tavily_research(payload: dict = Body(...)):
             "include_raw_content": True,
         }
 
-        response = requests.post(url, headers=headers, json=payload_data, timeout=30)
+        response = await asyncio.to_thread(
+            requests.post, url, headers=headers, json=payload_data, timeout=30
+        )
         response.raise_for_status()
         data = response.json()
 
@@ -1187,6 +1277,164 @@ async def search_tavily_research(payload: dict = Body(...)):
         raise HTTPException(status_code=502, detail=f"Tavily API error: {str(e)}")
     except Exception as e:
         logger.exception("Error searching Tavily")
+        raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
+
+
+@app.post("/api/research/pubmed/search")
+async def search_pubmed_research(payload: dict = Body(...)):
+    try:
+        query = str(payload.get("query") or "").strip()
+        max_results = int(payload.get("max_results", 3) or 3)
+        days_back = payload.get("days_back")
+        include_pmc_full_text = bool(payload.get("include_pmc_full_text", True))
+
+        if not query:
+            raise HTTPException(status_code=400, detail="Query is required")
+        if max_results <= 0:
+            max_results = 3
+        if max_results > 10:
+            max_results = 10
+
+        esearch_params = {
+            "db": "pubmed",
+            "term": query,
+            "sort": "date",
+            "retmode": "json",
+            "retmax": str(max_results),
+        }
+        if days_back is not None:
+            try:
+                days_i = int(days_back)
+            except Exception:
+                days_i = 0
+            if days_i > 0:
+                esearch_params["datetype"] = "pdat"
+                esearch_params["reldate"] = str(days_i)
+
+        esearch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+        esearch_resp = await asyncio.to_thread(
+            requests.get, esearch_url, params=esearch_params, timeout=30
+        )
+        esearch_resp.raise_for_status()
+        esearch = esearch_resp.json()
+        pmids = list(((esearch.get("esearchresult") or {}).get("idlist") or []))
+
+        if not pmids:
+            return {"results": []}
+
+        esummary_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+        esummary_resp = await asyncio.to_thread(
+            requests.get,
+            esummary_url,
+            params={"db": "pubmed", "id": ",".join(pmids), "retmode": "json"},
+            timeout=30,
+        )
+        esummary_resp.raise_for_status()
+        esummary = esummary_resp.json()
+        result_map = esummary.get("result") or {}
+
+        papers: List[Dict[str, Any]] = []
+        for pmid in pmids:
+            item = result_map.get(str(pmid)) or {}
+            title = str(item.get("title") or "").strip() or "Untitled"
+            source = str(item.get("source") or "").strip()
+            pubdate = str(item.get("pubdate") or "").strip()
+            authors = item.get("authors") or []
+            author_names = []
+            for a in authors:
+                if isinstance(a, dict) and a.get("name"):
+                    author_names.append(str(a.get("name")))
+            author_str = " ".join(author_names).strip() or "Unknown"
+
+            pmc_link = ""
+            try:
+                elink_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi"
+                elink_resp = await asyncio.to_thread(
+                    requests.get,
+                    elink_url,
+                    params={
+                        "dbfrom": "pubmed",
+                        "db": "pmc",
+                        "linkname": "pubmed_pmc",
+                        "id": str(pmid),
+                        "retmode": "xml",
+                    },
+                    timeout=30,
+                )
+                elink_resp.raise_for_status()
+                root = ET.fromstring(elink_resp.text)
+                pmc_id = None
+                for linksetdb in root.findall(".//LinkSetDb"):
+                    linkname = linksetdb.findtext("LinkName") or ""
+                    if linkname.strip() != "pubmed_pmc":
+                        continue
+                    id_text = linksetdb.findtext("Link/Id")
+                    if id_text and str(id_text).strip().isdigit():
+                        pmc_id = str(id_text).strip()
+                        break
+                if pmc_id:
+                    pmc_link = f"https://pmc.ncbi.nlm.nih.gov/articles/PMC{pmc_id}/"
+            except Exception:
+                pmc_link = ""
+
+            abstract_text = ""
+            try:
+                efetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+                efetch_resp = await asyncio.to_thread(
+                    requests.get,
+                    efetch_url,
+                    params={"db": "pubmed", "id": str(pmid), "retmode": "xml"},
+                    timeout=30,
+                )
+                efetch_resp.raise_for_status()
+                root = ET.fromstring(efetch_resp.text)
+                parts = []
+                for at in root.findall(".//AbstractText"):
+                    if at.text and str(at.text).strip():
+                        parts.append(str(at.text).strip())
+                abstract_text = "\n\n".join(parts).strip()
+            except Exception:
+                abstract_text = ""
+
+            article_text = abstract_text
+            if pmc_link and include_pmc_full_text:
+                try:
+                    pmc_resp = await asyncio.to_thread(requests.get, pmc_link, timeout=30)
+                    pmc_resp.raise_for_status()
+                    extracted = _strip_html_to_text(pmc_resp.text)
+                    if extracted:
+                        article_text = extracted
+                except Exception:
+                    article_text = abstract_text
+
+            article_text = (article_text or "").strip()
+            if len(article_text) > 5000:
+                article_text = article_text[:5000]
+
+            pubmed_url = f"https://pubmed.ncbi.nlm.nih.gov/{urllib.parse.quote_plus(str(pmid))}/"
+            citation = " ".join([p for p in [source, pubdate, f"PMID:{pmid}"] if p]).strip()
+
+            papers.append(
+                {
+                    "author": author_str,
+                    "title": title,
+                    "article_text": article_text,
+                    "article_citation": citation or pubmed_url,
+                    "pmc_link": pmc_link or pubmed_url,
+                    "source_type": "pubmed",
+                    "pubmed_url": pubmed_url,
+                    "pmid": str(pmid),
+                }
+            )
+
+        return {"results": papers}
+    except HTTPException:
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.exception("PubMed API error")
+        raise HTTPException(status_code=502, detail=f"PubMed API error: {str(e)}")
+    except Exception as e:
+        logger.exception("Error searching PubMed")
         raise HTTPException(status_code=500, detail=f"Search error: {str(e)}")
 
 
@@ -1233,7 +1481,7 @@ async def add_research_paper(payload: dict = Body(...)):
         try:
             logger.info(f"Vectorizing paper: {paper_id}")
             embedding = get_nvidia_embedding(article_text)
-            paper_doc["article_vectorized"] = embedding
+            paper_doc["article_text_vectorized"] = embedding
             vectorized = True
             logger.info(f"Successfully vectorized paper: {paper_id}")
         except Exception as e:
