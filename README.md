@@ -10,10 +10,10 @@ Doctors today face countless daily micro decisions, many of which are administra
 
 ## Screenshots
 ### PatientIQ Home
-![PatientIQ Home](assets/img/PatientIQ_Application/PatientIQ_Home.png)
+![PatientIQ Home](assets/img/PatientIQ_Application/Home/PatientIQ_Home.png)
 
 ### PatientIQ Dashboard
-![PatientIQ Dashboard](assets/img/PatientIQ_Application/PatientIQ_Patient_Dashboard.png)
+![PatientIQ Dashboard](assets/img/PatientIQ_Application/Dashboard/PatientIQ_Patient_Dashboard.png)
 
 ## Run
 - `make dev`
