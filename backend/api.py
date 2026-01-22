@@ -1,3 +1,41 @@
+"""FastAPI application.
+
+## Endpoints
+
+- **GET** `/health`
+- **GET** `/api/patients`
+- **GET** `/api/patients/{patient_id}`
+- **POST** `/api/patients/{patient_id}/summary`
+- **POST** `/api/conditions/summary`
+- **GET** `/api/patients/{patient_id}/wearables`
+- **GET** `/api/patients/{patient_id}/wearables/summary`
+- **POST** `/api/patients`
+- **GET** `/api/patients/{patient_id}/doctor-notes`
+- **POST** `/api/patients/{patient_id}/doctor-notes/search`
+- **POST** `/api/doctor-notes`
+- **DELETE** `/api/doctor-notes/{note_id}`
+- **GET** `/api/patients/{patient_id}/patient-notes`
+- **GET** `/api/messages/private/{doctor_id}`
+- **POST** `/api/messages/private`
+- **GET** `/api/messages/public`
+- **POST** `/api/messages/public`
+- **POST** `/api/messages/private/{message_id}/read`
+- **POST** `/api/messages/public/{message_id}/read`
+- **GET** `/api/appointments/doctor/{doctor_id}`
+- **GET** `/api/appointments/patient/{patient_id}`
+- **POST** `/api/appointments/{appointment_id}/status`
+- **GET** `/api/questionnaires/pre-visit/{patient_id}`
+- **GET** `/api/questionnaires/pre-visit/{patient_id}/summary`
+- **POST** `/api/questionnaires/pre-visit/status`
+- **GET** `/api/patients/{patient_id}/research`
+- **POST** `/api/patients/{patient_id}/research/ask`
+- **POST** `/api/research/answers`
+- **PATCH** `/api/research/answers/{answer_id}/rating`
+- **POST** `/api/research/tavily/search`
+- **POST** `/api/research/pubmed/search`
+- **POST** `/api/research/papers/add`
+"""
+
 import json
 import logging
 import sys
@@ -255,6 +293,7 @@ app.add_middleware(
 # Health Check
 @app.get("/health")
 def health():
+    """Health check endpoint."""
     return {"ok": True, "service": "Healthcare API"}
 
 
@@ -678,6 +717,7 @@ async def get_private_messages(doctor_id: str, limit: int = 50):
 
 @app.post("/api/messages/private")
 async def send_private_message(payload: dict):
+    """Send a private message to a doctor/staff member."""
     try:
         to_id = str(payload.get("to_id") or "").strip()
         to_name = str(payload.get("to_name") or "").strip()
@@ -727,6 +767,7 @@ async def get_public_messages(limit: int = 50):
 
 @app.post("/api/messages/public")
 async def send_public_message(payload: dict):
+    """Send a public message visible to all staff."""
     try:
         subject = str(payload.get("subject") or "").strip()
         content = str(payload.get("content") or "").strip()
@@ -834,6 +875,7 @@ async def update_appointment_status(appointment_id: str, status: str):
 
 @app.get("/api/questionnaires/pre-visit/{patient_id}")
 async def get_pre_visit_questionnaire(patient_id: str):
+    """Fetch the pre-visit questionnaire JSON for a patient."""
     try:
         root = Path(__file__).resolve().parent.parent
         path = (
@@ -865,6 +907,7 @@ async def get_pre_visit_questionnaire(patient_id: str):
 
 @app.get("/api/questionnaires/pre-visit/{patient_id}/summary", response_model=QuestionnaireSummary)
 async def get_pre_visit_questionnaire_summary(patient_id: str):
+    """Generate a one-paragraph summary of a patient's pre-visit questionnaire."""
     try:
         questionnaire = await get_pre_visit_questionnaire(patient_id)
         if not isinstance(questionnaire, dict):
@@ -907,6 +950,7 @@ async def get_pre_visit_questionnaire_summary(patient_id: str):
 
 @app.post("/api/questionnaires/pre-visit/status")
 async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)):
+    """Bulk-check existence/completion status for multiple patients' pre-visit questionnaires."""
     try:
         patient_ids = payload.get("patient_ids")
         if not isinstance(patient_ids, list):
@@ -1282,6 +1326,7 @@ async def search_tavily_research(payload: dict = Body(...)):
 
 @app.post("/api/research/pubmed/search")
 async def search_pubmed_research(payload: dict = Body(...)):
+    """Search PubMed (optionally including PMC full text) and return normalized paper results."""
     try:
         query = str(payload.get("query") or "").strip()
         max_results = int(payload.get("max_results", 3) or 3)
