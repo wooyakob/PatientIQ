@@ -1,4 +1,4 @@
-.PHONY: help dev backend frontend stop fmt fmt-check lint lint-fix check install-hooks index-catalog
+.PHONY: help dev backend frontend stop fmt fmt-check lint lint-fix check install-hooks index-catalog api-docs
 
 help:
 	@echo "Targets:"
@@ -7,10 +7,14 @@ help:
 	@echo "  make frontend     - run Vite frontend on :8080"
 	@echo "  make stop         - best-effort stop anything listening on :8000 and :8080"
 	@echo "  make index-catalog - index agent catalog tools and prompts"
+	@echo "  make api-docs     - generate HTML API docs (pdoc) into docs/api"
 
 index-catalog:
 	@echo "Indexing agent catalog..."
 	@uv run agentc index tools prompts
+
+api-docs:
+	uv run --extra dev python -m pdoc backend.api --output-directory docs/api
 
 backend:
 	uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000

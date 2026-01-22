@@ -8,6 +8,13 @@ PatientIQ centralizes patient data and minimizes a doctor's cognitive load by ma
 ## Abstract
 Doctors today face countless daily micro decisions, many of which are administrative and pull focus away from life saving care. PatientIQ centralizes key patient information and uses AI agents to handle routine information retrieval, giving clinicians more time to focus on analysis and delivery of patient care.
 
+## Screenshots
+### PatientIQ Home
+![PatientIQ Home](assets/img/PatientIQ_Application/PatientIQ_Home.png)
+
+### PatientIQ Dashboard
+![PatientIQ Dashboard](assets/img/PatientIQ_Application/PatientIQ_Patient_Dashboard.png)
+
 ## Run
 - `make dev`
 - `make stop`
@@ -18,6 +25,10 @@ Doctors today face countless daily micro decisions, many of which are administra
 
 ## Agentc
 See: `/agents/AGENTS.md`
+
+## API
+See: `/docs/api`
+- `open docs/api/index.html`
 
 ### Cluster Configuration
  Cluster used for testing (high level):

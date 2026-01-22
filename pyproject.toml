@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "flake8",
+  "pdoc",
   "ruff",
 ]
 

@@ -87,8 +87,16 @@ const WearablesDetail = () => {
   const heartRates = wearables?.heartRate ?? [];
   const stepCounts = wearables?.stepCount ?? [];
 
-  const availablePoints = Math.min(heartRates.length, stepCounts.length);
+  const availablePoints = Math.min(heartRates.length, stepCounts.length, timestamps.length);
   const pointsToShow = Math.min(30, availablePoints);
+
+  const timestampsToShow = timestamps.slice(-pointsToShow);
+  const heartRatesToShow = heartRates.slice(-pointsToShow);
+  const stepCountsToShow = stepCounts.slice(-pointsToShow);
+
+  const timestampsNewestFirst = [...timestampsToShow].reverse();
+  const heartRatesNewestFirst = [...heartRatesToShow].reverse();
+  const stepCountsNewestFirst = [...stepCountsToShow].reverse();
 
   const avgHeartRate = Math.round(heartRates.reduce((a, b) => a + b, 0) / (heartRates.length || 1));
   const avgSteps = Math.round(stepCounts.reduce((a, b) => a + b, 0) / (stepCounts.length || 1));
@@ -180,9 +188,8 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {heartRates.slice(-pointsToShow).map((rate, index) => {
-                const tsIndex = timestamps.length - pointsToShow + index;
-                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
+              {heartRatesNewestFirst.map((rate, index) => {
+                const ts = timestampsNewestFirst[index] ?? '';
                 return (
                   <div key={index} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-16">
@@ -213,9 +220,8 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {stepCounts.slice(-pointsToShow).map((steps, index) => {
-                const tsIndex = timestamps.length - pointsToShow + index;
-                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
+              {stepCountsNewestFirst.map((steps, index) => {
+                const ts = timestampsNewestFirst[index] ?? '';
                 return (
                   <div key={index} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-16">
