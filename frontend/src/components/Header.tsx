@@ -1,9 +1,12 @@
-import { Plus, Calendar } from 'lucide-react';
+import { Plus, Moon, Sun } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Button } from '@/components/ui/button';
 
 export function Header() {
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   
   const navLinks = [
     { to: '/', label: 'Patient Dashboard' },
@@ -35,6 +38,19 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="ml-2 h-9 w-9"
+            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            {theme === 'light' ? (
+              <Moon className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+            ) : (
+              <Sun className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+            )}
+          </Button>
         </nav>
       </div>
     </header>

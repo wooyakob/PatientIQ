@@ -3,7 +3,7 @@ import { Header } from '@/components/Header';
 import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { getPatient, getPatientWearables, getPatientWearablesSummary } from '@/lib/api';
+import { getPatient, getPatientWearables } from '@/lib/api';
 
 const WearablesDetail = () => {
   const { id } = useParams();
@@ -30,17 +30,6 @@ const WearablesDetail = () => {
     queryKey: ['patient-wearables', patientId, 30],
     queryFn: () => getPatientWearables(patientId, 30),
     enabled: Boolean(patientId),
-  });
-
-  const {
-    data: wearablesSummary,
-    isLoading: isSummaryLoading,
-    isError: isSummaryError,
-  } = useQuery({
-    queryKey: ['patient-wearables-summary', patientId, 30],
-    queryFn: () => getPatientWearablesSummary(patientId, 30),
-    enabled: Boolean(patientId),
-    staleTime: 1000 * 60 * 60,
   });
 
   if (isLoading || isWearablesLoading) {
@@ -87,16 +76,8 @@ const WearablesDetail = () => {
   const heartRates = wearables?.heartRate ?? [];
   const stepCounts = wearables?.stepCount ?? [];
 
-  const availablePoints = Math.min(heartRates.length, stepCounts.length, timestamps.length);
+  const availablePoints = Math.min(heartRates.length, stepCounts.length);
   const pointsToShow = Math.min(30, availablePoints);
-
-  const timestampsToShow = timestamps.slice(-pointsToShow);
-  const heartRatesToShow = heartRates.slice(-pointsToShow);
-  const stepCountsToShow = stepCounts.slice(-pointsToShow);
-
-  const timestampsNewestFirst = [...timestampsToShow].reverse();
-  const heartRatesNewestFirst = [...heartRatesToShow].reverse();
-  const stepCountsNewestFirst = [...stepCountsToShow].reverse();
 
   const avgHeartRate = Math.round(heartRates.reduce((a, b) => a + b, 0) / (heartRates.length || 1));
   const avgSteps = Math.round(stepCounts.reduce((a, b) => a + b, 0) / (stepCounts.length || 1));
@@ -140,17 +121,6 @@ const WearablesDetail = () => {
             </div>
           </div>
 
-          <div className="neo-card p-5 rounded-2xl mb-6">
-            <p className="text-xs text-muted-foreground mb-2">30-day summary</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {isSummaryLoading
-                ? 'Generating summary…'
-                : isSummaryError
-                  ? 'Unable to generate summary right now.'
-                  : (wearablesSummary?.summary ?? '')}
-            </p>
-          </div>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="neo-card p-4 rounded-xl">
               <p className="text-xs text-muted-foreground mb-1">Avg Heart Rate</p>
@@ -188,8 +158,9 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {heartRatesNewestFirst.map((rate, index) => {
-                const ts = timestampsNewestFirst[index] ?? '';
+              {heartRates.slice(-pointsToShow).map((rate, index) => {
+                const tsIndex = timestamps.length - pointsToShow + index;
+                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
                 return (
                   <div key={index} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-16">
@@ -220,8 +191,9 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {stepCountsNewestFirst.map((steps, index) => {
-                const ts = timestampsNewestFirst[index] ?? '';
+              {stepCounts.slice(-pointsToShow).map((steps, index) => {
+                const tsIndex = timestamps.length - pointsToShow + index;
+                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
                 return (
                   <div key={index} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-16">
