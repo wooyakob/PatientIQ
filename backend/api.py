@@ -58,7 +58,13 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from backend.database import db
-from backend.models import Patient, WearableData, WearablesSummary, QuestionnaireSummary
+from backend.models import (
+    Patient,
+    WearableData,
+    WearablesSummary,
+    QuestionnaireSummary,
+    DoctorNotesSummary,
+)
 
 import agentc
 import importlib.util
@@ -91,7 +97,6 @@ def _load_agent_module(agent_name: str, module_file: str = "graph.py"):
         raise RuntimeError(f"Unable to load agent module spec from {module_path}")
 
     module = importlib.util.module_from_spec(spec)
-    prior = sys.modules.get(unique_module_name)
     sys.modules[unique_module_name] = module
     original_sys_path = list(sys.path)
     if agent_dir not in sys.path:
@@ -100,10 +105,7 @@ def _load_agent_module(agent_name: str, module_file: str = "graph.py"):
         spec.loader.exec_module(module)
     finally:
         sys.path = original_sys_path
-        if prior is None:
-            sys.modules.pop(unique_module_name, None)
-        else:
-            sys.modules[unique_module_name] = prior
+        # Don't clean up the unique module - keep it in sys.modules
 
     return module
 
@@ -204,11 +206,16 @@ PulmonaryResearcher = pulmonary_graph.PulmonaryResearcher
 docnotes_graph = _load_agent_module("docnotes_search_agent", "graph.py")
 DocNotesSearcher = docnotes_graph.DocNotesSearcher
 
+# Import PrevisitSummarizer from previsit_summary_agent/graph.py
+previsit_graph = _load_agent_module("previsit_summary_agent", "graph.py")
+PrevisitSummarizer = previsit_graph.PrevisitSummarizer
+
 # Initialize catalog and agents at module level
 _catalog = agentc.Catalog()
 _root_span = _catalog.Span(name="CKO-Backend")
 _pulmonary_researcher = PulmonaryResearcher(catalog=_catalog)
 _docnotes_searcher = DocNotesSearcher(catalog=_catalog)
+_previsit_summarizer = PrevisitSummarizer(catalog=_catalog)
 
 logger = logging.getLogger("cko")
 logger.setLevel(logging.INFO)
@@ -348,6 +355,8 @@ async def summarize_patient(patient_id: str):
             "You are a clinical assistant. Write ONE paragraph summarizing the patient's profile and, if available, "
             "their pre-visit questionnaire. Capture key conditions, symptoms, functional impact, exposures, and follow-up needs. "
             "Be factual, concise, and avoid speculation. Do not mention that you are an AI. "
+            "Use ONLY the facts present in the provided JSON. Do NOT infer, estimate, or modify numeric values (e.g., age, weight, height). "
+            "If a value is missing, state it is not provided rather than guessing. "
             "Do NOT include any email addresses, phone numbers, insurance numbers, emergency contacts, or other personal contact information. "
             "End with a period.\n\n"
             f"Patient JSON:\n{json.dumps(patient_redacted, ensure_ascii=False)}\n\n"
@@ -357,7 +366,7 @@ async def summarize_patient(patient_id: str):
         text, _raw = await chat_completion_text(
             messages=[{"role": "user", "content": prompt}],
             max_tokens=220,
-            temperature=0.2,
+            temperature=0.0,
         )
 
         summary = _trim_to_last_sentence(text)
@@ -499,6 +508,70 @@ async def get_patient_doctor_notes(patient_id: str):
         return {"patient_id": patient_id, "notes": notes, "count": len(notes)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching doctor notes: {str(e)}")
+
+
+@app.get("/api/patients/{patient_id}/doctor-notes/summary", response_model=DoctorNotesSummary)
+async def get_patient_doctor_notes_summary(patient_id: str, max_notes: int = 20):
+    """Generate a one-paragraph summary of a patient's doctor notes."""
+    try:
+        logger.info(
+            "get_patient_doctor_notes_summary patient_id=%s max_notes=%s", patient_id, max_notes
+        )
+
+        try:
+            max_notes_i = int(max_notes)
+        except Exception:
+            max_notes_i = 20
+        if max_notes_i <= 0:
+            max_notes_i = 20
+        if max_notes_i > 50:
+            max_notes_i = 50
+
+        notes = db.get_doctor_notes_for_patient(patient_id) or []
+        note_count = len(notes)
+
+        patient = None
+        try:
+            patient = db.get_patient(patient_id)
+        except Exception:
+            patient = None
+        patient_name = str((patient or {}).get("name") or "")
+
+        notes_for_prompt = []
+        for n in notes[:max_notes_i]:
+            content = str(n.get("content") or "")
+            if len(content) > 800:
+                content = content[:800].rstrip() + "…"
+            notes_for_prompt.append({"date": str(n.get("date") or ""), "content": content})
+
+        prompt = (
+            "You are a clinical assistant. Summarize the patient's doctor visit notes in ONE paragraph. "
+            "Focus on the most important clinical themes: key symptoms, diagnoses, treatments/med changes, "
+            "test results, plans, and follow-up. Be factual, concise, and avoid speculation. "
+            "Do not mention that you are an AI. End with a period.\n\n"
+            f"Patient: {patient_name or patient_id}\n"
+            f"Total notes available: {note_count}\n"
+            f"Notes JSON (most recent first, truncated): {json.dumps(notes_for_prompt, ensure_ascii=False)}"
+        )
+
+        text, _raw = await chat_completion_text(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=240,
+            temperature=0.2,
+        )
+        summary = _trim_to_last_sentence(text)
+        return {
+            "patient_id": str(patient_id),
+            "note_count": int(note_count),
+            "summary": summary,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error generating doctor notes summary patient_id=%s", patient_id)
+        raise HTTPException(
+            status_code=500, detail=f"Error generating doctor notes summary: {str(e)}"
+        )
 
 
 @app.post("/api/patients/{patient_id}/doctor-notes/search")
@@ -1009,6 +1082,76 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
         raise HTTPException(
             status_code=500, detail=f"Error fetching questionnaire status: {str(e)}"
         )
+
+
+@app.get("/api/patients/{patient_id}/previsit-summary")
+async def get_previsit_summary(request: Request, patient_id: str):
+    """
+    Generate a comprehensive pre-visit summary for a patient using AI.
+
+    Uses hybrid approach:
+    - OpenAI (gpt-4o-mini) for tool calling to gather data
+    - Mistral for clinical summarization
+
+    Args:
+        patient_id: The patient's ID
+
+    Returns:
+        Structured pre-visit summary with clinical overview, medications, allergies, symptoms, and concerns
+    """
+    try:
+        logger.info("Generating pre-visit summary for patient_id=%s", patient_id)
+
+        # Build starting state for the agent
+        state = PrevisitSummarizer.build_starting_state(patient_id=patient_id)
+
+        # Add initial message
+        state["messages"].append(
+            langchain_core.messages.HumanMessage(content=f'{{"patient_id": "{patient_id}"}}')
+        )
+
+        # Create span for tracing
+        request_id = getattr(getattr(request, "state", None), "request_id", None)
+        summary_span = _root_span.new(
+            name="PrevisitSummarizer.invoke",
+            agent="previsit_summary_agent",
+            endpoint="GET /api/patients/{patient_id}/previsit-summary",
+            patient_id=str(patient_id),
+            request_id=str(request_id or ""),
+        )
+
+        # Invoke the agent
+        logger.info("Invoking PrevisitSummarizer agent for patient_id=%s", patient_id)
+        agent_result = PrevisitSummarizer(catalog=_catalog, span=summary_span).invoke(input=state)
+
+        # Build response
+        result = {
+            "patient_id": agent_result.get("patient_id", patient_id),
+            "patient_name": agent_result.get("patient_name", "Unknown"),
+            "clinical_summary": agent_result.get("clinical_summary", ""),
+            "current_medications": agent_result.get("current_medications", []),
+            "allergies": agent_result.get(
+                "allergies", {"drug": [], "food": [], "environmental": []}
+            ),
+            "key_symptoms": agent_result.get("key_symptoms", []),
+            "patient_concerns": agent_result.get("patient_concerns", []),
+            "recent_note_summary": agent_result.get("recent_note_summary", ""),
+        }
+
+        logger.info(
+            "PrevisitSummarizer completed - %s medications, %s symptoms, %s concerns",
+            len(result.get("current_medications", [])),
+            len(result.get("key_symptoms", [])),
+            len(result.get("patient_concerns", [])),
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error generating pre-visit summary for patient_id=%s", patient_id)
+        raise HTTPException(status_code=500, detail=f"Error generating pre-visit summary: {str(e)}")
 
 
 # Medical Research Agent Endpoints

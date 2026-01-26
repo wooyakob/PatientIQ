@@ -4,7 +4,7 @@ import { ArrowLeft, FileText, Calendar, Clock, Plus, Edit2, X, Trash2, Search, L
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDateOnlyForDisplay, getPatientWithNotes, saveDoctorNote, deleteDoctorNote, toLocalDateOnlyString, searchDoctorNotes, DoctorNotesSearchResponse } from '@/lib/api';
+import { formatDateOnlyForDisplay, getPatientDoctorNotesSummary, getPatientWithNotes, saveDoctorNote, deleteDoctorNote, toLocalDateOnlyString, searchDoctorNotes, DoctorNotesSearchResponse } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -23,6 +23,17 @@ const NotesDetail = () => {
   } = useQuery({
     queryKey: ['patient', patientId, 'notes'],
     queryFn: () => getPatientWithNotes(patientId),
+    enabled: Boolean(patientId),
+  });
+
+  const {
+    data: patientSummary,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+    error: summaryError,
+  } = useQuery({
+    queryKey: ['patient-summary', patientId],
+    queryFn: () => getPatientDoctorNotesSummary(patientId, 20),
     enabled: Boolean(patientId),
   });
 
@@ -264,6 +275,29 @@ const NotesDetail = () => {
           <ArrowLeft className="h-4 w-4" />
           <span className="text-sm">Back to {patient.name}</span>
         </button>
+
+        <div className="glass-card p-6 mb-6 animate-slide-up">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="neo-card p-2.5 rounded-xl">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Doctor Notes Summary</h2>
+              <p className="text-sm text-muted-foreground">Generated overview for {patient.name}</p>
+            </div>
+          </div>
+
+          {isSummaryLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Generating summary…</span>
+            </div>
+          ) : isSummaryError ? (
+            <p className="text-sm text-muted-foreground">{(summaryError as Error).message}</p>
+          ) : (
+            <p className="text-foreground leading-relaxed">{patientSummary?.summary || 'No summary returned.'}</p>
+          )}
+        </div>
 
         <div className="glass-card p-8 mb-6 animate-slide-up">
           <div className="flex items-center justify-between mb-6">

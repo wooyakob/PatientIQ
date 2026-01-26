@@ -11,17 +11,31 @@ This Agent searches through notes taken by a doctor during and after visits with
 This Agent can view public messages and announcements and nudge a doctor to read when it's important and related to them. The Agent can also respond to private messages when a doctor is unavailable, providing a contact or method to reach them in an emergency.
 
 ## wearable_alerting_agent
-This Agent will review a Patient's 30 day wearable data and alert the Doctor if there are any concerning trends or patterns. 
+This Agent will review a Patient's 30 day wearable data and alert the Doctor if there are any concerning trends or patterns.
 
 ## previsit_summarizer_agent
 This Agent will review a Patient's previsit Questionnaire answers and allow a Doctor to generate a quick summary before an upcoming Appointment with their Patient.
 
 ### Agentc
+
+The agentc framework provides infrastructure for building, managing, and deploying AI agents in PatientIQ. 
+It acts as a centralized registry for agent artifacts (tools, prompts, logs) and provides observability through the Agent Tracer system.
+
+Core Components:
+- Agent Catalog: Registry for agent tools, prompts, and metadata	agent-catalog bucket, agent_catalog scope
+- Agent Tracer: Observability and debugging system for agent execution	agent-catalog bucket, agent_activity scope
+- CLI Interface: Command-line tool for agent lifecycle management	agentc Python package
+- LangGraph Integration: Workflow orchestration framework	agentc_langgraph.graph.GraphRunnable
+
+The framework integrates with Couchbase to persist agent configurations and execution traces, enabling cross-session debugging and agent refinement.
+
+```bash
 agentc init
 agentc status
 agentc index tools prompts (optional logs, if there are issues with tracing)
 agentc publish --bucket agent-catalog
 agentc clean (can clean logs locally, and in Capella)
+```
 
 #### Vector Search Tools
 - **Couchbase AI Services**: Embedding model with 2048-dimensional vectors
@@ -32,10 +46,10 @@ agentc clean (can clean logs locally, and in Capella)
 #### Agent Tracer
 
 Agent Tracer is used for troubleshooting Agents:
-- Agent acts unpredictably. Check the exact prompts sent to your agent and the generated thinking from your LLM during a user session.	
-- Wrong tool called. Check the tools the agent called and troubleshoot, whether it’s similar names or overlapping and confusing descriptions.	
-- Inter-agent coordination failure. Inspect the context handed off between agents - find withheld information or reasoning-action mismatches.	
-- Tool schema mismatch. Compare the tool inputs provided to your agent’s LLM with your expected schema.	
+- Agent acts unpredictably. Check the exact prompts sent to your agent and the generated thinking from your LLM during a user session.
+- Wrong tool called. Check the tools the agent called and troubleshoot, whether it’s similar names or overlapping and confusing descriptions.
+- Inter-agent coordination failure. Inspect the context handed off between agents - find withheld information or reasoning-action mismatches.
+- Tool schema mismatch. Compare the tool inputs provided to your agent’s LLM with your expected schema.
 - Agent stuck in a loop. Check whether the same tool or a set of tools are called in a loop, and check the agent’s reasoning log.
 
 A single span could be:
@@ -47,21 +61,17 @@ When defining spans in your app, you start with a root span, that contains the e
 
 Define child spans from your root span to change what information gets logged at each step of your app.
 
-There are too many traces generated that are impacting the current Agent Tracer UI based on available memory quota. 
+There are too many traces generated that are impacting the current Agent Tracer UI based on available memory quota.
 
 I can set a log ttl to limit the life of generated traces to 24 hours.
 
-https://couchbaselabs.github.io/agent-catalog/config.html#agentc_core.config.config.RemoteCatalogConfig.log_ttl 
 Can limit them:
+```python
 log_ttl = 86400  # 24 hours * 60 minutes * 60 seconds
-
-
-
-
-https://couchbaselabs.github.io/agent-catalog/config.html#agentc_core.config.config.RemoteCatalogConfig.log_ttl
-
+```
 
 ### Links:
+- [https://couchbaselabs.github.io/agent-catalog/config.html#agentc_core.config.config.RemoteCatalogConfig.log_ttl](https://couchbaselabs.github.io/agent-catalog/config.html#agentc_core.config.config.RemoteCatalogConfig.log_ttl)
 - [https://docs.couchbase.com/ai/build/integrate-agent-with-catalog.html](https://docs.couchbase.com/ai/build/integrate-agent-with-catalog.html)
 - [https://docs.couchbase.com/ai/build/tools-prompts-hub.html](https://docs.couchbase.com/ai/build/tools-prompts-hub.html)
 - [https://couchbaselabs.github.io/agent-catalog/](https://couchbaselabs.github.io/agent-catalog/)

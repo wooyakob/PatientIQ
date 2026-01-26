@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { getPatient, getPatientWearables, getPatientWearablesSummary } from '@/lib/api';
@@ -36,11 +36,11 @@ const WearablesDetail = () => {
     data: wearablesSummary,
     isLoading: isSummaryLoading,
     isError: isSummaryError,
+    error: summaryError,
   } = useQuery({
     queryKey: ['patient-wearables-summary', patientId, 30],
     queryFn: () => getPatientWearablesSummary(patientId, 30),
     enabled: Boolean(patientId),
-    staleTime: 1000 * 60 * 60,
   });
 
   if (isLoading || isWearablesLoading) {
@@ -87,16 +87,8 @@ const WearablesDetail = () => {
   const heartRates = wearables?.heartRate ?? [];
   const stepCounts = wearables?.stepCount ?? [];
 
-  const availablePoints = Math.min(heartRates.length, stepCounts.length, timestamps.length);
+  const availablePoints = Math.min(heartRates.length, stepCounts.length);
   const pointsToShow = Math.min(30, availablePoints);
-
-  const timestampsToShow = timestamps.slice(-pointsToShow);
-  const heartRatesToShow = heartRates.slice(-pointsToShow);
-  const stepCountsToShow = stepCounts.slice(-pointsToShow);
-
-  const timestampsNewestFirst = [...timestampsToShow].reverse();
-  const heartRatesNewestFirst = [...heartRatesToShow].reverse();
-  const stepCountsNewestFirst = [...stepCountsToShow].reverse();
 
   const avgHeartRate = Math.round(heartRates.reduce((a, b) => a + b, 0) / (heartRates.length || 1));
   const avgSteps = Math.round(stepCounts.reduce((a, b) => a + b, 0) / (stepCounts.length || 1));
@@ -129,6 +121,29 @@ const WearablesDetail = () => {
           <span className="text-sm">Back to {patient.name}</span>
         </button>
 
+        <div className="glass-card p-6 mb-6 animate-slide-up">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="neo-card p-2.5 rounded-xl">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Wearables Summary</h2>
+              <p className="text-sm text-muted-foreground">Generated overview for {patient.name}</p>
+            </div>
+          </div>
+
+          {isSummaryLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Generating summary…</span>
+            </div>
+          ) : isSummaryError ? (
+            <p className="text-sm text-muted-foreground">{(summaryError as Error).message}</p>
+          ) : (
+            <p className="text-foreground leading-relaxed">{wearablesSummary?.summary || 'No summary returned.'}</p>
+          )}
+        </div>
+
         <div className="glass-card p-8 mb-6 animate-slide-up">
           <div className="flex items-center gap-4 mb-6">
             <div className="neo-card p-3 rounded-xl">
@@ -138,17 +153,6 @@ const WearablesDetail = () => {
               <h1 className="text-2xl font-bold text-foreground">Wearable Data Analysis</h1>
               <p className="text-muted-foreground">30-day overview for {patient.name}</p>
             </div>
-          </div>
-
-          <div className="neo-card p-5 rounded-2xl mb-6">
-            <p className="text-xs text-muted-foreground mb-2">30-day summary</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {isSummaryLoading
-                ? 'Generating summary…'
-                : isSummaryError
-                  ? 'Unable to generate summary right now.'
-                  : (wearablesSummary?.summary ?? '')}
-            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -188,8 +192,9 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {heartRatesNewestFirst.map((rate, index) => {
-                const ts = timestampsNewestFirst[index] ?? '';
+              {heartRates.slice(-pointsToShow).map((rate, index) => {
+                const tsIndex = timestamps.length - pointsToShow + index;
+                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
                 return (
                   <div key={index} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-16">
@@ -220,8 +225,9 @@ const WearablesDetail = () => {
               </div>
             </div>
             <div className="space-y-3">
-              {stepCountsNewestFirst.map((steps, index) => {
-                const ts = timestampsNewestFirst[index] ?? '';
+              {stepCounts.slice(-pointsToShow).map((steps, index) => {
+                const tsIndex = timestamps.length - pointsToShow + index;
+                const ts = tsIndex >= 0 && tsIndex < timestamps.length ? timestamps[tsIndex] : '';
                 return (
                   <div key={index} className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground w-16">

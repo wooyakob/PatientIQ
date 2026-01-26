@@ -34,6 +34,12 @@ class QuestionnaireSummary(BaseModel):
     summary: str
 
 
+class DoctorNotesSummary(BaseModel):
+    patient_id: str
+    note_count: int
+    summary: str
+
+
 class DoctorNote(BaseModel):
     id: str
     date: str

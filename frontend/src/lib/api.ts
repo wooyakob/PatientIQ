@@ -124,6 +124,31 @@ export async function getPreVisitQuestionnaireSummary(
   );
 }
 
+export interface PreVisitSummary {
+  patient_id: string;
+  patient_name: string;
+  clinical_summary: string;
+  current_medications: {
+    name: string;
+    dosage: string;
+    frequency: string;
+  }[];
+  allergies: {
+    drug: string[];
+    food: string[];
+    environmental: string[];
+  };
+  key_symptoms: string[];
+  patient_concerns: string[];
+  recent_note_summary: string;
+}
+
+export async function getPreVisitSummary(patientId: string): Promise<PreVisitSummary> {
+  return apiFetch<PreVisitSummary>(
+    `/api/patients/${encodeURIComponent(String(patientId))}/previsit-summary`
+  );
+}
+
 export async function getDoctorAppointments(
   doctorId: string,
   params?: { start_date?: string; end_date?: string }
@@ -205,6 +230,21 @@ export async function getPatientWearablesSummary(
 ): Promise<WearablesSummaryResponse> {
   return apiFetch<WearablesSummaryResponse>(
     `/api/patients/${encodeURIComponent(patientId)}/wearables/summary?days=${encodeURIComponent(String(days))}`
+  );
+}
+
+export interface DoctorNotesSummaryResponse {
+  patient_id: string;
+  note_count: number;
+  summary: string;
+}
+
+export async function getPatientDoctorNotesSummary(
+  patientId: string,
+  maxNotes: number = 20
+): Promise<DoctorNotesSummaryResponse> {
+  return apiFetch<DoctorNotesSummaryResponse>(
+    `/api/patients/${encodeURIComponent(patientId)}/doctor-notes/summary?max_notes=${encodeURIComponent(String(maxNotes))}`
   );
 }
 

@@ -10,10 +10,10 @@ import ResearchDetail from "./pages/ResearchDetail";
 import WearablesDetail from "./pages/WearablesDetail";
 import SentimentDetail from "./pages/SentimentDetail";
 import NotesDetail from "./pages/NotesDetail";
+import PatientSummary from "./pages/PatientSummary";
 import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
 import PreVisitQuestionnaire from "./pages/PreVisitQuestionnaire";
-import PatientSummary from "./pages/PatientSummary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
