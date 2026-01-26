@@ -548,6 +548,8 @@ async def get_patient_doctor_notes_summary(patient_id: str, max_notes: int = 20)
             "You are a clinical assistant. Summarize the patient's doctor visit notes in ONE paragraph. "
             "Focus on the most important clinical themes: key symptoms, diagnoses, treatments/med changes, "
             "test results, plans, and follow-up. Be factual, concise, and avoid speculation. "
+            "Do NOT mention the patient's age unless it appears verbatim in the provided notes content; do not infer or guess it. "
+            "Do NOT add demographic details that are not present in the provided notes. "
             "Do not mention that you are an AI. End with a period.\n\n"
             f"Patient: {patient_name or patient_id}\n"
             f"Total notes available: {note_count}\n"
@@ -557,7 +559,7 @@ async def get_patient_doctor_notes_summary(patient_id: str, max_notes: int = 20)
         text, _raw = await chat_completion_text(
             messages=[{"role": "user", "content": prompt}],
             max_tokens=240,
-            temperature=0.2,
+            temperature=0.0,
         )
         summary = _trim_to_last_sentence(text)
         return {
