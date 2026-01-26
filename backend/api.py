@@ -100,10 +100,7 @@ def _load_agent_module(agent_name: str, module_file: str = "graph.py"):
         spec.loader.exec_module(module)
     finally:
         sys.path = original_sys_path
-        if prior is None:
-            sys.modules.pop(unique_module_name, None)
-        else:
-            sys.modules[unique_module_name] = prior
+        # Don't clean up the unique module - keep it in sys.modules
 
     return module
 
@@ -204,11 +201,16 @@ PulmonaryResearcher = pulmonary_graph.PulmonaryResearcher
 docnotes_graph = _load_agent_module("docnotes_search_agent", "graph.py")
 DocNotesSearcher = docnotes_graph.DocNotesSearcher
 
+# Import PrevisitSummarizer from previsit_summary_agent/graph.py
+previsit_graph = _load_agent_module("previsit_summary_agent", "graph.py")
+PrevisitSummarizer = previsit_graph.PrevisitSummarizer
+
 # Initialize catalog and agents at module level
 _catalog = agentc.Catalog()
 _root_span = _catalog.Span(name="CKO-Backend")
 _pulmonary_researcher = PulmonaryResearcher(catalog=_catalog)
 _docnotes_searcher = DocNotesSearcher(catalog=_catalog)
+_previsit_summarizer = PrevisitSummarizer(catalog=_catalog)
 
 logger = logging.getLogger("cko")
 logger.setLevel(logging.INFO)
@@ -1008,6 +1010,78 @@ async def get_pre_visit_questionnaire_status(payload: Dict[str, Any] = Body(...)
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error fetching questionnaire status: {str(e)}"
+        )
+
+
+@app.get("/api/patients/{patient_id}/previsit-summary")
+async def get_previsit_summary(request: Request, patient_id: str):
+    """
+    Generate a comprehensive pre-visit summary for a patient using AI.
+
+    Uses hybrid approach:
+    - OpenAI (gpt-4o-mini) for tool calling to gather data
+    - Mistral for clinical summarization
+
+    Args:
+        patient_id: The patient's ID
+
+    Returns:
+        Structured pre-visit summary with clinical overview, medications, allergies, symptoms, and concerns
+    """
+    try:
+        logger.info("Generating pre-visit summary for patient_id=%s", patient_id)
+
+        # Build starting state for the agent
+        state = PrevisitSummarizer.build_starting_state(patient_id=patient_id)
+
+        # Add initial message
+        state["messages"].append(
+            langchain_core.messages.HumanMessage(
+                content=f'{{"patient_id": "{patient_id}"}}'
+            )
+        )
+
+        # Create span for tracing
+        request_id = getattr(getattr(request, "state", None), "request_id", None)
+        summary_span = _root_span.new(
+            name="PrevisitSummarizer.invoke",
+            agent="previsit_summary_agent",
+            endpoint="GET /api/patients/{patient_id}/previsit-summary",
+            patient_id=str(patient_id),
+            request_id=str(request_id or ""),
+        )
+
+        # Invoke the agent
+        logger.info("Invoking PrevisitSummarizer agent for patient_id=%s", patient_id)
+        agent_result = PrevisitSummarizer(catalog=_catalog, span=summary_span).invoke(input=state)
+
+        # Build response
+        result = {
+            "patient_id": agent_result.get("patient_id", patient_id),
+            "patient_name": agent_result.get("patient_name", "Unknown"),
+            "clinical_summary": agent_result.get("clinical_summary", ""),
+            "current_medications": agent_result.get("current_medications", []),
+            "allergies": agent_result.get("allergies", {"drug": [], "food": [], "environmental": []}),
+            "key_symptoms": agent_result.get("key_symptoms", []),
+            "patient_concerns": agent_result.get("patient_concerns", []),
+            "recent_note_summary": agent_result.get("recent_note_summary", ""),
+        }
+
+        logger.info(
+            "PrevisitSummarizer completed - %s medications, %s symptoms, %s concerns",
+            len(result.get("current_medications", [])),
+            len(result.get("key_symptoms", [])),
+            len(result.get("patient_concerns", [])),
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Error generating pre-visit summary for patient_id=%s", patient_id)
+        raise HTTPException(
+            status_code=500, detail=f"Error generating pre-visit summary: {str(e)}"
         )
 
 
