@@ -76,24 +76,32 @@ class PrevisitSummaryAgent(agentc_langgraph.agent.ReActAgent):
 
         # Create ReAct agent and set recursion limit to prevent infinite loops
         agent = self.create_react_agent(span)
-        config = {"recursion_limit": 15} if not isinstance(config, dict) else {**config, "recursion_limit": 15}
+        config = (
+            {"recursion_limit": 15}
+            if not isinstance(config, dict)
+            else {**config, "recursion_limit": 15}
+        )
 
         # Invoke agent to gather data and generate structured response
         response = agent.invoke(input=state, config=config)
         structured_response = response.get("structured_response", {})
 
         # Update state with extracted data
-        state.update({
-            "patient_id": structured_response.get("patient_id", state.get("patient_id")),
-            "patient_name": structured_response.get("patient_name"),
-            "clinical_summary": structured_response.get("clinical_summary", ""),
-            "current_medications": structured_response.get("current_medications", []),
-            "allergies": structured_response.get("allergies", {"drug": [], "food": [], "environmental": []}),
-            "key_symptoms": structured_response.get("key_symptoms", []),
-            "patient_concerns": structured_response.get("patient_concerns", []),
-            "recent_note_summary": structured_response.get("recent_note_summary", ""),
-            "is_complete": True,
-        })
+        state.update(
+            {
+                "patient_id": structured_response.get("patient_id", state.get("patient_id")),
+                "patient_name": structured_response.get("patient_name"),
+                "clinical_summary": structured_response.get("clinical_summary", ""),
+                "current_medications": structured_response.get("current_medications", []),
+                "allergies": structured_response.get(
+                    "allergies", {"drug": [], "food": [], "environmental": []}
+                ),
+                "key_symptoms": structured_response.get("key_symptoms", []),
+                "patient_concerns": structured_response.get("patient_concerns", []),
+                "recent_note_summary": structured_response.get("recent_note_summary", ""),
+                "is_complete": True,
+            }
+        )
 
         # Append AI response to message history
         if response.get("messages"):

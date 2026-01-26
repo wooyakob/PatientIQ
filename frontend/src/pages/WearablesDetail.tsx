@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
-import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ArrowLeft, Heart, Footprints, TrendingUp, TrendingDown, Minus, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { getPatient, getPatientWearables } from '@/lib/api';
+import { getPatient, getPatientWearables, getPatientWearablesSummary } from '@/lib/api';
 
 const WearablesDetail = () => {
   const { id } = useParams();
@@ -29,6 +29,17 @@ const WearablesDetail = () => {
   } = useQuery({
     queryKey: ['patient-wearables', patientId, 30],
     queryFn: () => getPatientWearables(patientId, 30),
+    enabled: Boolean(patientId),
+  });
+
+  const {
+    data: wearablesSummary,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+    error: summaryError,
+  } = useQuery({
+    queryKey: ['patient-wearables-summary', patientId, 30],
+    queryFn: () => getPatientWearablesSummary(patientId, 30),
     enabled: Boolean(patientId),
   });
 
@@ -109,6 +120,29 @@ const WearablesDetail = () => {
           <ArrowLeft className="h-4 w-4" />
           <span className="text-sm">Back to {patient.name}</span>
         </button>
+
+        <div className="glass-card p-6 mb-6 animate-slide-up">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="neo-card p-2.5 rounded-xl">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Wearables Summary</h2>
+              <p className="text-sm text-muted-foreground">Generated overview for {patient.name}</p>
+            </div>
+          </div>
+
+          {isSummaryLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Generating summary…</span>
+            </div>
+          ) : isSummaryError ? (
+            <p className="text-sm text-muted-foreground">{(summaryError as Error).message}</p>
+          ) : (
+            <p className="text-foreground leading-relaxed">{wearablesSummary?.summary || 'No summary returned.'}</p>
+          )}
+        </div>
 
         <div className="glass-card p-8 mb-6 animate-slide-up">
           <div className="flex items-center gap-4 mb-6">

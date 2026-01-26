@@ -10,6 +10,7 @@ import ResearchDetail from "./pages/ResearchDetail";
 import WearablesDetail from "./pages/WearablesDetail";
 import SentimentDetail from "./pages/SentimentDetail";
 import NotesDetail from "./pages/NotesDetail";
+import PatientSummary from "./pages/PatientSummary";
 import Calendar from "./pages/Calendar";
 import Messages from "./pages/Messages";
 import PreVisitQuestionnaire from "./pages/PreVisitQuestionnaire";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/patient/:id" element={<PatientDetail />} />
+          <Route path="/patient/:id/summary" element={<PatientSummary />} />
           <Route path="/patient/:id/research" element={<ResearchDetail />} />
           <Route path="/patient/:id/wearables" element={<WearablesDetail />} />
           <Route path="/patient/:id/sentiment" element={<SentimentDetail />} />

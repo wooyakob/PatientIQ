@@ -44,9 +44,7 @@ def main():
 
         # Add initial message
         state["messages"].append(
-            langchain_core.messages.HumanMessage(
-                content=f'{{"patient_id": "{args.patient_id}"}}'
-            )
+            langchain_core.messages.HumanMessage(content=f'{{"patient_id": "{args.patient_id}"}}')
         )
 
         print(f"\n🏥 Generating pre-visit summary for patient {args.patient_id}...\n")
@@ -108,6 +106,7 @@ def main():
     except Exception as e:
         print(f"❌ Error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

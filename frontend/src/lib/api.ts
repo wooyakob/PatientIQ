@@ -233,6 +233,21 @@ export async function getPatientWearablesSummary(
   );
 }
 
+export interface DoctorNotesSummaryResponse {
+  patient_id: string;
+  note_count: number;
+  summary: string;
+}
+
+export async function getPatientDoctorNotesSummary(
+  patientId: string,
+  maxNotes: number = 20
+): Promise<DoctorNotesSummaryResponse> {
+  return apiFetch<DoctorNotesSummaryResponse>(
+    `/api/patients/${encodeURIComponent(patientId)}/doctor-notes/summary?max_notes=${encodeURIComponent(String(maxNotes))}`
+  );
+}
+
 export function toLocalDateOnlyString(d: Date): string {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
