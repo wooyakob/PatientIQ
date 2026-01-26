@@ -1,8 +1,9 @@
 import { Header } from '@/components/Header';
-import { Calendar as CalendarIcon, Clock, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, FileText, CheckCircle2, AlertCircle, Sparkles, X, Loader2, Pill, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getDoctorAppointments, getPreVisitQuestionnaireStatus } from '@/lib/api';
+import { useState } from 'react';
+import { getDoctorAppointments, getPreVisitQuestionnaireStatus, getPreVisitSummary, PreVisitSummary } from '@/lib/api';
 
 interface Appointment {
   id: string;
@@ -108,7 +109,202 @@ function formatAppointmentType(t: string) {
   return map[s] ?? s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function PreVisitSummaryModal({
+  patientId,
+  patientName,
+  onClose
+}: {
+  patientId: string;
+  patientName: string;
+  onClose: () => void;
+}) {
+  const { data: summary, isLoading, error } = useQuery({
+    queryKey: ['previsit-summary', patientId],
+    queryFn: () => getPreVisitSummary(patientId),
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+      <div
+        className="bg-background rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground">Pre-Visit Summary</h2>
+              <p className="text-sm text-muted-foreground">{patientName}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors">
+            <X className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+          {isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">Generating pre-visit summary...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="text-center py-12 text-red-500">
+              Failed to load summary. Please try again.
+            </div>
+          )}
+
+          {summary && (
+            <div className="space-y-5">
+              {/* Clinical Summary - Highlighted at top */}
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 border-l-4 border-primary rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-primary mb-2.5 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Clinical Summary
+                </h3>
+                <p className="text-foreground leading-relaxed text-[15px]">{summary.clinical_summary}</p>
+              </div>
+
+              <div className="h-px bg-border"></div>
+
+              {/* Two Column Layout for Key Info */}
+              <div className="grid md:grid-cols-2 gap-5">
+                {/* Left Column */}
+                <div className="space-y-5">
+                  {/* Medications */}
+                  {summary.current_medications && summary.current_medications.length > 0 && (
+                    <div className="bg-card border border-border rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <Pill className="h-4 w-4 text-blue-500" />
+                        Current Medications
+                        <span className="ml-auto text-xs font-normal text-muted-foreground">
+                          {summary.current_medications.length} active
+                        </span>
+                      </h3>
+                      <div className="space-y-2.5">
+                        {summary.current_medications.map((med, idx) => (
+                          <div key={idx} className="bg-muted/30 rounded-md p-2.5 text-sm border border-border/50">
+                            <div className="font-medium text-foreground">{med.name}</div>
+                            <div className="text-muted-foreground text-xs mt-1 flex items-center gap-2">
+                              <span className="bg-background px-2 py-0.5 rounded">{med.dosage}</span>
+                              <span>•</span>
+                              <span>{med.frequency}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key Symptoms */}
+                  {summary.key_symptoms && summary.key_symptoms.length > 0 && (
+                    <div className="bg-card border border-border rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Key Symptoms
+                      </h3>
+                      <ul className="space-y-2">
+                        {summary.key_symptoms.map((symptom, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5 text-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+                            <span className="text-foreground flex-1">{symptom}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-5">
+                  {/* Allergies - Critical Info */}
+                  {(summary.allergies.drug.length > 0 || summary.allergies.food.length > 0 || summary.allergies.environmental.length > 0) && (
+                    <div className="bg-card border border-red-500/30 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <span className="text-red-600 dark:text-red-400">Allergies</span>
+                      </h3>
+                      <div className="space-y-2">
+                        {summary.allergies.drug.length > 0 && (
+                          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-md p-2.5 text-sm">
+                            <div className="font-semibold text-red-700 dark:text-red-400 text-xs uppercase tracking-wide mb-1">Drug Allergies</div>
+                            <div className="text-red-900 dark:text-red-300">{summary.allergies.drug.join(', ')}</div>
+                          </div>
+                        )}
+                        {summary.allergies.food.length > 0 && (
+                          <div className="bg-muted/50 border border-border/50 rounded-md p-2.5 text-sm">
+                            <div className="font-medium text-foreground text-xs uppercase tracking-wide mb-1">Food</div>
+                            <div className="text-muted-foreground">{summary.allergies.food.join(', ')}</div>
+                          </div>
+                        )}
+                        {summary.allergies.environmental.length > 0 && (
+                          <div className="bg-muted/50 border border-border/50 rounded-md p-2.5 text-sm">
+                            <div className="font-medium text-foreground text-xs uppercase tracking-wide mb-1">Environmental</div>
+                            <div className="text-muted-foreground">{summary.allergies.environmental.join(', ')}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Patient Concerns/Questions */}
+                  {summary.patient_concerns && summary.patient_concerns.length > 0 && (
+                    <div className="bg-card border border-border rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                        <svg className="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Patient Questions
+                        <span className="ml-auto text-xs font-normal text-muted-foreground">
+                          {summary.patient_concerns.length} questions
+                        </span>
+                      </h3>
+                      <ul className="space-y-2.5">
+                        {summary.patient_concerns.map((concern, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5 text-sm bg-muted/20 rounded-md p-2">
+                            <span className="flex-shrink-0 h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium">
+                              {idx + 1}
+                            </span>
+                            <span className="text-foreground flex-1 pt-0.5">{concern}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Doctor Note - Full Width at Bottom */}
+              {summary.recent_note_summary && (
+                <div className="bg-card border border-border rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <svg className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Recent Doctor Note
+                  </h3>
+                  <div className="bg-muted/30 border border-border/50 rounded-md p-3 text-sm text-foreground leading-relaxed italic">
+                    {summary.recent_note_summary}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Calendar() {
+  const [summaryModal, setSummaryModal] = useState<{ patientId: string; patientName: string } | null>(null);
+
   const { data: apiAppointments } = useQuery({
     queryKey: ['appointments', 'doctor', currentDoctorId],
     queryFn: () => getDoctorAppointments(currentDoctorId),
@@ -249,11 +445,22 @@ export default function Calendar() {
 
                       {appointment.questionnaires.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-border/50">
-                          <div className="flex items-center gap-2 mb-3">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm font-medium text-foreground">Pre-Visit Questionnaires</span>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm font-medium text-foreground">Pre-Visit Questionnaires</span>
+                            </div>
+                            {appointment.questionnaires.some(q => q.completed) && (
+                              <button
+                                onClick={() => setSummaryModal({ patientId: appointment.patientId, patientName: appointment.patientName })}
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+                              >
+                                <Sparkles className="h-3.5 w-3.5" />
+                                Pre-Visit Summary
+                              </button>
+                            )}
                           </div>
-                          
+
                           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                             {appointment.questionnaires.map((questionnaire, index) => (
                               questionnaire.exists ? (
@@ -302,6 +509,14 @@ export default function Calendar() {
           ))}
         </div>
       </main>
+
+      {summaryModal && (
+        <PreVisitSummaryModal
+          patientId={summaryModal.patientId}
+          patientName={summaryModal.patientName}
+          onClose={() => setSummaryModal(null)}
+        />
+      )}
     </div>
   );
 }
