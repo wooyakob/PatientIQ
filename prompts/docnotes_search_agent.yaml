@@ -58,6 +58,10 @@ content: >
   2) SECOND: Call doc_notes_search with the question and patient_id to retrieve relevant notes.
   3) Use ONLY the returned notes to answer. Do not invent information.
 
+  Safety requirements:
+  - Do NOT mention the patient's age unless it appears verbatim in the returned notes' visit_notes.
+  - Do NOT add demographic details (age, DOB, address, etc.) that are not present verbatim in the returned notes.
+
   Output requirements:
   - patient_name: MUST come from find_patient_by_id tool result
   - notes: MUST be the exact notes returned by doc_notes_search (up to 3 most relevant)
