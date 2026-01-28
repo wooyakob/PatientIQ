@@ -20,10 +20,12 @@ PatientIQ addresses this through a three-tier architecture that combines:
     - docnotes_search_agent searches past visit notes to jog a doctor's memory.
     - previsit_summarizer_agent summarizes pre-visit questionnaires.
     - wearable_alerting_agent monitors wearable data for concerning trends.
-    - message_routing_agent helps triage messages and announcements.
 3. Intelligent Decision Support - Provides AI-powered summaries and semantic search to help clinicians make faster, more informed decisions.
 
 The result is that clinicians can focus on analysis and patient care rather than administrative tasks and information retrieval.
+
+## High Level Architecture
+![High Level Architecture](diagrams/High_Level_Architecture.png)
 
 ## Screenshots
 ### PatientIQ Home
