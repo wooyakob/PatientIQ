@@ -100,6 +100,7 @@ class PrevisitSummaryAgent(agentc_langgraph.agent.ReActAgent):
                 "patient_concerns": structured_response.get("patient_concerns", []),
                 "recent_note_summary": structured_response.get("recent_note_summary", ""),
                 "is_complete": True,
+                "is_last_step": True,
             }
         )
 

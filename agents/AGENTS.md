@@ -7,14 +7,35 @@ This Agent fetches a Patient's condition e.g. Asthma, and searches Pulmonary res
 ## docnotes_search_agent
 This Agent searches through notes taken by a doctor during and after visits with patients. A doctor can ask questions to jog their memory and remind themselves about previous visits with patients to ensure important information is not lost and can be reused to make informed decisions based on a patient's visit history and items discussed.
 
-## message_routing_agent
-This Agent can view public messages and announcements and nudge a doctor to read when it's important and related to them. The Agent can also respond to private messages when a doctor is unavailable, providing a contact or method to reach them in an emergency.
-
 ## wearable_alerting_agent
 This Agent will review a Patient's 30 day wearable data and alert the Doctor if there are any concerning trends or patterns.
 
 ## previsit_summarizer_agent
 This Agent will review a Patient's previsit Questionnaire answers and allow a Doctor to generate a quick summary before an upcoming Appointment with their Patient.
+
+## evals
+Evals live in `agents/evals/` and are used to run repeatable, JSONL-driven checks against the agents in this repo (e.g. `pulmonary_research_agent`, `docnotes_search_agent`, `previsit_summary_agent`).
+
+Resources are stored in `agents/evals/resources/*.jsonl`.
+
+These evals (and the agents they invoke) require `OPENAI_API_KEY` to be set (or present in `.env`).
+
+By default, eval runs disable agent tracing (no local `.agent-activity` logs / no publishable traces). To enable tracing explicitly, set `ENABLE_TRACING=true`.
+
+Run from the project root:
+```bash
+ENABLE_TRACING=false ENABLE_RAGAS=true python agents/evals/eval_short.py
+```
+
+Optional: enable tracing (writes local agent activity logs):
+```bash
+ENABLE_TRACING=true ENABLE_RAGAS=true python agents/evals/eval_short.py
+```
+
+Optional: run without LLM-graded similarity scoring:
+```bash
+ENABLE_RAGAS=false python agents/evals/eval_short.py
+```
 
 ### Agentc
 

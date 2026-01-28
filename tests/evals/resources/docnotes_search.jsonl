@@ -1,0 +1,2 @@
+{"input": {"patient_id": "P001", "patient_name": "", "question": "What medications was the patient prescribed?"}, "reference": ""}
+{"input": {"patient_id": "P002", "patient_name": "", "question": "What were the findings from the last chest X-ray?"}, "reference": ""}
