@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Send, Bot, AlertTriangle, TrendingUp, Users, FileText, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Send, Bot, AlertTriangle, TrendingUp, Users, FileText, Loader2, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -33,6 +33,24 @@ interface ResearchPaper {
   key_findings?: string[];
 }
 
+interface Recommendation {
+  recommendation: string;
+  priority?: string;
+}
+
+interface PatientComparison {
+  summary: string;
+  comparison_points: string[];
+  outlier_status: 'normal' | 'concerning' | 'critical';
+  cohort_size: number;
+  metric_comparisons?: Array<{
+    metric: string;
+    patient_value: number;
+    cohort_average: number;
+    status: string;
+  }>;
+}
+
 interface AnalyticsResponse {
   patient_id: string;
   patient_name: string;
@@ -40,8 +58,9 @@ interface AnalyticsResponse {
   question: string;
   alerts: WearableAlert[];
   similar_patients?: SimilarPatient[];
+  patient_comparison?: PatientComparison;  // NEW
   research_papers?: ResearchPaper[];
-  recommendations?: string[];
+  recommendations?: (string | Recommendation)[]; // Support both formats
   answer: string;
   generated_at: string;
   analysis_duration_seconds?: number;
@@ -59,13 +78,49 @@ interface WearableAnalyticsChatProps {
   patientName: string;
 }
 
+// Helper function to determine which sections to show based on question
+const getSectionsToShow = (question: string) => {
+  const q = question.toLowerCase();
+  
+  return {
+    showAlerts: q.includes('alert') || q.includes('critical') || q.includes('urgent') || q.includes('issue') || q.includes('problem') || q.includes('trend') || q.includes('pattern') || q.includes('concerning') || q.includes('analyze'),
+    showComparison: q.includes('compare') || q.includes('similar') || q.includes('other patients') || q.includes('cohort') || q.includes('different'),
+    showResearch: q.includes('research') || q.includes('paper') || q.includes('studies') || q.includes('literature') || q.includes('evidence'),
+    showRecommendations: q.includes('recommend') || q.includes('suggestion') || q.includes('what should') || q.includes('advice') || q.includes('analyze'),
+  };
+};
+
 export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyticsChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState<string>(''); // NEW: Track current loading step
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const analyzeWearables = async (question: string) => {
     setIsLoading(true);
+    setLoadingStep('Loading patient information...'); // Start with first step
+    
+    // Simulate loading steps (since we don't have real-time streaming yet)
+    const steps = [
+      'Loading patient information...',
+      'Retrieving wearable data...',
+      'Analyzing trends...',
+      'Finding similar patients...',
+      'Computing patient comparison...',
+      'Generating recommendations...'
+    ];
+    
+    let stepIndex = 0;
+    const stepInterval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        setLoadingStep(steps[stepIndex]);
+        stepIndex++;
+      }
+    }, 300); // Change step every 300ms
+    
+    // Create new abort controller for this request
+    abortControllerRef.current = new AbortController();
     
     try {
       const response = await fetch(`http://localhost:8000/api/patients/${patientId}/wearables/analyze`, {
@@ -78,6 +133,7 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
           question: question,
           days: 30,
         }),
+        signal: abortControllerRef.current.signal, // Add abort signal
       });
 
       if (!response.ok) {
@@ -85,13 +141,64 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
       }
 
       const data: AnalyticsResponse = await response.json();
+      
+      // DEBUG: Log patient comparison data
+      console.log('📊 [FRONTEND DEBUG] Received response:', {
+        hasPatientComparison: !!data.patient_comparison,
+        patientComparison: data.patient_comparison
+      });
+      
+      // Clear loading states immediately
+      clearInterval(stepInterval);
+      setIsLoading(false);
+      setLoadingStep('');
+      
       return data;
-    } catch (error) {
+    } catch (error: any) {
+      clearInterval(stepInterval);
+      setIsLoading(false);
+      setLoadingStep('');
+      
+      if (error.name === 'AbortError') {
+        console.log('Request was cancelled');
+        throw new Error('Request cancelled');
+      }
       console.error('Error analyzing wearables:', error);
       throw error;
     } finally {
+      // Final cleanup to ensure all states are cleared
+      clearInterval(stepInterval);
+      setIsLoading(false);
+      setLoadingStep('');
+      abortControllerRef.current = null;
+    }
+  };
+
+  const cancelRequest = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setIsLoading(false);
+      
+      // Add a system message indicating cancellation
+      const cancelMessage: Message = {
+        role: 'assistant',
+        content: 'Request cancelled. Feel free to ask another question.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, cancelMessage]);
+    }
+  };
+
+  const clearChat = () => {
+    // Cancel any pending request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
       setIsLoading(false);
     }
+    
+    // Clear all messages
+    setMessages([]);
+    setInput('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,7 +226,12 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
+      // Don't show error message if request was cancelled
+      if (error.message === 'Request cancelled') {
+        return;
+      }
+      
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Sorry, I encountered an error analyzing the wearable data. Please try again.',
@@ -149,15 +261,42 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border">
-        <div className="neo-card p-2 rounded-lg">
-          <Bot className="h-5 w-5 text-primary" />
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="neo-card p-2 rounded-lg">
+            <Bot className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Wearable IQ</h3>
+            <p className="text-xs text-muted-foreground">
+              Get the latest insights based on your wearable data and medical research
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-foreground">AI Wearable Analytics</h3>
-          <p className="text-xs text-muted-foreground">
-            Analyzing data for {patientName}
-          </p>
+        <div className="flex items-center gap-2">
+          {isLoading && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={cancelRequest}
+              className="text-xs"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Cancel
+            </Button>
+          )}
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearChat}
+              disabled={isLoading}
+              className="text-xs"
+            >
+              <Trash2 className="h-3 w-3 mr-1" />
+              Clear
+            </Button>
+          )}
         </div>
       </div>
 
@@ -198,19 +337,23 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
                   </div>
 
                   {/* Analysis results (for assistant messages) */}
-                  {message.role === 'assistant' && message.analysis && (
-                    <div className="mt-3 space-y-3">
-                      {/* Alerts */}
-                      {message.analysis.alerts && message.analysis.alerts.length > 0 && (
-                        <Card className="p-3 neo-card">
-                          <div className="flex items-center gap-2 mb-2">
-                            <AlertTriangle className="h-4 w-4 text-orange-500" />
-                            <p className="text-xs font-semibold">
-                              Alerts ({message.analysis.alerts.length})
-                            </p>
-                          </div>
-                          <div className="space-y-2">
-                            {message.analysis.alerts.slice(0, 3).map((alert, alertIdx) => (
+                  {message.role === 'assistant' && message.analysis && (() => {
+                    // Determine which sections to show based on the question
+                    const sections = getSectionsToShow(message.analysis.question || '');
+                    
+                    return (
+                      <div className="mt-3 space-y-3">
+                        {/* Alerts - show if question is about alerts, trends, or general analysis */}
+                        {sections.showAlerts && message.analysis.alerts && message.analysis.alerts.length > 0 && (
+                          <Card className="p-3 neo-card">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="h-4 w-4 text-orange-500" />
+                              <p className="text-xs font-semibold">
+                                Alerts ({message.analysis.alerts.length})
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              {message.analysis.alerts.slice(0, 3).map((alert, alertIdx) => (
                               <Alert key={alertIdx} className="py-2">
                                 <AlertDescription>
                                   <div className="flex items-start gap-2">
@@ -231,30 +374,69 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
                         </Card>
                       )}
 
-                      {/* Similar Patients */}
-                      {message.analysis.similar_patients && message.analysis.similar_patients.length > 0 && (
+                      {/* Patient Comparison - show if question is about comparison */}
+                      {sections.showComparison && message.analysis.patient_comparison && (
                         <Card className="p-3 neo-card">
                           <div className="flex items-center gap-2 mb-2">
                             <Users className="h-4 w-4 text-blue-500" />
                             <p className="text-xs font-semibold">
-                              Similar Patients ({message.analysis.similar_patients.length})
+                              Patient Comparison
+                              {message.analysis.patient_comparison.cohort_size > 0 && (
+                                <span className="ml-1 text-muted-foreground font-normal">
+                                  (vs {message.analysis.patient_comparison.cohort_size} similar patient{message.analysis.patient_comparison.cohort_size > 1 ? 's' : ''})
+                                </span>
+                              )}
                             </p>
                           </div>
-                          <div className="space-y-2">
-                            {message.analysis.similar_patients.slice(0, 3).map((patient, pIdx) => (
-                              <div key={pIdx} className="flex items-center justify-between text-xs">
-                                <span>{patient.patient_name}</span>
-                                <Badge variant="outline">
-                                  {patient.similarity_score}% match
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
+                          
+                          {/* Summary Text */}
+                          {message.analysis.patient_comparison.summary && (
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {message.analysis.patient_comparison.summary}
+                            </p>
+                          )}
+                          
+                          {/* Outlier Status Badge */}
+                          {message.analysis.patient_comparison.outlier_status && (
+                            <div className="mb-2">
+                              <Badge 
+                                variant={
+                                  message.analysis.patient_comparison.outlier_status === 'critical' ? 'destructive' :
+                                  message.analysis.patient_comparison.outlier_status === 'concerning' ? 'default' :
+                                  'outline'
+                                }
+                              >
+                                {message.analysis.patient_comparison.outlier_status === 'critical' && '⚠️ Critical Outlier'}
+                                {message.analysis.patient_comparison.outlier_status === 'concerning' && '⚡ Concerning Deviation'}
+                                {message.analysis.patient_comparison.outlier_status === 'normal' && '✓ Within Normal Range'}
+                              </Badge>
+                            </div>
+                          )}
+                          
+                          {/* Comparison Points (Key Observations) */}
+                          {message.analysis.patient_comparison.comparison_points && 
+                           message.analysis.patient_comparison.comparison_points.length > 0 ? (
+                            <div className="space-y-1">
+                              <p className="text-xs font-medium mb-1">Key Observations:</p>
+                              <ul className="space-y-1">
+                                {message.analysis.patient_comparison.comparison_points.map((point, idx) => (
+                                  <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                    <span className="text-blue-500">•</span>
+                                    <span>{point}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground italic">
+                              No comparison data available
+                            </p>
+                          )}
                         </Card>
                       )}
 
-                      {/* Research Papers */}
-                      {message.analysis.research_papers && message.analysis.research_papers.length > 0 && (
+                      {/* Research Papers - show if question is about research */}
+                      {sections.showResearch && message.analysis.research_papers && message.analysis.research_papers.length > 0 && (
                         <Card className="p-3 neo-card">
                           <div className="flex items-center gap-2 mb-2">
                             <FileText className="h-4 w-4 text-green-500" />
@@ -283,25 +465,32 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
                         </Card>
                       )}
 
-                      {/* Recommendations */}
-                      {message.analysis.recommendations && message.analysis.recommendations.length > 0 && (
+                      {/* Recommendations - show if question is about recommendations or general analysis */}
+                      {sections.showRecommendations && message.analysis.recommendations && message.analysis.recommendations.length > 0 && (
                         <Card className="p-3 neo-card">
                           <div className="flex items-center gap-2 mb-2">
                             <TrendingUp className="h-4 w-4 text-purple-500" />
                             <p className="text-xs font-semibold">Recommendations</p>
                           </div>
                           <ul className="space-y-1">
-                            {message.analysis.recommendations.map((rec, rIdx) => (
-                              <li key={rIdx} className="text-xs text-muted-foreground flex items-start gap-2">
-                                <span className="text-primary">•</span>
-                                <span>{rec}</span>
-                              </li>
-                            ))}
+                            {message.analysis.recommendations.map((rec, rIdx) => {
+                              // Handle both string and object formats for backwards compatibility
+                              const recommendation = typeof rec === 'string' ? rec : rec.recommendation;
+                              const priority = typeof rec === 'object' && rec.priority ? rec.priority : 'medium';
+                              
+                              return (
+                                <li key={rIdx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                  <span className="text-primary">•</span>
+                                  <span>{recommendation}</span>
+                                </li>
+                              );
+                            })}
                           </ul>
                         </Card>
                       )}
                     </div>
-                  )}
+                  );
+                  })()}
 
                   <p className="text-xs text-muted-foreground mt-1">
                     {message.timestamp.toLocaleTimeString()}
@@ -315,7 +504,9 @@ export function WearableAnalyticsChat({ patientId, patientName }: WearableAnalyt
                 <div className="neo-card p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Analyzing wearable data...</p>
+                    <p className="text-sm text-muted-foreground">
+                      {loadingStep || 'Analyzing wearable data...'}
+                    </p>
                   </div>
                 </div>
               </div>
