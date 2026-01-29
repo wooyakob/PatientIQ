@@ -9,7 +9,7 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   
   const navLinks = [
-    { to: '/', label: 'Patient Dashboard' },
+    { to: '/', label: 'Patient Overview' },
     { to: '/calendar', label: 'Calendar' },
     { to: '/messages', label: 'Messages' },
   ];
