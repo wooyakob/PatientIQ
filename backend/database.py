@@ -66,10 +66,11 @@ class CouchbaseDB:
         self.patients_collection = None
         self._connection_attempted = False
         self._connection_error = None
+        self._is_connected = False
 
-    def _ensure_connected(self):
-        """Lazy initialization - connect to database on first use"""
-        if self._connection_attempted:
+    def connect(self):
+        """Explicitly connect to database - called during FastAPI lifespan startup"""
+        if self._is_connected or self._connection_attempted:
             return
 
         self._connection_attempted = True
@@ -89,7 +90,6 @@ class CouchbaseDB:
                 safe_connstr = urlunsplit((parts.scheme, parts.netloc, parts.path or "/", "", ""))
             except Exception:
                 safe_connstr = ""
-            print(f"Connecting to Couchbase at {safe_connstr or '[redacted]'}...")
             auth = PasswordAuthenticator(self.username, self.password)
             options = ClusterOptions(auth)
             options.apply_profile("wan_development")
@@ -122,17 +122,18 @@ class CouchbaseDB:
             self.calendar_scope = self.bucket.scope("Calendar")
             self.appointments_collection = self.calendar_scope.collection("Appointments")
 
-            print(
-                "Connected to Couchbase cluster. "
+            self._is_connected = True
+            logger.info(
+                "✓ Connected to Couchbase cluster. "
                 f"Scripps bucket: {self.bucket_name}. "
                 f"Research bucket: {self.research_bucket_name}"
             )
-            print("Initialized scopes (Scripps): People, Wearables, Notes, Messages, Calendar")
+            logger.info("✓ Initialized scopes (Scripps): People, Wearables, Notes, Messages, Calendar")
 
         except Exception as e:
             self._connection_error = e
             print(f"Warning: Could not connect to Couchbase: {e}")
-            print("   Please verify the cluster is running and accessible.")
+            logger.error("   Please verify the cluster is running and accessible.")
             if "UnAmbiguousTimeoutException" in str(e) or "unambiguous_timeout" in str(e):
                 print(
                     "   Timeout hints: For Capella, TLS is required. If you don't have the CA cert "
@@ -143,6 +144,27 @@ class CouchbaseDB:
                 "   Expected structure: Scripps bucket with People/Notes/Wearables/Calendar/Messages scopes "
                 "and Research bucket with Pubmed/Pulmonary collection"
             )
+
+    def close(self):
+        """Close database connections - called during FastAPI lifespan shutdown"""
+        if self.cluster:
+            try:
+                logger.info("Closing Couchbase cluster connection...")
+                # Couchbase SDK doesn't have an explicit close method for cluster
+                # but we can clean up references
+                self.cluster = None
+                self.bucket = None
+                self.patients_collection = None
+                self._is_connected = False
+                logger.info("✓ Couchbase connections closed")
+            except Exception as e:
+                logger.warning(f"Error closing Couchbase connection: {e}")
+
+    def _ensure_connected(self):
+        """Lazy initialization - connect to database on first use (fallback for non-lifespan usage)"""
+        if self._is_connected:
+            return
+        self.connect()
 
     def _build_connection_string(self, connstr: Optional[str]) -> str:
         if not connstr:

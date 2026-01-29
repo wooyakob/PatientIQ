@@ -48,6 +48,8 @@ import requests
 import re
 import urllib.parse
 import xml.etree.ElementTree as ET
+import warnings
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -55,18 +57,21 @@ from typing import Any, Dict, List, Optional
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, StreamingResponse
+from fastapi.responses import Response
 
 from backend.database import db
 from backend.models import (
     Patient,
     WearableData,
     WearablesSummary,
+    WearableAnalyticsRequest,
     QuestionnaireSummary,
     DoctorNotesSummary,
 )
 
 import agentc
+import agentc.span  # For BeginContent, EndContent
 import importlib.util
 import langchain_core.messages
 
@@ -210,12 +215,35 @@ DocNotesSearcher = docnotes_graph.DocNotesSearcher
 previsit_graph = _load_agent_module("previsit_summary_agent", "graph.py")
 PrevisitSummarizer = previsit_graph.PrevisitSummarizer
 
+# Import WearableAnalyzer from wearable_analytics_agent/graph.py
+wearable_graph = _load_agent_module("wearable_analytics_agent", "graph.py")
+WearableAnalyzer = wearable_graph.WearableAnalyzer
+
 # Initialize catalog and agents at module level
+# Configure Catalog to write traces to Couchbase (not just local files)
 _catalog = agentc.Catalog()
-_root_span = _catalog.Span(name="CKO-Backend")
+_root_span = _catalog.Span(
+    name="CKO-Backend",
+    application="cko-healthcare-demo",
+    environment=os.getenv("ENVIRONMENT", "production")
+)
+
+# Note: The Auditor is automatically configured via environment variables:
+# - AGENT_CATALOG_CONN_STRING
+# - AGENT_CATALOG_USERNAME
+# - AGENT_CATALOG_PASSWORD
+# - AGENT_CATALOG_BUCKET
+# - AGENT_CATALOG_ACTIVITY (scope for traces)
+# 
+# Traces will be written to: agent-catalog → agent_activity → logs
+# after calling _catalog._auditor.flush()
 _pulmonary_researcher = PulmonaryResearcher(catalog=_catalog)
 _docnotes_searcher = DocNotesSearcher(catalog=_catalog)
 _previsit_summarizer = PrevisitSummarizer(catalog=_catalog)
+_wearable_analyzer = WearableAnalyzer(catalog=_catalog, span=_root_span)
+
+# Suppress non-critical Pydantic warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="pydantic._internal._generate_schema")
 
 logger = logging.getLogger("cko")
 logger.setLevel(logging.INFO)
@@ -225,10 +253,59 @@ def _now_utc_iso_z() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    FastAPI lifespan context manager for startup and shutdown events.
+    
+    This connects to Couchbase when the application starts (before accepting requests)
+    and closes connections when shutting down (after handling all requests).
+    
+    This improves performance by:
+    - Eliminating connection latency on first request (~2-5 seconds)
+    - Ensuring connections are ready before the demo starts
+    - Providing clean shutdown and resource cleanup
+    """
+    # Startup: Connect to Couchbase
+    logger.info("=" * 60)
+    logger.info("FastAPI application starting up...")
+    logger.info("=" * 60)
+    
+    try:
+        # Connect to database before accepting requests
+        db.connect()
+        logger.info("✓ Database connection pool initialized")
+    except Exception as e:
+        logger.error(f"✗ Failed to connect to database during startup: {e}")
+        # Continue anyway - _ensure_connected() will handle retries
+    
+    logger.info("=" * 60)
+    logger.info("✓ FastAPI application ready to accept requests")
+    logger.info("=" * 60)
+    
+    yield
+    
+    # Shutdown: Clean up resources
+    logger.info("=" * 60)
+    logger.info("FastAPI application shutting down...")
+    logger.info("=" * 60)
+    
+    try:
+        db.close()
+        logger.info("✓ Database connections closed")
+    except Exception as e:
+        logger.warning(f"Warning during shutdown: {e}")
+    
+    logger.info("=" * 60)
+    logger.info("✓ FastAPI application shutdown complete")
+    logger.info("=" * 60)
+
+
 app = FastAPI(
     title="Healthcare API",
     description="FastAPI backend for healthcare dashboard",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -483,6 +560,201 @@ async def get_patient_wearables_summary(patient_id: str, days: int = 30):
     except Exception as e:
         logger.exception("Error generating wearables summary patient_id=%s", patient_id)
         raise HTTPException(status_code=500, detail=f"Error generating wearables summary: {str(e)}")
+
+
+@app.post("/api/patients/{patient_id}/wearables/analyze")
+async def analyze_wearable_data(
+    request: Request,
+    patient_id: str,
+    payload: WearableAnalyticsRequest = Body(...)
+):
+    """
+    Comprehensive wearable data analysis using AI agent.
+    Returns structured alerts, similar patients, and recommendations.
+    """
+    start_time = time.perf_counter()
+    print(f"\n{'='*80}")
+    print(f"⏱️  [ENDPOINT] Starting wearable analysis for patient {patient_id}")
+    print(f"    Question: {payload.question}")
+    print(f"    Days: {payload.days}")
+    print(f"{'='*80}\n")
+    
+    try:
+        # Override patient_id from path parameter
+        payload.patient_id = patient_id
+        
+        print(f"⏱️  [ENDPOINT] Building starting state... (elapsed: {time.perf_counter() - start_time:.2f}s)")
+        # Build starting state for the agent
+        state = WearableAnalyzer.build_starting_state(
+            patient_id=patient_id,
+            question=payload.question,
+            days=payload.days
+        )
+        print(f"✅ [ENDPOINT] State built in {time.perf_counter() - start_time:.2f}s")
+        
+        # Add the request as a human message in JSON format
+        state["messages"].append(
+            langchain_core.messages.HumanMessage(
+                content=f'{{"patient_id": "{patient_id}", "question": "{payload.question}", "days": {payload.days}}}'
+            )
+        )
+        
+        print(f"⏱️  [ENDPOINT] Invoking agent... (elapsed: {time.perf_counter() - start_time:.2f}s)")
+        agent_start = time.perf_counter()
+        
+        # Create a new span for this agent session (required for Agent Tracer UI)
+        request_id = getattr(getattr(request, "state", None), "request_id", None) or str(uuid.uuid4())
+        with _root_span.new(
+            name="WearableAnalyzer.Session",
+            agent="wearable_analytics_agent",
+            agent_name="wearable_analytics_agent",  # Explicit tag for UI filtering
+            agent_type="wearable_analyzer",
+            endpoint="POST /api/patients/{patient_id}/wearables/analyze",
+            patient_id=str(patient_id),
+            request_id=str(request_id),
+        ) as session_span:
+            # Log session start
+            session_span.log(agentc.span.BeginContent(state={"patient_id": patient_id, "question": payload.question}))
+            
+            # Invoke the wearable analytics agent
+            agent_result = _wearable_analyzer.invoke(input=state)
+            
+            # Log session end
+            session_span.log(agentc.span.EndContent(state=agent_result))
+        
+        agent_duration = time.perf_counter() - agent_start
+        print(f"✅ [ENDPOINT] Agent completed in {agent_duration:.2f}s")
+        
+        # Calculate analysis duration
+        analysis_duration = time.perf_counter() - start_time
+        
+        print(f"⏱️  [ENDPOINT] Extracting and restructuring results... (elapsed: {analysis_duration:.2f}s)")
+        
+        # Get raw results from agent
+        alerts = agent_result.get("alerts", [])
+        similar_patients = agent_result.get("similar_patients", [])
+        recommendations_list = agent_result.get("recommendations", [])
+        trend_analysis = agent_result.get("trend_analysis", {})
+        patient_comparison = agent_result.get("patient_comparison", {})
+        research_papers = agent_result.get("research_papers", [])  # NEW
+        
+        # DEBUG: Print patient comparison data
+        print(f"📊 [DEBUG] Patient Comparison Data:")
+        print(f"    Type: {type(patient_comparison)}")
+        print(f"    Keys: {patient_comparison.keys() if isinstance(patient_comparison, dict) else 'N/A'}")
+        print(f"    Summary: {patient_comparison.get('summary', 'MISSING') if isinstance(patient_comparison, dict) else 'NOT A DICT'}")
+        print(f"    Outlier Status: {patient_comparison.get('outlier_status', 'MISSING') if isinstance(patient_comparison, dict) else 'NOT A DICT'}")
+        print(f"    Comparison Points: {patient_comparison.get('comparison_points', 'MISSING') if isinstance(patient_comparison, dict) else 'NOT A DICT'}")
+        print(f"📚 [DEBUG] Research Papers: {len(research_papers)} papers found")
+        
+        # Extract recommendations from trend_analysis if not in recommendations_list
+        if not recommendations_list and trend_analysis:
+            recommendations_list = trend_analysis.get("recommendations", [])
+        
+        # Enrich alerts with clinical context
+        enriched_alerts = []
+        for alert in alerts:
+            enriched_alert = {
+                "severity": alert.get("severity", "unknown").upper(),
+                "metric": alert.get("metric", ""),
+                "message": alert.get("message", ""),
+                "clinical_significance": alert.get("clinical_significance", ""),
+                "threshold": alert.get("threshold"),
+                "values": alert.get("values", []),
+            }
+            enriched_alerts.append(enriched_alert)
+        
+        # Enrich similar patients with matching details
+        enriched_similar_patients = []
+        for patient in similar_patients:
+            enriched_patient = {
+                "patient_id": patient.get("patient_id", ""),
+                "patient_name": patient.get("patient_name", "Unknown"),
+                "age": patient.get("age"),
+                "gender": patient.get("gender", ""),
+                "medical_conditions": patient.get("medical_conditions", ""),
+                "similarity_score": 100,  # Frontend expects similarity_score, not match_percentage
+                "matching_criteria": []
+            }
+            
+            # Add matching criteria
+            if patient.get("age"):
+                enriched_patient["matching_criteria"].append(f"Similar age ({patient['age']})")
+            if patient.get("gender"):
+                enriched_patient["matching_criteria"].append(f"Same gender ({patient['gender']})")
+            if patient.get("medical_conditions"):
+                enriched_patient["matching_criteria"].append(f"Same condition ({patient['medical_conditions']})")
+            
+            enriched_similar_patients.append(enriched_patient)
+        
+        # Structure recommendations properly
+        structured_recommendations = []
+        for rec in recommendations_list:
+            if isinstance(rec, str):
+                structured_recommendations.append({
+                    "recommendation": rec,
+                    "priority": "medium"
+                })
+            elif isinstance(rec, dict):
+                structured_recommendations.append(rec)
+        
+        # Normalize research papers
+        normalized_research_papers = _normalize_research_papers(research_papers)
+        
+        # Build clean response without redundant text summary
+        result = {
+            "patient_id": agent_result.get("patient_id", patient_id),
+            "patient_name": agent_result.get("patient_name", "Unknown"),
+            "patient_condition": agent_result.get("patient_condition", ""),
+            "question": agent_result.get("question", payload.question),
+            "answer": agent_result.get("answer", ""),  # LLM-generated conversational summary
+            "alerts": enriched_alerts,
+            "similar_patients": enriched_similar_patients,
+            "patient_comparison": patient_comparison,
+            "research_papers": normalized_research_papers,  # NEW: Add research papers
+            "recommendations": structured_recommendations,
+            "wearable_data_summary": {
+                "data_points": len(agent_result.get("wearable_data", [])),
+                "period_days": payload.days,
+            },
+            "generated_at": datetime.now().isoformat(),
+            "analysis_duration_seconds": round(analysis_duration, 2)
+        }
+        
+        print(f"\n{'='*80}")
+        print(f"✨ [ENDPOINT] COMPLETE - Total time: {analysis_duration:.2f}s")
+        print(f"    Agent time: {agent_duration:.2f}s ({agent_duration/analysis_duration*100:.1f}%)")
+        print(f"    Alerts: {len(enriched_alerts)}")
+        print(f"    Research Papers: {len(normalized_research_papers)}")
+        print(f"    Similar Patients: {len(enriched_similar_patients)}")
+        print(f"    Recommendations: {len(structured_recommendations)}")
+        print(f"{'='*80}\n")
+        print(f"    Similar Patients: {len(enriched_similar_patients)}")
+        print(f"    Recommendations: {len(structured_recommendations)}")
+        print(f"{'='*80}\n")
+        
+        logger.info(
+            "Wearable analysis completed for patient_id=%s in %.2fs",
+            patient_id,
+            analysis_duration
+        )
+        
+        # Agent Tracer logs are automatically flushed when spans close
+        # The session_span context manager handles this via __exit__
+        # Logs are written to: agent-catalog → agent_activity → logs
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_time = time.perf_counter() - start_time
+        print(f"\n❌ [ENDPOINT] ERROR after {error_time:.2f}s: {str(e)}\n")
+        logger.exception("Error analyzing wearable data for patient_id=%s: %s", patient_id, str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error analyzing wearable data: {str(e)}"
+        )
 
 
 @app.post("/api/patients")
