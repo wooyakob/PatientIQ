@@ -23,6 +23,7 @@ frontend:
 	npm --prefix frontend run dev
 
 dev:
+	@$(MAKE) stop
 	@echo "Starting backend + frontend..."
 	@echo "Backend:  http://127.0.0.1:8000"
 	@echo "Frontend: http://localhost:8080"
@@ -30,14 +31,16 @@ dev:
 	@echo "Press Ctrl+C to stop both."
 	@echo ""
 	@set -e; \
-	trap 'kill 0' INT TERM; \
+	trap '$(MAKE) stop; exit' INT TERM; \
 	(uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000) & \
 	(npm --prefix frontend run dev) & \
 	wait
 
 stop:
-	@-lsof -ti tcp:8000 | xargs -r kill >/dev/null 2>&1 || true
-	@-lsof -ti tcp:8080 | xargs -r kill >/dev/null 2>&1 || true
+	@echo "Stopping processes on ports 8000 and 8080..."
+	@-lsof -ti tcp:8000 | xargs kill -9 2>/dev/null || true
+	@-lsof -ti tcp:8080 | xargs kill -9 2>/dev/null || true
+	@echo "Done."
 
 fmt:
 	uv run ruff format .

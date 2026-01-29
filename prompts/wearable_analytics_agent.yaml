@@ -77,6 +77,8 @@ output:
           type: object
         outliers:
           type: array
+          items:
+            type: object
         comparison_summary:
           type: string
     research_papers:
