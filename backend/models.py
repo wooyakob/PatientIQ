@@ -122,18 +122,21 @@ class Appointment(BaseModel):
 
 # Wearable Analytics Models
 
+
 class WearableAnalyticsRequest(BaseModel):
     """Request model for wearable analytics agent"""
+
     patient_id: str = Field(..., description="Patient ID to analyze")
     question: str = Field(
         default="Analyze wearable data and provide clinical insights",
-        description="Specific question or analysis request"
+        description="Specific question or analysis request",
     )
     days: int = Field(default=30, description="Number of days of data to analyze", ge=1, le=90)
 
 
 class WearableMetricTrend(BaseModel):
     """Trend analysis for a single metric"""
+
     metric_name: str
     average: float
     minimum: float
@@ -146,6 +149,7 @@ class WearableMetricTrend(BaseModel):
 
 class WearableAlertDetail(BaseModel):
     """Detailed alert from trend analysis"""
+
     metric: str
     severity: str  # critical, high, medium, low
     priority: int
@@ -157,6 +161,7 @@ class WearableAlertDetail(BaseModel):
 
 class SimilarPatient(BaseModel):
     """Information about a demographically similar patient"""
+
     patient_id: str
     patient_name: str
     age: int = None
@@ -169,6 +174,7 @@ class SimilarPatient(BaseModel):
 
 class CohortMetric(BaseModel):
     """Statistical metrics for cohort comparison"""
+
     mean: float
     std: float
     median: float = None
@@ -179,6 +185,7 @@ class CohortMetric(BaseModel):
 
 class CohortOutlier(BaseModel):
     """Outlier detection result"""
+
     metric: str
     metric_key: str
     patient_value: float
@@ -195,6 +202,7 @@ class CohortOutlier(BaseModel):
 
 class ResearchPaper(BaseModel):
     """Research paper with relevance to symptoms"""
+
     title: str
     author: str
     article_citation: str = None
@@ -207,6 +215,7 @@ class ResearchPaper(BaseModel):
 
 class TrendAnalysisResult(BaseModel):
     """Complete trend analysis results"""
+
     alerts: List[WearableAlertDetail]
     trends: dict  # Flexible dict for various metric trends
     summary: str
@@ -218,6 +227,7 @@ class TrendAnalysisResult(BaseModel):
 
 class CohortComparisonResult(BaseModel):
     """Complete cohort comparison results"""
+
     patient_metrics: dict
     cohort_metrics: dict
     percentile_rankings: dict
@@ -229,11 +239,14 @@ class CohortComparisonResult(BaseModel):
 
 class WearableAnalyticsResponse(BaseModel):
     """Complete response from wearable analytics agent"""
+
     patient_id: str
     patient_name: str
     patient_condition: str
     question: str
-    wearable_data: List[dict] = Field(default_factory=list, description="Summary of wearable data analyzed")
+    wearable_data: List[dict] = Field(
+        default_factory=list, description="Summary of wearable data analyzed"
+    )
     similar_patients: List[SimilarPatient] = Field(default_factory=list)
     trend_analysis: TrendAnalysisResult = None
     cohort_comparison: CohortComparisonResult = None

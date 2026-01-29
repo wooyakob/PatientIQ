@@ -4,7 +4,7 @@ import { ArrowLeft, FileText, Calendar, Clock, Plus, Edit2, X, Trash2, Search, L
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { formatDateOnlyForDisplay, getPatientDoctorNotesSummary, getPatientWithNotes, saveDoctorNote, deleteDoctorNote, toLocalDateOnlyString, searchDoctorNotes, DoctorNotesSearchResponse } from '@/lib/api';
+import { formatDateOnlyForDisplay, getPatientDoctorNotesSummary, getPatientWithNotes, saveDoctorNote, updateDoctorNote, deleteDoctorNote, toLocalDateOnlyString, searchDoctorNotes, DoctorNotesSearchResponse } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -89,6 +89,24 @@ const NotesDetail = () => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to save doctor note',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ noteId, noteData }: { noteId: string; noteData: any }) => updateDoctorNote(noteId, noteData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['patient', patientId, 'notes'] });
+      toast({
+        title: 'Success',
+        description: 'Doctor note updated successfully',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update doctor note',
         variant: 'destructive',
       });
     },
@@ -238,7 +256,7 @@ const NotesDetail = () => {
       patient_id: patientId,
     };
 
-    saveMutation.mutate(noteData, {
+    updateMutation.mutate({ noteId: noteToEdit.id, noteData }, {
       onSuccess: () => {
         setEditingNoteId(null);
         setEditNoteContent('');
