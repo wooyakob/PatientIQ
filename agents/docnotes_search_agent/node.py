@@ -60,6 +60,7 @@ class DocNotesSearchAgent(agentc_langgraph.agent.ReActAgent):
         state["notes"] = structured_response.get("notes", [])
         state["answer"] = structured_response.get("answer")
         state["is_complete"] = True
+        state["is_last_step"] = True
 
         # Append the AI response to messages
         if response.get("messages"):

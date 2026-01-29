@@ -700,17 +700,6 @@ class CouchbaseDB:
             print(f"Error fetching research: {e}")
             return None
 
-    def save_message_route(self, route_id: str, route_data: dict) -> bool:
-        """Save a message routing record to Notes.Doctor collection"""
-        self._check_connection()
-        try:
-            route_data.pop("type", None)
-            self.doctor_notes_collection.upsert(route_id, route_data)
-            return True
-        except Exception as e:
-            print(f"Error saving message route: {e}")
-            return False
-
     # NOTE: Questionnaires scope collection names TBD
     # Temporarily saving to Notes.Doctor until collection is confirmed
 
