@@ -426,6 +426,18 @@ export async function saveDoctorNote(note: SaveDoctorNoteRequest): Promise<{ mes
   });
 }
 
+export async function updateDoctorNote(
+  noteId: string,
+  note: SaveDoctorNoteRequest
+): Promise<{ message: string; note_id: string }> {
+  return apiFetch<{ message: string; note_id: string }>(`/api/doctor-notes/${encodeURIComponent(noteId)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(note),
+    }
+  );
+}
+
 export async function deleteDoctorNote(noteId: string): Promise<{ message: string; note_id: string }> {
   return apiFetch<{ message: string; note_id: string }>(`/api/doctor-notes/${encodeURIComponent(noteId)}`, {
     method: "DELETE",

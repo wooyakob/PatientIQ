@@ -51,12 +51,16 @@ from pathlib import Path
 # Import edge and node modules from this directory specifically
 _current_dir = Path(__file__).parent
 
-edge_spec = importlib.util.spec_from_file_location("wearable_analytics_edge", _current_dir / "edge.py")
+edge_spec = importlib.util.spec_from_file_location(
+    "wearable_analytics_edge", _current_dir / "edge.py"
+)
 edge_module = importlib.util.module_from_spec(edge_spec)
 edge_spec.loader.exec_module(edge_module)
 out_analytics_agent_edge = edge_module.out_analytics_agent_edge
 
-node_spec = importlib.util.spec_from_file_location("wearable_analytics_node", _current_dir / "node.py")
+node_spec = importlib.util.spec_from_file_location(
+    "wearable_analytics_node", _current_dir / "node.py"
+)
 node_module = importlib.util.module_from_spec(node_spec)
 node_spec.loader.exec_module(node_module)
 WearableAnalyticsAgent = node_module.WearableAnalyticsAgent
@@ -81,11 +85,7 @@ class WearableAnalyzer(agentc_langgraph.graph.GraphRunnable):
     """
 
     @staticmethod
-    def build_starting_state(
-        patient_id: str = None, 
-        question: str = None,
-        days: int = 30
-    ) -> State:
+    def build_starting_state(patient_id: str = None, question: str = None, days: int = 30) -> State:
         """
         Build the initial state for the analytics workflow.
 

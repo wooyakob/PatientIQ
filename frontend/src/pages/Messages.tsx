@@ -102,7 +102,7 @@ export default function Messages() {
       subject: m.subject,
       content: m.content,
       timestamp: m.timestamp,
-      isPinned: Boolean(pinnedIds[m.id]),
+      isPinned: !isPrivate && Boolean(pinnedIds[m.id]),
       isPrivate,
       recipientId: isPrivate ? m.to_id : undefined,
       read: m.read,
@@ -379,12 +379,14 @@ export default function Messages() {
                           <p className="text-sm font-medium text-foreground">{message.subject}</p>
                           <p className="text-sm text-foreground/80">{message.content}</p>
                         </div>
-                        <button
-                          onClick={() => togglePin(message.id)}
-                          className="p-1.5 rounded-lg hover:bg-background/50 text-muted-foreground hover:text-primary"
-                        >
-                          <Pin className="h-4 w-4" />
-                        </button>
+                        {!message.isPrivate && (
+                          <button
+                            onClick={() => togglePin(message.id)}
+                            className="p-1.5 rounded-lg hover:bg-background/50 text-muted-foreground hover:text-primary"
+                          >
+                            <Pin className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))
