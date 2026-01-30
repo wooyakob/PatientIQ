@@ -27,7 +27,6 @@ The result is that clinicians can focus on analysis and patient care rather than
 ## High Level Architecture
 ![High Level Architecture](diagrams/High_Level_Architecture.png)
 
-## Screenshots
 ### PatientIQ Home
 ![PatientIQ Home](assets/img/PatientIQ_Application/Home/PatientIQ_Home.png)
 ### PatientIQ Dashboard
