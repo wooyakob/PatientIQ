@@ -782,6 +782,7 @@ Generate a concise, professional summary (2-4 sentences) that directly answers t
             state["recommendations"] = recommendations
             state["answer"] = comprehensive_summary
             state["is_complete"] = True
+            state["is_last_step"] = True
 
             total_duration = time.time() - start_time
 
