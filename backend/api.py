@@ -221,11 +221,15 @@ WearableAnalyzer = wearable_graph.WearableAnalyzer
 # Initialize catalog and agents at module level
 # Configure Catalog to write traces to Couchbase (not just local files)
 _catalog = agentc.Catalog()
-_root_span = _catalog.Span(
-    name="CKO-Backend",
-    application="cko-healthcare-demo",
-    environment=os.getenv("ENVIRONMENT", "production"),
-)
+
+
+def _new_backend_root_span() -> agentc.Span:
+    return _catalog.Span(
+        name="CKO-Backend",
+        application="cko-healthcare-demo",
+        environment=os.getenv("ENVIRONMENT", "production"),
+    )
+
 
 # Note: The Auditor is automatically configured via environment variables:
 # - AGENT_CATALOG_CONN_STRING
@@ -239,7 +243,6 @@ _root_span = _catalog.Span(
 _pulmonary_researcher = PulmonaryResearcher(catalog=_catalog)
 _docnotes_searcher = DocNotesSearcher(catalog=_catalog)
 _previsit_summarizer = PrevisitSummarizer(catalog=_catalog)
-_wearable_analyzer = WearableAnalyzer(catalog=_catalog, span=_root_span)
 
 # Suppress non-critical Pydantic warnings
 warnings.filterwarnings(
@@ -605,7 +608,8 @@ async def analyze_wearable_data(
         request_id = getattr(getattr(request, "state", None), "request_id", None) or str(
             uuid.uuid4()
         )
-        with _root_span.new(
+        root_span = _new_backend_root_span()
+        with root_span.new(
             name="WearableAnalyzer.Session",
             agent="wearable_analytics_agent",
             agent_name="wearable_analytics_agent",  # Explicit tag for UI filtering
@@ -622,7 +626,7 @@ async def analyze_wearable_data(
             )
 
             # Invoke the wearable analytics agent
-            agent_result = _wearable_analyzer.invoke(input=state)
+            agent_result = WearableAnalyzer(catalog=_catalog, span=session_span).invoke(input=state)
 
             # Log session end
             session_span.log(agentc.span.EndContent(state=agent_result))
@@ -920,7 +924,8 @@ async def search_patient_doctor_notes(request: Request, patient_id: str, payload
         # Invoke the agent
         logger.info("Invoking DocNotesSearcher agent for patient_id=%s", patient_id)
         request_id = getattr(getattr(request, "state", None), "request_id", None)
-        search_span = _root_span.new(
+        root_span = _new_backend_root_span()
+        search_span = root_span.new(
             name="DocNotesSearcher.invoke",
             agent="docnotes_search_agent",
             endpoint="POST /api/patients/{patient_id}/doctor-notes/search",
@@ -1442,7 +1447,8 @@ async def get_previsit_summary(request: Request, patient_id: str):
 
         # Create span for tracing
         request_id = getattr(getattr(request, "state", None), "request_id", None)
-        summary_span = _root_span.new(
+        root_span = _new_backend_root_span()
+        summary_span = root_span.new(
             name="PrevisitSummarizer.invoke",
             agent="previsit_summary_agent",
             endpoint="GET /api/patients/{patient_id}/previsit-summary",
@@ -1521,7 +1527,8 @@ async def get_patient_research(request: Request, patient_id: str, question: Opti
         # Invoke the agent
         logger.info("Invoking PulmonaryResearcher agent for patient_id=%s", patient_id)
         request_id = getattr(getattr(request, "state", None), "request_id", None)
-        research_span = _root_span.new(
+        root_span = _new_backend_root_span()
+        research_span = root_span.new(
             name="PulmonaryResearcher.invoke",
             agent="pulmonary_research_agent",
             endpoint="GET /api/patients/{patient_id}/research",
@@ -1610,7 +1617,8 @@ async def ask_research_question(request: Request, patient_id: str, payload: dict
             question_id,
         )
         request_id = getattr(getattr(request, "state", None), "request_id", None)
-        research_span = _root_span.new(
+        root_span = _new_backend_root_span()
+        research_span = root_span.new(
             name="PulmonaryResearcher.ask.invoke",
             agent="pulmonary_research_agent",
             endpoint="POST /api/patients/{patient_id}/research/ask",
