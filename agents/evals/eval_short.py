@@ -358,11 +358,85 @@ def eval_previsit_summary():
     }
 
 
+def eval_wearable_analytics():
+    WearableAnalyzer = _load_agent_graph_class("wearable_analytics_agent", "WearableAnalyzer")
+    total = 0
+    is_last_step_ok = 0
+    scored_cases = 0
+    criteria_scores: dict[str, list[float]] = {}
+    criteria = {
+        "clinical_usefulness": "Score 0 to 5 for clinical usefulness: highlights key trends/alerts and provides appropriate interpretation.",
+        "actionability": "Score 0 to 5 for actionable, practical next steps; prioritize urgency appropriately.",
+        "no_fabrication": "Score 0 to 5 for avoiding fabricated vitals/diagnoses and appropriately stating uncertainty when data is missing.",
+    }
+    suite_ctx = (
+        root_span.new("WearableAnalytics")
+        if root_span is not None
+        else contextlib.nullcontext(None)
+    )
+    with (
+        (_resources_dir() / "wearable_analytics.jsonl").open() as fp,
+        suite_ctx as suite_span,
+    ):
+        for i, line in enumerate(fp):
+            row = json.loads(line)
+            reference = row.get("reference", "")
+            _input = row.get("input", {})
+            patient_id = _input.get("patient_id")
+            question = _input.get("question")
+
+            eval_ctx = (
+                suite_span.new(f"Eval_{i}", test_input=line)
+                if suite_span is not None
+                else contextlib.nullcontext(None)
+            )
+
+            with eval_ctx as eval_span:
+                graph = (
+                    WearableAnalyzer(catalog=catalog, span=eval_span)
+                    if eval_span is not None
+                    else WearableAnalyzer(catalog=catalog)
+                )
+                state = WearableAnalyzer.build_starting_state(
+                    patient_id=patient_id,
+                    question=question,
+                )
+                user_message = json.dumps({"patient_id": patient_id, "question": question})
+                state["messages"].append(langchain_core.messages.HumanMessage(content=user_message))
+
+                result = graph.invoke(input=state)
+                total += 1
+                last_step = bool(result.get("is_last_step"))
+                if last_step:
+                    is_last_step_ok += 1
+                if eval_span is not None:
+                    eval_span["correctly_set_is_last_step"] = last_step
+
+                answer = str(result.get("answer") or "")
+                scores = _score_criteria(criteria, user_message, answer, reference)
+                if scores:
+                    scored_cases += 1
+                    for k, v in scores.items():
+                        criteria_scores.setdefault(k, []).append(v)
+                    if eval_span is not None:
+                        eval_span["quality"] = {"scores": scores, "reference": reference}
+
+    criteria_avg = {k: (sum(v) / len(v)) for k, v in criteria_scores.items() if v}
+    return {
+        "suite": "WearableAnalytics",
+        "total": total,
+        "is_last_step_ok": is_last_step_ok,
+        "scored_cases": scored_cases,
+        "criteria_avg": criteria_avg,
+    }
+
+
 if __name__ == "__main__":
     results = [
         eval_pulmonary_research(),
         eval_docnotes_search(),
         eval_previsit_summary(),
+        eval_wearable_analytics(),
     ]
 
     for r in results:

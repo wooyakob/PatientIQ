@@ -44,6 +44,18 @@ The result is that clinicians can focus on analysis and patient care rather than
 ## Agents
 See: `/agents/AGENTS.md`
 
+### Docnotes Search Agent
+![Docnotes Search](assets/img/PatientIQ_Application/Doctors_Notes/PatientIQ_Doctors_Notes_Search_III.png)
+
+### Pulmonary Researcher Agent
+![Pulmonary Researcher](assets/img/PatientIQ_Application/Medical_Research/PatientIQ_Pulmonary_Research_Referenced_Papers.png)
+
+### Previsit Summarizer Agent
+![Previsit Summarizer](assets/img/PatientIQ_Application/Calendar/Previsit_Summary_Agent.png)
+
+### Wearable Analysis and Alerting Agent
+![Wearable Analysis and Alerting](assets/img/PatientIQ_Application/Wearable_Data/Wearable_Analysis_Agent.png)
+
 ## Documentation
 - **DeepWiki**: https://deepwiki.com/wooyakob/PatientIQ
 - **Agents**: `/agents/AGENTS.md`
